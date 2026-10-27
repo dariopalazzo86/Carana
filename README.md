@@ -65,13 +65,17 @@ In **Library**, choose a section (Introduction, Mission and police concepts, Dir
 
 In **Run**, click **Import messages** and choose `carana-messages.json`, then **Save messages**. It holds starter messages for all three exercises with staff notes. Edit them freely.
 
-## Reading log
+## Personal logins and the reading log
 
-Whenever someone signed in with a group login opens a document in the Library, CARANA records who opened which document and when. Because a group shares one login, each person chooses their name (from the group’s members in Participants, or types it) the first time they use the Library on their device; **Not you?** switches to another name.
+In **Participants**, click **Create personal logins** (or **Create login** on one row). Each participant gets a login such as `amina.diallo` and a password; print them with **Personal login cards (PDF)**. **New password** and **Remove** work per person.
 
-Staff see the record at the bottom of the **Library** tab: a grid with one row per participant and one column per document, showing a tick (or 2×, 3×…) with the last time it was opened, and how many documents each person has opened. Tick **Only before the course started** to see the preparatory phase only. **Download as CSV** gives every single opening; **Clear the log** empties it before a new course. Staff openings aren’t recorded.
+- **Before the course**, a participant signs in with their personal login and sees only the Library.
+- **During the course**, the same login automatically works in the group the participant is placed in for the running exercise, editing the group worksheet together with the rest of the group. If you move them to another group or switch exercise, their page reloads into the new group. Someone not placed in a group keeps library-only access.
+- Shared group logins still work too, for example for a group laptop.
 
-The names are what participants choose on their device, so treat the grid as a reliable guide rather than proof.
+Every time a participant opens a document, CARANA records it. The **Reading log** tab (staff) shows a table with one row per participant: their group, login, when they last signed in, how many documents they have opened, and a column per document with a tick (or 2×, 3×…) and the last time it was opened. Click a name to see everything they did in order. Tick **Only before the course started** for the preparatory phase, or **Only people who haven’t opened everything** to see who still needs a reminder. CSV download is there if you need it; **Clear the log** empties it before a new course.
+
+People using a shared group login choose their name before opening documents, so those rows rely on what they selected. Staff openings aren’t recorded.
 
 ## Adding your own scenarios
 
@@ -96,7 +100,7 @@ Use **Export** to save an exercise as a file and **Import exercise** to load it 
    - FPU topics: four parts of the OPLAN.
    - RBB topics: the three components (two groups can share one).
    - Custom exercises: each worksheet section is a topic.
-3. **Participants:** register everyone and place them in groups; each exercise can have its own grouping.
+3. **Participants:** register everyone, create personal logins if you use them, and place people in groups; each exercise can have its own grouping.
 4. Print the **login cards** (Groups tab). Every member of a group can sign in with the group login on their own device.
 5. **Start** the clock and move through the three stages. Before group work moves on, CARANA shows a check: groups that haven’t started or submitted, plan-check problems, groups without a topic and participants not placed in a group. You can go back or continue, and choose whether to build or rebuild the joint plan from the latest worksheets.
    - **Group work: all topics.** Every group works on every part of the exercise in its own worksheet. The plan check flags problems as they type. Groups can submit their worksheet.

@@ -201,6 +201,9 @@ table.logins td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mono
 @media (max-width:640px){.rrow{grid-template-columns:1fr}}
 .score{font-weight:700;font-variant-numeric:tabular-nums}
 .lib{max-width:960px}
+.logtab tbody tr{cursor:pointer}
+.logtab tbody tr:hover td{filter:brightness(.97)}
+.logtab tr.sel td.rh{color:var(--un)}
 .logtab td,.logtab th{text-align:center}
 .logtab td.rh,.logtab th:first-child{text-align:left}
 .logtab th.dh{min-width:86px;max-width:110px;font-size:.74rem;line-height:1.25;white-space:normal}
@@ -309,12 +312,6 @@ footer p{margin:0 0 8px}
   </div>
   <div class="assign" id="readerBox" hidden></div>
   <div class="lib" id="libList"></div>
-  <div id="readLog" hidden style="margin-top:30px">
-    <h2>Who opened what</h2>
-    <p class="small" style="max-width:75ch">Every time someone signed in with a group login opens a document, CARANA records who (the name they chose), which document and when. Staff openings aren’t recorded. Hover over a tick to see how often and when.</p>
-    <div class="row" style="margin-bottom:10px"><label class="small"><input type="checkbox" id="logPre"> Only before the course started</label><button class="btn sm" id="logCsv">Download as CSV</button><button class="btn sm danger" id="logClear">Clear the log</button><span class="small" id="logSummary"></span></div>
-    <div id="logGrid"></div>
-  </div>
 </section>
 
 <!-- Staff views -->
@@ -362,7 +359,7 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-people">
   <h1>Participants</h1>
-  <p class="lede">Register everyone on the course, then place them in groups. Each exercise can have its own grouping; groups still sign in with their shared group login.</p>
+  <p class="lede">Register everyone on the course, give them a personal login, and place them in groups. Each exercise can have its own grouping. With a personal login a participant can read the Library before the course, and during the course works in whichever group they’re placed in for the running exercise.</p>
   <div class="panel" style="max-width:1100px;margin-bottom:16px">
     <h3 style="margin-top:0">Register participants</h3>
     <div class="row" style="align-items:end">
@@ -382,6 +379,8 @@ footer p{margin:0 0 8px}
     <span class="small" style="font-weight:600">Grouping for</span><div class="seg" id="pExSeg"></div>
   </div>
   <div class="row" style="margin-bottom:10px">
+    <button class="btn primary" id="pLogins">Create personal logins</button>
+    <button class="btn" id="pCards">Personal login cards (PDF)</button>
     <button class="btn" id="pDistribute">Place unassigned evenly</button>
     <button class="btn" id="pShuffle">Shuffle everyone</button>
     <select id="pCopyFrom" style="width:auto"></select><button class="btn" id="pCopy">Copy grouping</button>
@@ -411,6 +410,15 @@ footer p{margin:0 0 8px}
   <div class="row" style="margin-bottom:12px"><button class="btn primary" id="xNew">New exercise</button><label class="btn" for="xImport">Import exercise</label><input type="file" id="xImport" accept=".json,application/json" hidden></div>
   <div id="xList"></div>
   <div id="xEdit" style="margin-top:20px"></div>
+</section>
+
+<section class="view" id="v-reading">
+  <h1>Reading log</h1>
+  <p class="lede">Who opened which document in the Library, and when. Participants with a personal login are recorded automatically; people using a shared group login choose their name first. Staff openings aren’t recorded.</p>
+  <div class="row" style="margin-bottom:10px"><label class="small"><input type="checkbox" id="logPre"> Only before the course started</label><label class="small"><input type="checkbox" id="logOnlyMissing"> Only people who haven’t opened everything</label><button class="btn sm" id="logCsv">Download as CSV</button><button class="btn sm danger" id="logClear">Clear the log</button></div>
+  <p class="small" id="logSummary" style="font-weight:600"></p>
+  <div id="logGrid"></div>
+  <div id="logDetail" style="margin-top:18px"></div>
 </section>
 
 <section class="view" id="v-staff">
@@ -776,7 +784,7 @@ function toast(el,t){el.textContent=t;setTimeout(function(){if(el.textContent===
 
 /* ---------- State ---------- */
 var db=null,AUTH=null,AUTHUSER=null,uid=null,CONF=null,DOMAIN="",fsRef=null;
-var isStaff=false,TEAMID=null,TEAM=null,SIGNED=false;
+var isStaff=false,TEAMID=null,TEAM=null,SIGNED=false,PERSON=null;
 var LIVE=null,CFG=null,DRAFT=null,dirty=false,CREDS={teams:[]},TEAMS=[],ROSTER={},RATINGS={},STAFF=[],LIB=[];
 var ME={teamName:"",ex:{},sub:{}};
 var PLEN={},PLEN_EX=null,plenUnsub=null,teamsUnsub=null,acks=[];
@@ -984,12 +992,12 @@ function keepOpen(box,html){var was=box.querySelector("details");var open=was&&w
 
 /* ---------- Navigation ---------- */
 var TEAM_VIEWS=[["brief","Brief"],["work","Worksheet"],["messages","Messages"],["others","Other groups"],["plenary","Joint plan"],["library","Library"]];
-var STAFF_VIEWS=[["run","Run"],["exercises","Exercises"],["groups","Groups"],["people","Participants"],["results","Results"],["plenary","Joint plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
+var STAFF_VIEWS=[["run","Run"],["exercises","Exercises"],["groups","Groups"],["people","Participants"],["reading","Reading log"],["results","Results"],["plenary","Joint plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
 var current="login";
 function visibleViews(){
   if(!SIGNED)return [];
   if(isStaff)return STAFF_VIEWS;
-  if(!L().courseOpen)return [["library","Library"]];
+  if(!L().courseOpen||!TEAMID)return [["library","Library"]];
   var st=L().stage;
   return TEAM_VIEWS.filter(function(v){if(v[0]==="others")return st!=="group";if(v[0]==="plenary")return st!=="group";return true;});
 }
@@ -1004,6 +1012,7 @@ function show(id){
   if(id==="people")renderPeople();
   if(id==="exercises")renderXList();
   if(id==="library")renderLibrary();
+  if(id==="reading")renderReadLog();
   if(id==="messages"){acks=acks.concat(L().sent.map(function(m){return m.id;}).filter(function(x){return acks.indexOf(x)<0;}));saveAcks();renderTrack();}
   try{if(location.hash.slice(1)!==id)history.replaceState(null,"","#"+id);}catch(e){}
   window.scrollTo(0,0);
@@ -1226,7 +1235,7 @@ function tick(){
   else{var rem=(l.duration+l.extra)*60000-elapsed();t.textContent=fmt(rem);t.className="time"+(rem<0?" over":rem<10*60000?" warn":"");}
   var b=$("startBtn");
   if(isStaff){b.hidden=false;b.textContent=l.status==="idle"?"Start":l.status==="running"?"Pause":"Resume";b.classList.toggle("primary",l.status!=="running");autoSend();}
-  var gated=!isStaff&&!l.courseOpen;t.hidden=gated;
+  var gated=!isStaff&&(!l.courseOpen||!TEAMID);t.hidden=gated;
   var sp=$("stagePill");if(SIGNED&&!gated){sp.hidden=false;sp.textContent={group:"Group work",review:"Topic review",plenary:"Joint result"}[l.stage]||"";}
 }
 setInterval(tick,1000);
@@ -1252,12 +1261,13 @@ function onLive(){
   var wkey=exId()+":"+l.stage+":"+submitted()+":"+otherGroups().map(function(g){return g.id;}).join(",");
   if(TEAMID&&(exChanged||stageChanged||workRenderedFor!==wkey))renderWork();else if(TEAMID)updateWorkChecks();
   if(exChanged||plenRenderedFor!==plenKey())renderPlenary();
-  if(isStaff){renderRun();if(current==="results")renderResults();if(current==="groups")renderLogins();}
+  if(isStaff){renderRun();if(current==="results")renderResults();if(current==="groups")renderLogins();if(exChanged&&PEOPLE.list&&PEOPLE.list.length)syncMembers();}
   if(!isStaff&&stageChanged&&l.stage!=="group"&&current==="work")show("plenary");
   if(current==="others")renderOthers();
   if(!isStaff&&openChanged&&l.courseOpen)show("brief");
   if(visibleViews().map(function(v){return v[0];}).indexOf(current)<0)show(visibleViews()[0][0]);
   if(!isStaff&&!l.courseOpen){$("exTitle").textContent="UNAC Police planning exercises";setStatus("The course hasn’t started yet. You can already read the scenario documents in the Library.");return;}
+  if(!isStaff&&!TEAMID){$("exTitle").textContent="UNAC Police planning exercises";setStatus("You aren’t in a group for "+EX().title+" yet. Your course staff will place you; meanwhile you can read the Library.");return;}
   var st={group:"Group work: every group works on all topics",review:"Review: each group works on its topic in the joint plan",plenary:"Joint result: everyone finishes the joint plan together"}[l.stage];
   if(isStaff&&!l.courseOpen)setStatus("Course not started: participants who sign in see only the Library. Start the course in Run when you’re ready.");
   else if(isStaff)setStatus(l.status==="idle"?EX().title+" is ready. Set up groups and messages, then start.":l.status==="paused"?"Paused. "+st+".":"Running. "+st+". Keep this page open so scheduled messages go out.");
@@ -1526,7 +1536,7 @@ async function removeLogin(t){
   if(t.uid)await db.doc("members/"+t.uid).delete().catch(function(){});
   await db.doc("roster/"+t.id).delete().catch(function(){});await db.doc("teams/"+t.id).delete().catch(function(){});
   CREDS.teams=(CREDS.teams||[]).filter(function(x){return x!==t;});await saveCreds();
-  var changed=false;(PEOPLE.list||[]).forEach(function(p){Object.keys(p.groups||{}).forEach(function(k){if(p.groups[k]===t.id){delete p.groups[k];changed=true;}});});if(changed)await savePeople();
+  var changed=false;(PEOPLE.list||[]).forEach(function(p){Object.keys(p.groups||{}).forEach(function(k){if(p.groups[k]===t.id){delete p.groups[k];changed=true;}});});if(changed){await savePeople();await syncMembers();}
 }
 $("logins").addEventListener("click",async function(e){
   var b=e.target.closest("[data-newpw],[data-delg]");if(!b||busyLogins)return;var t=credById(b.dataset.newpw||b.dataset.delg);if(!t)return;
@@ -1565,7 +1575,63 @@ $("cardsPdf").addEventListener("click",function(){
 
 
 /* ---------- Staff: participants register ---------- */
-var PEOPLE={list:[]},peopleEx=null;
+var PEOPLE={list:[]},peopleEx=null,MEMBERS={},busyP=false;
+// Keep each personal login pointed at its owner's group in the running exercise.
+function syncMembers(){
+  var ex=exId(),gs={};groupsSorted().forEach(function(g){gs[g.id]=1;});
+  return Promise.all((PEOPLE.list||[]).filter(function(p){return p.uid;}).map(function(p){
+    var g=(p.groups||{})[ex];g=g&&gs[g]?g:null;var m=MEMBERS[p.uid]||{};
+    if(m.personId===p.id&&(m.teamId||null)===g&&m.name===personLabel(p))return null;
+    return db.doc("members/"+p.uid).set({personId:p.id,name:personLabel(p),teamId:g});
+  })).catch(function(){toast($("pNote"),"Couldn’t update personal logins. Check your connection.");});
+}
+function personLoginBase(p){var s=String(p.name).toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9 ]+/g," ").trim().split(/\s+/).filter(Boolean);return (s.length>1?s[0]+"."+s[s.length-1]:s[0]||"participant").slice(0,30);}
+async function createPersonLogin(p,taken){
+  var base=personLoginBase(p),login=base,n=2,pw=genPw(8),u=null;
+  while(taken[login])login=base+(n++);
+  for(var tries=0;tries<6&&!u;tries++){
+    try{var cr=await createUserWithEmailAndPassword(creator(),login+"@"+DOMAIN,pw);u=cr.user;await signOut(creator());}
+    catch(e){if(e&&e.code==="auth/email-already-in-use"){login=base+(n++);continue;}throw e;}
+  }
+  if(!u)throw new Error("no free login");
+  taken[login]=1;p.login=login;p.password=pw;p.uid=u.uid;
+  var g=(p.groups||{})[exId()];var gs={};groupsSorted().forEach(function(x){gs[x.id]=1;});
+  await db.doc("members/"+u.uid).set({personId:p.id,name:personLabel(p),teamId:g&&gs[g]?g:null});
+  await savePeople();
+}
+async function removePersonLogin(p){
+  if(!p.uid)return;var c=creator();
+  try{await signInWithEmailAndPassword(c,p.login+"@"+DOMAIN,p.password);await deleteUser(c.currentUser);}catch(e){if(!(e&&(e.code==="auth/user-not-found"||e.code==="auth/invalid-credential")))throw e;}
+  await db.doc("members/"+p.uid).delete().catch(function(){});
+  delete p.login;delete p.password;delete p.uid;
+}
+async function newPersonPassword(p){var c=creator(),np=genPw(8);await signInWithEmailAndPassword(c,p.login+"@"+DOMAIN,p.password);await updatePassword(c.currentUser,np);await signOut(c);p.password=np;await savePeople();}
+$("pLogins").addEventListener("click",async function(){
+  if(busyP)return;var todo=(PEOPLE.list||[]).filter(function(p){return !p.uid;});
+  if(!todo.length){toast($("pNote"),"Everyone already has a personal login.");return;}
+  if(!confirm("Create personal logins for "+todo.length+" participant"+(todo.length>1?"s":"")+"?"))return;
+  var taken={};(CREDS.teams||[]).forEach(function(t){taken[t.login]=1;});(PEOPLE.list||[]).forEach(function(p){if(p.login)taken[p.login]=1;});
+  busyP=true;$("pLogins").disabled=true;var done=0;
+  try{for(var i=0;i<todo.length;i++){$("pNote").textContent="Creating login for "+todo[i].name+"… ("+(i+1)+" of "+todo.length+")";await createPersonLogin(todo[i],taken);done++;}
+    $("pNote").textContent=done+" personal login"+(done>1?"s":"")+" created.";}
+  catch(e){$("pNote").textContent=(done?done+" created, then ":"")+(e&&e.code==="auth/too-many-requests"?"Firebase is limiting new accounts. Wait an hour, then click again for the rest.":"creating a login failed. Check your connection.");}
+  finally{busyP=false;$("pLogins").disabled=false;renderPeople();}
+});
+$("pCards").addEventListener("click",function(){
+  var ps=(PEOPLE.list||[]).filter(function(p){return p.login;}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  if(!ps.length){toast($("pNote"),"Create personal logins first.");return;}
+  ensurePdf().then(function(){
+    var url=siteUrl(),cards=ps.map(function(p){return {stack:[
+      {text:"CARANA · UNAC Police planning exercises",color:"#8A5A1E",bold:true,fontSize:9},{text:personLabel(p),fontSize:17,bold:true,margin:[0,2,0,2]},
+      p.country?{text:p.country,fontSize:9,color:"#566778",margin:[0,0,0,6]}:{text:"",margin:[0,0,0,4]},
+      {text:"Website",fontSize:8,color:"#566778"},{text:url,fontSize:9.5,margin:[0,0,0,6]},
+      {columns:[{stack:[{text:"Login",fontSize:8,color:"#566778"},{text:p.login,fontSize:13,bold:true}]},{stack:[{text:"Password",fontSize:8,color:"#566778"},{text:p.password,fontSize:13,bold:true}]}]},
+      {text:"Personal login. Before the course you can read the Library; during the course you work with your group.",fontSize:8,color:"#566778",margin:[0,8,0,0]}],margin:[12,12,12,12]};});
+    var rows=[];for(var i=0;i<cards.length;i+=2)rows.push([cards[i],cards[i+1]||{text:""}]);
+    window.pdfMake.createPdf({pageSize:"A4",pageMargins:[36,40,36,40],content:[{table:{widths:["*","*"],dontBreakRows:true,body:rows},layout:{hLineWidth:function(){return 1;},vLineWidth:function(){return 1;},hLineColor:function(){return "#9AA8B8";},vLineColor:function(){return "#9AA8B8";},hLineStyle:function(){return {dash:{length:4}};},vLineStyle:function(){return {dash:{length:4}};}}}],defaultStyle:{color:"#172A3A"}}).download("carana-personal-logins.pdf");
+  }).catch(function(){toast($("pNote"),"Couldn’t create the PDF. Check your connection.");});
+});
+
 function membersOf(r,ex){if(!r)return [];var m=r.membersBy&&r.membersBy[ex];return (m||r.members||[]).filter(Boolean);}
 function personLabel(p){return (p.rank?p.rank+" ":"")+p.name;}
 function groupsSorted(){return (CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});}
@@ -1579,7 +1645,7 @@ function syncRoster(ex){
     if(JSON.stringify(membersOf(r,ex))===JSON.stringify(by[gid])&&JSON.stringify((r.peopleBy||{})[ex]||[])===JSON.stringify(ppl[gid])&&r.membersBy)return null;
     return db.doc("roster/"+gid).merge({membersBy:m,peopleBy:q});}));
 }
-function commitPeople(ex,msg){return savePeople().then(function(){return syncRoster(ex||pEx());}).then(function(){if(msg)toast($("pNote"),msg);},function(){toast($("pNote"),"Couldn’t save. Check your connection.");});}
+function commitPeople(ex,msg){return savePeople().then(function(){return syncRoster(ex||pEx());}).then(syncMembers).then(function(){if(msg)toast($("pNote"),msg);},function(){toast($("pNote"),"Couldn’t save. Check your connection.");});}
 function renderPeople(){
   if(!isStaff)return;
   var ex=pEx(),gs=groupsSorted(),list=(PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);});
@@ -1590,13 +1656,14 @@ function renderPeople(){
   if(!gs.length&&list.length)$("pCounts").textContent+=" Create group logins in the Groups tab to place people.";
   if($("pList").contains(document.activeElement))return;
   if(!list.length){$("pList").innerHTML='<div class="empty">No participants registered yet.</div>';return;}
-  $("pList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain logins"><thead><tr><th>Name</th><th>Rank or title</th><th>Country or organization</th><th>Email</th><th>Group in '+esc(EXERCISES[ex].title)+'</th><th></th></tr></thead><tbody>'+
+  $("pList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain logins"><thead><tr><th>Name</th><th>Rank or title</th><th>Country or organization</th><th>Email</th><th>Group in '+esc(EXERCISES[ex].title)+'</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
     list.map(function(p){var g=(p.groups||{})[ex]||"";return '<tr><td><input type="text" data-pf="name" data-pid="'+esc(p.id)+'" value="'+esc(p.name)+'" aria-label="Name"></td>'+
       '<td><input type="text" data-pf="rank" data-pid="'+esc(p.id)+'" value="'+esc(p.rank)+'" aria-label="Rank"></td>'+
       '<td><input type="text" data-pf="country" data-pid="'+esc(p.id)+'" value="'+esc(p.country)+'" aria-label="Country"></td>'+
       '<td><input type="email" data-pf="email" data-pid="'+esc(p.id)+'" value="'+esc(p.email)+'" aria-label="Email"></td>'+
       '<td><select data-pg="'+esc(p.id)+'" aria-label="Group"><option value="">Unassigned</option>'+gs.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===g?" selected":"")+'>'+esc(x.name)+'</option>';}).join("")+'</select></td>'+
-      '<td><button class="btn sm danger" data-prm="'+esc(p.id)+'">Remove</button></td></tr>';}).join("")+'</tbody></table></div>';
+      '<td class="mono">'+esc(p.login||"–")+'</td><td class="mono">'+esc(p.password||"")+'</td>'+
+      '<td><div class="row">'+(p.uid?'<button class="btn sm" data-ppw="'+esc(p.id)+'">New password</button>':'<button class="btn sm" data-plog="'+esc(p.id)+'">Create login</button>')+'<button class="btn sm danger" data-prm="'+esc(p.id)+'">Remove</button></div></td></tr>';}).join("")+'</tbody></table></div>';
 }
 function personById(id){return (PEOPLE.list||[]).filter(function(p){return p.id===id;})[0];}
 function addPeople(rows){
@@ -1626,8 +1693,17 @@ $("pList").addEventListener("change",function(e){
   else if(t.dataset.pf&&(p=personById(t.dataset.pid))){var v=t.value.replace(/\s+/g," ").trim();if(t.dataset.pf==="name"&&!v){t.value=p.name;return;}p[t.dataset.pf]=t.dataset.pf==="email"?v.toLowerCase():v;
     savePeople().then(function(){return Promise.all(EX_ORDER.map(syncRoster));});}
 });
-$("pList").addEventListener("click",function(e){var b=e.target.closest("[data-prm]");if(!b)return;var p=personById(b.dataset.prm);if(!p||!confirm("Remove "+p.name+" from the course?"))return;
-  PEOPLE.list=PEOPLE.list.filter(function(x){return x!==p;});savePeople().then(function(){return Promise.all(EX_ORDER.map(syncRoster));});renderPeople();});
+$("pList").addEventListener("click",async function(e){
+  var b=e.target.closest("[data-prm],[data-plog],[data-ppw]");if(!b||busyP)return;
+  var p=personById(b.dataset.prm||b.dataset.plog||b.dataset.ppw);if(!p)return;
+  if(b.dataset.plog){var taken={};(CREDS.teams||[]).forEach(function(t){taken[t.login]=1;});(PEOPLE.list||[]).forEach(function(x){if(x.login)taken[x.login]=1;});
+    busyP=true;b.disabled=true;try{await createPersonLogin(p,taken);toast($("pNote"),"Login created for "+p.name+".");}catch(x){toast($("pNote"),"Couldn’t create the login. Check your connection.");}finally{busyP=false;renderPeople();}return;}
+  if(b.dataset.ppw){if(!confirm("Give "+p.name+" a new password? Devices using the old one are signed out within the hour."))return;
+    busyP=true;b.disabled=true;try{await newPersonPassword(p);toast($("pNote"),"New password set for "+p.name+".");}catch(x){toast($("pNote"),"That didn’t work. Try again.");}finally{busyP=false;renderPeople();}return;}
+  if(!confirm("Remove "+p.name+" from the course"+(p.uid?" and delete their personal login":"")+"?"))return;
+  busyP=true;try{await removePersonLogin(p);}catch(x){toast($("pNote"),"Couldn’t delete the login. Try again.");busyP=false;return;}busyP=false;
+  PEOPLE.list=PEOPLE.list.filter(function(x){return x!==p;});savePeople().then(function(){return Promise.all(EX_ORDER.map(syncRoster));});renderPeople();
+});
 $("pExSeg").addEventListener("click",function(e){var b=e.target.closest("[data-pex]");if(b){peopleEx=b.dataset.pex;renderPeople();}});
 function placeEvenly(people){
   var gs=groupsSorted();if(!gs.length){toast($("pNote"),"Create group logins first.");return false;}
@@ -1807,13 +1883,13 @@ $("exportPdf").addEventListener("click",function(){
 var LIB_CATS=["Introduction","Mission and police concepts","Directives","Maps","Exercise instructions","Other"];
 var CHUNK=900000;
 /* ---------- Reading log ---------- */
-var VIEWS_LOG=[],viewsUnsub=null;
+var VIEWS_LOG=[],viewsUnsub=null,SIGNIN_PENDING=false;
 function readerKey(){return "carana-reader:"+TEAMID;}
-function getReader(){try{var r=JSON.parse(localStorage.getItem(readerKey())||"null");return r&&r.name?r:null;}catch(e){return null;}}
+function getReader(){if(PERSON)return {id:PERSON.id,name:PERSON.name};try{var r=JSON.parse(localStorage.getItem(readerKey())||"null");return r&&r.name?r:null;}catch(e){return null;}}
 function setReader(r){try{localStorage.setItem(readerKey(),JSON.stringify(r));}catch(e){}}
 function groupPeople(){var p=TEAM&&TEAM.peopleBy&&TEAM.peopleBy[exId()];if(p&&p.length)return p;return membersOf(TEAM,exId()).map(function(n){return {id:"",label:n};});}
 function renderReader(){
-  var box=$("readerBox");if(isStaff||!TEAMID){box.hidden=true;return;}
+  var box=$("readerBox");if(isStaff||PERSON||!TEAMID){box.hidden=true;return;}
   var r=getReader(),ppl=groupPeople();box.hidden=false;
   if(r&&!box.dataset.editing){box.innerHTML='Reading as <b>'+esc(r.name)+'</b>. <button class="linkbtn" id="readerChange">Not you?</button>';return;}
   box.innerHTML='<b style="display:block;margin-bottom:6px">Who is reading?</b><span class="small">Choose your name before opening documents. Your course staff can see which documents each participant has opened.</span>'+
@@ -1829,42 +1905,58 @@ $("readerBox").addEventListener("click",function(e){
   else{var n=$("readerName").value.replace(/\s+/g," ").trim();if(n.length<2){$("readerErr").textContent="Choose or type your name.";return;}r={id:"",name:n};}
   setReader(r);delete $("readerBox").dataset.editing;renderReader();renderLibrary();
 });
-function logOpen(d){
-  if(isStaff||!TEAMID)return;var r=getReader()||{id:"",name:""};
-  db.doc("views/"+newId("v")).set({docId:d.id,title:d.title,teamId:TEAMID,teamName:TEAM?TEAM.name:"",personId:r.id||"",person:r.name||"",uid:uid,at:Date.now(),pre:!L().courseOpen}).catch(function(){});
+function logEvent(extra){
+  if(isStaff||!(TEAMID||PERSON))return;var r=getReader()||{id:"",name:""};
+  db.doc("views/"+newId("v")).set(Object.assign({type:"open",teamId:TEAMID||"",teamName:TEAM?TEAM.name:"",personId:r.id||"",person:r.name||"",personal:!!PERSON,uid:uid,at:Date.now(),pre:!L().courseOpen},extra)).catch(function(){});
 }
-function subscribeViews(){if(viewsUnsub||!isStaff)return;viewsUnsub=db.collection("views").onSnapshot(function(q){VIEWS_LOG=q.docs.map(function(d){return d.data();});if(current==="library")renderReadLog();},function(){viewsUnsub=null;});}
+function logOpen(d){logEvent({docId:d.id,title:d.title});}
+function subscribeViews(){if(viewsUnsub||!isStaff)return;viewsUnsub=db.collection("views").onSnapshot(function(q){VIEWS_LOG=q.docs.map(function(d){return d.data();});renderReadLog();},function(){viewsUnsub=null;});}
 function readLogRows(){
-  var onlyPre=$("logPre").checked,logs=VIEWS_LOG.filter(function(v){return !onlyPre||v.pre;});
+  var onlyPre=$("logPre").checked,logs=VIEWS_LOG.filter(function(v){return (v.type||"open")==="open"&&(!onlyPre||v.pre);});
   var groupsById={};groupsSorted().forEach(function(g){groupsById[g.id]=g.name;});
   var rows={},order=[];
   function row(key,name,group,registered){if(!rows[key]){rows[key]={name:name,group:group,registered:registered,docs:{}};order.push(key);}return rows[key];}
-  (PEOPLE.list||[]).forEach(function(p){var gid=(p.groups||{})[exId()];row("p:"+p.id,personLabel(p),gid?groupsById[gid]||"":"",true);});
+  (PEOPLE.list||[]).forEach(function(p){var gid=(p.groups||{})[exId()];var r=row("p:"+p.id,personLabel(p),gid?groupsById[gid]||"":"",true);r.login=p.login||"";r.pid=p.id;});
+  VIEWS_LOG.forEach(function(v){if(v.type==="signin"&&rows["p:"+v.personId]){var r=rows["p:"+v.personId];if(!r.seen||v.at>r.seen)r.seen=v.at;}});
   logs.forEach(function(v){
     var key=v.personId&&rows["p:"+v.personId]?"p:"+v.personId:v.person?"n:"+v.teamId+":"+v.person.toLowerCase():"g:"+v.teamId;
     var r=rows[key]||row(key,v.person||"(name not given)",v.teamName||groupsById[v.teamId]||v.teamId,false);
-    var c=r.docs[v.docId]=r.docs[v.docId]||{n:0,last:0};c.n++;if(v.at>c.last)c.last=v.at;
+    r.key=key;var c=r.docs[v.docId]=r.docs[v.docId]||{n:0,last:0};c.n++;if(v.at>c.last)c.last=v.at;(r.events=r.events||[]).push(v);
   });
+  order.forEach(function(k){rows[k].key=k;});
   return order.map(function(k){return rows[k];}).sort(function(a,b){return ((a.group?0:1)-(b.group?0:1))||(a.group||"").localeCompare(b.group||"",undefined,{numeric:true})||a.name.localeCompare(b.name);});
 }
+var LOG_SEL=null;
 function renderReadLog(){
-  if(!isStaff){$("readLog").hidden=true;return;}
-  $("readLog").hidden=false;subscribeViews();
+  if(!isStaff)return;subscribeViews();
+  if(current!=="reading")return;
   var docs=LIB.slice().sort(function(a,b){return a.cat.localeCompare(b.cat)||a.title.localeCompare(b.title,undefined,{numeric:true});}),rows=readLogRows();
-  var logs=VIEWS_LOG.filter(function(v){return !$("logPre").checked||v.pre;});
-  $("logSummary").textContent=logs.length+" document opening"+(logs.length===1?"":"s")+" recorded"+($("logPre").checked?" before the course started":"")+". "+rows.filter(function(r){return Object.keys(r.docs).length;}).length+" of "+rows.length+" people have opened at least one document.";
-  if(!docs.length||!rows.length){$("logGrid").innerHTML='<div class="empty">'+(!docs.length?"No documents in the library yet.":"No participants registered and no documents opened yet.")+'</div>';return;}
+  var logs=VIEWS_LOG.filter(function(v){return (v.type||"open")==="open"&&(!$("logPre").checked||v.pre);});
+  var withAny=rows.filter(function(r){return Object.keys(r.docs).length;}).length,all=rows.filter(function(r){return docs.length&&docs.every(function(d){return r.docs[d.id];});}).length;
+  $("logSummary").textContent=logs.length+" document opening"+(logs.length===1?"":"s")+($("logPre").checked?" before the course started":"")+". "+withAny+" of "+rows.length+" people have opened at least one document; "+all+" have opened all "+docs.length+".";
+  if($("logOnlyMissing").checked)rows=rows.filter(function(r){return !docs.every(function(d){return r.docs[d.id];});});
+  if(!docs.length||!rows.length){$("logGrid").innerHTML='<div class="empty">'+(!docs.length?"No documents in the library yet.":"Nobody to show.")+'</div>';$("logDetail").innerHTML="";return;}
   var dt=function(t){return new Date(t).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});};
-  $("logGrid").innerHTML='<div class="wide"><table class="ws logtab"><thead><tr><th style="min-width:180px">Participant</th><th>Group</th><th>Opened</th>'+docs.map(function(d){return '<th class="dh" title="'+esc(d.title)+'"><span>'+esc(d.title)+'</span></th>';}).join("")+'</tr></thead><tbody>'+
+  $("logGrid").innerHTML='<div class="wide"><table class="ws logtab"><thead><tr><th style="min-width:180px">Participant</th><th>Group</th><th>Login</th><th>Last signed in</th><th>Opened</th>'+docs.map(function(d){return '<th class="dh" title="'+esc(d.title)+'"><span>'+esc(d.title)+'</span></th>';}).join("")+'</tr></thead><tbody>'+
     rows.map(function(r){var n=docs.filter(function(d){return r.docs[d.id];}).length;
-      return '<tr><td class="rh">'+esc(r.name)+(r.registered?'':' <span class="small">(not registered)</span>')+'</td><td class="small">'+esc(r.group||"–")+'</td><td class="score">'+n+' / '+docs.length+'</td>'+
+      return '<tr data-logrow="'+esc(r.key)+'"'+(r.key===LOG_SEL?' class="sel"':'')+'><td class="rh">'+esc(r.name)+(r.registered?'':' <span class="small">(not registered)</span>')+'</td><td class="small">'+esc(r.group||"–")+'</td>'+
+        '<td class="small">'+(r.login?'<span style="font-family:monospace">'+esc(r.login)+'</span>':(r.registered?'none':'group login'))+'</td><td class="small">'+(r.seen?esc(dt(r.seen)):(r.login?"never":"–"))+'</td>'+
+        '<td class="score">'+n+' / '+docs.length+'</td>'+
         docs.map(function(d){var c=r.docs[d.id];return c?'<td class="hit" title="Opened '+c.n+'×, last '+esc(dt(c.last))+'">'+(c.n>1?c.n+'×':'✓')+'<span class="small">'+esc(dt(c.last))+'</span></td>':'<td class="miss">–</td>';}).join("")+'</tr>';}).join("")+
-    '</tbody></table></div>';
+    '</tbody></table></div><p class="small">Click a participant to see every opening in order.</p>';
+  var sel=rows.filter(function(r){return r.key===LOG_SEL;})[0];
+  if(!sel){$("logDetail").innerHTML="";return;}
+  var ev=VIEWS_LOG.filter(function(v){var k=v.personId&&("p:"+v.personId)===sel.key?sel.key:null;return k||(sel.events||[]).indexOf(v)>=0;}).filter(function(v){return !$("logPre").checked||v.pre;}).sort(function(x,y){return y.at-x.at;});
+  $("logDetail").innerHTML='<div class="panel" style="max-width:900px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">'+esc(sel.name)+'</h3><button class="btn sm" id="logDetailClose">Close</button></div>'+
+    (ev.length?'<div class="tablewrap" style="margin-top:10px"><table class="plain"><thead><tr><th>When</th><th>What</th><th>Phase</th></tr></thead><tbody>'+ev.map(function(v){return '<tr><td class="small">'+esc(new Date(v.at).toLocaleString())+'</td><td>'+(v.type==="signin"?'<span class="small">Signed in</span>':'Opened <b>'+esc(v.title)+'</b>')+'</td><td class="small">'+(v.pre?"Before the course":"During the course")+'</td></tr>';}).join("")+'</tbody></table></div>':'<p class="small">No activity recorded.</p>')+'</div>';
 }
+$("logGrid").addEventListener("click",function(e){var tr=e.target.closest("[data-logrow]");if(!tr)return;LOG_SEL=LOG_SEL===tr.dataset.logrow?null:tr.dataset.logrow;renderReadLog();});
+$("logDetail").addEventListener("click",function(e){if(e.target.id==="logDetailClose"){LOG_SEL=null;renderReadLog();}});
+$("logOnlyMissing").addEventListener("change",renderReadLog);
 $("logPre").addEventListener("change",renderReadLog);
 $("logCsv").addEventListener("click",function(){
   var q=function(s){s=String(s==null?"":s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
-  var lines=["Participant,Group,Document,Opened at,Before course start"].concat(VIEWS_LOG.slice().sort(function(a,b){return a.at-b.at;}).map(function(v){return [v.person||"(name not given)",v.teamName||v.teamId,v.title,new Date(v.at).toISOString().replace("T"," ").slice(0,16),v.pre?"yes":"no"].map(q).join(",");}));
+  var lines=["Participant,Group,Action,Document,At,Before course start"].concat(VIEWS_LOG.slice().sort(function(a,b){return a.at-b.at;}).map(function(v){return [v.person||"(name not given)",v.teamName||v.teamId,v.type==="signin"?"signed in":"opened",v.title||"",new Date(v.at).toISOString().replace("T"," ").slice(0,16),v.pre?"yes":"no"].map(q).join(",");}));
   var blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"});var a2=document.createElement("a");a2.href=URL.createObjectURL(blob);a2.download="carana-reading-log.csv";document.body.appendChild(a2);a2.click();setTimeout(function(){URL.revokeObjectURL(a2.href);a2.remove();},500);
 });
 $("logClear").addEventListener("click",async function(){
@@ -1873,12 +1965,12 @@ $("logClear").addEventListener("click",async function(){
 });
 
 function renderLibrary(){
-  $("libUpload").hidden=!isStaff;renderReader();renderReadLog();
+  $("libUpload").hidden=!isStaff;renderReader();if(isStaff)renderReadLog();
   if(!LIB.length){$("libList").innerHTML='<div class="empty">'+(isStaff?"No documents yet. Add the CARANA PDFs above.":"No documents have been added yet.")+'</div>';return;}
   var cats=LIB_CATS.filter(function(c){return LIB.some(function(d){return d.cat===c;});});
   LIB.forEach(function(d){if(cats.indexOf(d.cat)<0)cats.push(d.cat);});
   $("libList").innerHTML=cats.map(function(cat){return '<h3>'+esc(cat)+'</h3>'+LIB.filter(function(d){return d.cat===cat;}).sort(function(a,b){return a.title.localeCompare(b.title,undefined,{numeric:true});}).map(function(d){
-    return '<div class="item"><b>'+esc(d.title)+'</b><span class="small">'+Math.round((d.size||0)/1024)+' KB</span><button class="btn sm primary" data-open="'+esc(d.id)+'"'+(!isStaff&&TEAMID&&(!getReader()||$("readerBox").dataset.editing)?" disabled title=\"Choose your name first\"":"")+'>Open</button>'+
+    return '<div class="item"><b>'+esc(d.title)+'</b><span class="small">'+Math.round((d.size||0)/1024)+' KB</span><button class="btn sm primary" data-open="'+esc(d.id)+'"'+(!isStaff&&!PERSON&&TEAMID&&(!getReader()||$("readerBox").dataset.editing)?" disabled title=\"Choose your name first\"":"")+'>Open</button>'+
       (isStaff?'<select data-cat="'+esc(d.id)+'" aria-label="Section" style="width:auto">'+LIB_CATS.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+c+'</option>';}).join("")+'</select><button class="btn sm danger" data-rm="'+esc(d.id)+'">Remove</button>':'')+'</div>';}).join("");}).join("");
 }
 function b64(buf){var bin="",bytes=new Uint8Array(buf),step=0x8000;for(var i=0;i<bytes.length;i+=step)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+step));return btoa(bin);}
@@ -1899,7 +1991,7 @@ $("libFiles").addEventListener("change",async function(e){
 });
 async function openDoc(id,o){
   var d=LIB.filter(function(x){return x.id===id;})[0];if(!d){alert("That document is no longer in the library.");return;}
-  if(!isStaff&&TEAMID&&!getReader()){show("library");alert("Choose your name at the top of the Library first.");return;}
+  if(!isStaff&&!PERSON&&TEAMID&&!getReader()){show("library");alert("Choose your name at the top of the Library first.");return;}
   logOpen(d);
   var w=window.open("","_blank");if(w)w.document.write("<p style='font-family:sans-serif;padding:20px'>Opening "+esc(d.title)+"…</p>");
   var label=o.textContent;o.disabled=true;o.textContent="Opening…";
@@ -2202,20 +2294,29 @@ var booted=false;
       var me=null;try{var sd=await db.doc("staff/"+String(u.email||"").toLowerCase()).get();if(sd.exists)me=sd.data();}catch(e){}
       $("whoLine").textContent=(me?me.role+": "+me.name:"Staff")+" · "+u.email;
     } else {
-      try{var mm=await db.doc("members/"+u.uid).get();if(mm.exists){TEAMID=mm.data().teamId;var r=await db.doc("roster/"+TEAMID).get();if(r.exists)TEAM=r.data();else TEAMID=null;}}catch(e){TEAMID=null;}
-      if(!TEAMID){$("gErr").textContent="This account isn’t a group or staff login for CARANA.";setStatus("Signed in as "+(u.email||"unknown")+", which has no access here. Sign out and use the details your course staff gave you.",true);$("signOutBtn").hidden=false;return;}
-      $("whoLine").textContent=TEAM.name+" · UNAC Police planning team";
+      var mdata=null;
+      try{var mm=await db.doc("members/"+u.uid).get();if(mm.exists){mdata=mm.data();if(mdata.personId)PERSON={id:mdata.personId,name:mdata.name||""};TEAMID=mdata.teamId||null;
+        if(TEAMID){var r=await db.doc("roster/"+TEAMID).get();if(r.exists)TEAM=r.data();else TEAMID=null;}}}catch(e){TEAMID=null;}
+      // A personal login follows its owner into whichever group they're placed in for the running exercise.
+      if(mdata)db.doc("members/"+u.uid).onSnapshot(function(s){if(!s.exists)return;var d=s.data();if((d.teamId||null)!==TEAMID){setStatus("Your group has changed. Reloading…");setTimeout(function(){location.reload();},800);}});
+      if(PERSON)SIGNIN_PENDING=true;
+      if(!TEAMID&&PERSON){$("whoLine").textContent=PERSON.name+" · UNAC Police planning exercises";}
+      else if(!TEAMID){$("gErr").textContent="This account isn’t a group or staff login for CARANA.";setStatus("Signed in as "+(u.email||"unknown")+", which has no access here. Sign out and use the details your course staff gave you.",true);$("signOutBtn").hidden=false;return;}
+      
+      if(TEAMID){
+      $("whoLine").textContent=(PERSON?PERSON.name+" · ":"")+TEAM.name+" · UNAC Police planning team";
       try{var mine=await db.doc("teams/"+TEAMID).get();if(mine.exists){ME=mine.data();ME.ex=ME.ex||{};ME.sub=ME.sub||{};}}catch(e){}
       db.doc("teams/"+TEAMID).onSnapshot(function(s){if(!s.exists)return;var wasSub=submitted();ME=teamSaver.absorb(s.data());ME.ex=ME.ex||{};ME.sub=ME.sub||{};if($("workBody").__scope)$("workBody").__scope.root=ME;
         if(wasSub!==submitted())renderWork();else{refreshSheet($("workBody"));updateWorkChecks();}renderMessages();applyLock();});
-      db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){TEAM=s.data();renderBrief();renderLibrary();$("whoLine").textContent=TEAM.name+" · UNAC Police planning team";updateWorkChecks();}});
+      db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){TEAM=s.data();renderBrief();renderLibrary();$("whoLine").textContent=(PERSON?PERSON.name+" · ":"")+TEAM.name+" · UNAC Police planning team";updateWorkChecks();}});
+      }
     }
     await new Promise(function(res){var first=true;
       db.collection("exercises").onSnapshot(function(q){XDEFS={};q.docs.forEach(function(d){XDEFS[d.id]=d.data();});rebuildExercises();
         if(first){first=false;res();return;}
         workRenderedFor=null;plenRenderedFor=null;lastEx=null;onLive();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){if(first){first=false;res();}});});
     SIGNED=true;
-    db.doc("live/state").onSnapshot(function(s){LIVE=s.exists?s.data():null;onLive();},function(){setStatus("Lost the live connection. Reload the page.",true);});
+    db.doc("live/state").onSnapshot(function(s){LIVE=s.exists?s.data():null;if(SIGNIN_PENDING){SIGNIN_PENDING=false;logEvent({type:"signin"});}onLive();},function(){setStatus("Lost the live connection. Reload the page.",true);});
     db.collection("docs").onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});renderLibrary();renderBrief();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){});
     if(isStaff){
       db.doc("fac/config").onSnapshot(function(s){CFG=s.exists?s.data():{messages:{}};CFG.messages=CFG.messages||{};if(!dirty){DRAFT=clone(CFG);delete DRAFT.updatedAt;if(!$("editor").contains(document.activeElement))renderEditor();}});
@@ -2223,7 +2324,9 @@ var booted=false;
       db.collection("roster").onSnapshot(function(q){ROSTER={};q.docs.forEach(function(d){ROSTER[d.id]=d.data();});renderLogins();if(current==="results")renderResults();});
       db.collection("teams").onSnapshot(function(q){TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});if(current==="results")renderResults();if(current==="others")renderOthers();});
       db.doc("fac/ratings").onSnapshot(function(s){if(!ratingsDirty){RATINGS=s.exists?clone(s.data()):{};if(current==="results")renderResults();}});
-      db.doc("fac/participants").onSnapshot(function(s){PEOPLE=s.exists?clone(s.data()):{list:[]};PEOPLE.list=PEOPLE.list||[];renderPeople();if(current==="library")renderReadLog();});
+      db.doc("fac/participants").onSnapshot(function(s){PEOPLE=s.exists?clone(s.data()):{list:[]};PEOPLE.list=PEOPLE.list||[];renderPeople();renderReadLog();});
+      db.collection("members").onSnapshot(function(q){MEMBERS={};q.docs.forEach(function(d){MEMBERS[d.id]=d.data();});},function(){});
+      subscribeViews();
       db.collection("staff").onSnapshot(function(q){STAFF=q.docs.map(function(d){return d.data();});renderStaff();},function(){});
     }
     onLive();
