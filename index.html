@@ -201,6 +201,13 @@ table.logins td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mono
 @media (max-width:640px){.rrow{grid-template-columns:1fr}}
 .score{font-weight:700;font-variant-numeric:tabular-nums}
 .lib{max-width:960px}
+.logtab td,.logtab th{text-align:center}
+.logtab td.rh,.logtab th:first-child{text-align:left}
+.logtab th.dh{min-width:86px;max-width:110px;font-size:.74rem;line-height:1.25;white-space:normal}
+.logtab th.dh span{display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden}
+.logtab td.hit{background:var(--ok-soft);color:var(--ok);font-weight:700}
+.logtab td.hit .small{display:block;font-weight:400;font-size:.7rem}
+.logtab td.miss{color:var(--muted)}
 .course{display:flex;gap:16px;align-items:center;flex-wrap:wrap;border:2px solid var(--terrain);background:var(--terrain-soft);border-radius:10px;padding:14px 18px;margin:0 0 10px;max-width:1100px}
 .course .txt{flex:1;min-width:240px}
 .course b{display:block;font-size:1.05rem}
@@ -300,7 +307,14 @@ footer p{margin:0 0 8px}
     </div>
     <p class="small" id="libNote">Each file is stored in the database in pieces and is visible only to signed-in users. Up to about 20 MB per file.</p>
   </div>
+  <div class="assign" id="readerBox" hidden></div>
   <div class="lib" id="libList"></div>
+  <div id="readLog" hidden style="margin-top:30px">
+    <h2>Who opened what</h2>
+    <p class="small" style="max-width:75ch">Every time someone signed in with a group login opens a document, CARANA records who (the name they chose), which document and when. Staff openings aren’t recorded. Hover over a tick to see how often and when.</p>
+    <div class="row" style="margin-bottom:10px"><label class="small"><input type="checkbox" id="logPre"> Only before the course started</label><button class="btn sm" id="logCsv">Download as CSV</button><button class="btn sm danger" id="logClear">Clear the log</button><span class="small" id="logSummary"></span></div>
+    <div id="logGrid"></div>
+  </div>
 </section>
 
 <!-- Staff views -->
@@ -989,6 +1003,7 @@ function show(id){
   if(id==="results")renderResults();
   if(id==="people")renderPeople();
   if(id==="exercises")renderXList();
+  if(id==="library")renderLibrary();
   if(id==="messages"){acks=acks.concat(L().sent.map(function(m){return m.id;}).filter(function(x){return acks.indexOf(x)<0;}));saveAcks();renderTrack();}
   try{if(location.hash.slice(1)!==id)history.replaceState(null,"","#"+id);}catch(e){}
   window.scrollTo(0,0);
@@ -1558,9 +1573,11 @@ function pEx(){return peopleEx||exId();}
 function savePeople(){return db.doc("fac/participants").set(clone(PEOPLE));}
 // Keep each group's member list (shown to the group and on login cards) in step with the register.
 function syncRoster(ex){
-  var by={};groupsSorted().forEach(function(g){by[g.id]=[];});
-  (PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){var g=(p.groups||{})[ex];if(g&&by[g])by[g].push(personLabel(p));});
-  return Promise.all(Object.keys(by).map(function(gid){var m={};m[ex]=by[gid];var cur=membersOf(ROSTER[gid],ex);if(JSON.stringify(cur)===JSON.stringify(by[gid])&&ROSTER[gid]&&ROSTER[gid].membersBy)return null;return db.doc("roster/"+gid).merge({membersBy:m});}));
+  var by={},ppl={};groupsSorted().forEach(function(g){by[g.id]=[];ppl[g.id]=[];});
+  (PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){var g=(p.groups||{})[ex];if(g&&by[g]){by[g].push(personLabel(p));ppl[g].push({id:p.id,label:personLabel(p)});}});
+  return Promise.all(Object.keys(by).map(function(gid){var m={},q={};m[ex]=by[gid];q[ex]=ppl[gid];var r=ROSTER[gid]||{};
+    if(JSON.stringify(membersOf(r,ex))===JSON.stringify(by[gid])&&JSON.stringify((r.peopleBy||{})[ex]||[])===JSON.stringify(ppl[gid])&&r.membersBy)return null;
+    return db.doc("roster/"+gid).merge({membersBy:m,peopleBy:q});}));
 }
 function commitPeople(ex,msg){return savePeople().then(function(){return syncRoster(ex||pEx());}).then(function(){if(msg)toast($("pNote"),msg);},function(){toast($("pNote"),"Couldn’t save. Check your connection.");});}
 function renderPeople(){
@@ -1789,13 +1806,79 @@ $("exportPdf").addEventListener("click",function(){
 /* ---------- Library ---------- */
 var LIB_CATS=["Introduction","Mission and police concepts","Directives","Maps","Exercise instructions","Other"];
 var CHUNK=900000;
+/* ---------- Reading log ---------- */
+var VIEWS_LOG=[],viewsUnsub=null;
+function readerKey(){return "carana-reader:"+TEAMID;}
+function getReader(){try{var r=JSON.parse(localStorage.getItem(readerKey())||"null");return r&&r.name?r:null;}catch(e){return null;}}
+function setReader(r){try{localStorage.setItem(readerKey(),JSON.stringify(r));}catch(e){}}
+function groupPeople(){var p=TEAM&&TEAM.peopleBy&&TEAM.peopleBy[exId()];if(p&&p.length)return p;return membersOf(TEAM,exId()).map(function(n){return {id:"",label:n};});}
+function renderReader(){
+  var box=$("readerBox");if(isStaff||!TEAMID){box.hidden=true;return;}
+  var r=getReader(),ppl=groupPeople();box.hidden=false;
+  if(r&&!box.dataset.editing){box.innerHTML='Reading as <b>'+esc(r.name)+'</b>. <button class="linkbtn" id="readerChange">Not you?</button>';return;}
+  box.innerHTML='<b style="display:block;margin-bottom:6px">Who is reading?</b><span class="small">Choose your name before opening documents. Your course staff can see which documents each participant has opened.</span>'+
+    '<div class="row" style="margin-top:8px;align-items:end">'+(ppl.length?'<select id="readerSel" style="max-width:320px"><option value="">Choose your name…</option>'+ppl.map(function(p,i){return '<option value="'+i+'"'+(r&&r.name===p.label?" selected":"")+'>'+esc(p.label)+'</option>';}).join("")+'<option value="other">My name isn’t listed</option></select>':'')+
+    '<input type="text" id="readerName" maxlength="80" placeholder="Your full name" style="max-width:280px"'+(ppl.length?" hidden":"")+'><button class="btn primary" id="readerOk">Continue</button></div><p class="err-line" id="readerErr"></p>';
+}
+$("readerBox").addEventListener("change",function(e){if(e.target.id==="readerSel")$("readerName").hidden=e.target.value!=="other";});
+$("readerBox").addEventListener("click",function(e){
+  if(e.target.id==="readerChange"){$("readerBox").dataset.editing="1";renderReader();renderLibrary();return;}
+  if(e.target.id!=="readerOk")return;
+  var sel=$("readerSel"),ppl=groupPeople(),r=null;
+  if(sel&&sel.value!==""&&sel.value!=="other"){var p=ppl[+sel.value];r={id:p.id||"",name:p.label};}
+  else{var n=$("readerName").value.replace(/\s+/g," ").trim();if(n.length<2){$("readerErr").textContent="Choose or type your name.";return;}r={id:"",name:n};}
+  setReader(r);delete $("readerBox").dataset.editing;renderReader();renderLibrary();
+});
+function logOpen(d){
+  if(isStaff||!TEAMID)return;var r=getReader()||{id:"",name:""};
+  db.doc("views/"+newId("v")).set({docId:d.id,title:d.title,teamId:TEAMID,teamName:TEAM?TEAM.name:"",personId:r.id||"",person:r.name||"",uid:uid,at:Date.now(),pre:!L().courseOpen}).catch(function(){});
+}
+function subscribeViews(){if(viewsUnsub||!isStaff)return;viewsUnsub=db.collection("views").onSnapshot(function(q){VIEWS_LOG=q.docs.map(function(d){return d.data();});if(current==="library")renderReadLog();},function(){viewsUnsub=null;});}
+function readLogRows(){
+  var onlyPre=$("logPre").checked,logs=VIEWS_LOG.filter(function(v){return !onlyPre||v.pre;});
+  var groupsById={};groupsSorted().forEach(function(g){groupsById[g.id]=g.name;});
+  var rows={},order=[];
+  function row(key,name,group,registered){if(!rows[key]){rows[key]={name:name,group:group,registered:registered,docs:{}};order.push(key);}return rows[key];}
+  (PEOPLE.list||[]).forEach(function(p){var gid=(p.groups||{})[exId()];row("p:"+p.id,personLabel(p),gid?groupsById[gid]||"":"",true);});
+  logs.forEach(function(v){
+    var key=v.personId&&rows["p:"+v.personId]?"p:"+v.personId:v.person?"n:"+v.teamId+":"+v.person.toLowerCase():"g:"+v.teamId;
+    var r=rows[key]||row(key,v.person||"(name not given)",v.teamName||groupsById[v.teamId]||v.teamId,false);
+    var c=r.docs[v.docId]=r.docs[v.docId]||{n:0,last:0};c.n++;if(v.at>c.last)c.last=v.at;
+  });
+  return order.map(function(k){return rows[k];}).sort(function(a,b){return ((a.group?0:1)-(b.group?0:1))||(a.group||"").localeCompare(b.group||"",undefined,{numeric:true})||a.name.localeCompare(b.name);});
+}
+function renderReadLog(){
+  if(!isStaff){$("readLog").hidden=true;return;}
+  $("readLog").hidden=false;subscribeViews();
+  var docs=LIB.slice().sort(function(a,b){return a.cat.localeCompare(b.cat)||a.title.localeCompare(b.title,undefined,{numeric:true});}),rows=readLogRows();
+  var logs=VIEWS_LOG.filter(function(v){return !$("logPre").checked||v.pre;});
+  $("logSummary").textContent=logs.length+" document opening"+(logs.length===1?"":"s")+" recorded"+($("logPre").checked?" before the course started":"")+". "+rows.filter(function(r){return Object.keys(r.docs).length;}).length+" of "+rows.length+" people have opened at least one document.";
+  if(!docs.length||!rows.length){$("logGrid").innerHTML='<div class="empty">'+(!docs.length?"No documents in the library yet.":"No participants registered and no documents opened yet.")+'</div>';return;}
+  var dt=function(t){return new Date(t).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});};
+  $("logGrid").innerHTML='<div class="wide"><table class="ws logtab"><thead><tr><th style="min-width:180px">Participant</th><th>Group</th><th>Opened</th>'+docs.map(function(d){return '<th class="dh" title="'+esc(d.title)+'"><span>'+esc(d.title)+'</span></th>';}).join("")+'</tr></thead><tbody>'+
+    rows.map(function(r){var n=docs.filter(function(d){return r.docs[d.id];}).length;
+      return '<tr><td class="rh">'+esc(r.name)+(r.registered?'':' <span class="small">(not registered)</span>')+'</td><td class="small">'+esc(r.group||"–")+'</td><td class="score">'+n+' / '+docs.length+'</td>'+
+        docs.map(function(d){var c=r.docs[d.id];return c?'<td class="hit" title="Opened '+c.n+'×, last '+esc(dt(c.last))+'">'+(c.n>1?c.n+'×':'✓')+'<span class="small">'+esc(dt(c.last))+'</span></td>':'<td class="miss">–</td>';}).join("")+'</tr>';}).join("")+
+    '</tbody></table></div>';
+}
+$("logPre").addEventListener("change",renderReadLog);
+$("logCsv").addEventListener("click",function(){
+  var q=function(s){s=String(s==null?"":s);return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s;};
+  var lines=["Participant,Group,Document,Opened at,Before course start"].concat(VIEWS_LOG.slice().sort(function(a,b){return a.at-b.at;}).map(function(v){return [v.person||"(name not given)",v.teamName||v.teamId,v.title,new Date(v.at).toISOString().replace("T"," ").slice(0,16),v.pre?"yes":"no"].map(q).join(",");}));
+  var blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv"});var a2=document.createElement("a");a2.href=URL.createObjectURL(blob);a2.download="carana-reading-log.csv";document.body.appendChild(a2);a2.click();setTimeout(function(){URL.revokeObjectURL(a2.href);a2.remove();},500);
+});
+$("logClear").addEventListener("click",async function(){
+  if(!VIEWS_LOG.length||!confirm("Delete the whole reading log ("+VIEWS_LOG.length+" records)? This can’t be undone."))return;
+  try{var q=await db.collection("views").get();for(var i=0;i<q.docs.length;i++)await db.doc("views/"+q.docs[i].id).delete();}catch(e){alert("Couldn’t clear the log. Try again.");}
+});
+
 function renderLibrary(){
-  $("libUpload").hidden=!isStaff;
+  $("libUpload").hidden=!isStaff;renderReader();renderReadLog();
   if(!LIB.length){$("libList").innerHTML='<div class="empty">'+(isStaff?"No documents yet. Add the CARANA PDFs above.":"No documents have been added yet.")+'</div>';return;}
   var cats=LIB_CATS.filter(function(c){return LIB.some(function(d){return d.cat===c;});});
   LIB.forEach(function(d){if(cats.indexOf(d.cat)<0)cats.push(d.cat);});
   $("libList").innerHTML=cats.map(function(cat){return '<h3>'+esc(cat)+'</h3>'+LIB.filter(function(d){return d.cat===cat;}).sort(function(a,b){return a.title.localeCompare(b.title,undefined,{numeric:true});}).map(function(d){
-    return '<div class="item"><b>'+esc(d.title)+'</b><span class="small">'+Math.round((d.size||0)/1024)+' KB</span><button class="btn sm primary" data-open="'+esc(d.id)+'">Open</button>'+
+    return '<div class="item"><b>'+esc(d.title)+'</b><span class="small">'+Math.round((d.size||0)/1024)+' KB</span><button class="btn sm primary" data-open="'+esc(d.id)+'"'+(!isStaff&&TEAMID&&(!getReader()||$("readerBox").dataset.editing)?" disabled title=\"Choose your name first\"":"")+'>Open</button>'+
       (isStaff?'<select data-cat="'+esc(d.id)+'" aria-label="Section" style="width:auto">'+LIB_CATS.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+c+'</option>';}).join("")+'</select><button class="btn sm danger" data-rm="'+esc(d.id)+'">Remove</button>':'')+'</div>';}).join("");}).join("");
 }
 function b64(buf){var bin="",bytes=new Uint8Array(buf),step=0x8000;for(var i=0;i<bytes.length;i+=step)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+step));return btoa(bin);}
@@ -1816,6 +1899,8 @@ $("libFiles").addEventListener("change",async function(e){
 });
 async function openDoc(id,o){
   var d=LIB.filter(function(x){return x.id===id;})[0];if(!d){alert("That document is no longer in the library.");return;}
+  if(!isStaff&&TEAMID&&!getReader()){show("library");alert("Choose your name at the top of the Library first.");return;}
+  logOpen(d);
   var w=window.open("","_blank");if(w)w.document.write("<p style='font-family:sans-serif;padding:20px'>Opening "+esc(d.title)+"…</p>");
   var label=o.textContent;o.disabled=true;o.textContent="Opening…";
   try{var q=await db.collection("docs/"+d.id+"/chunks").get();var parts=q.docs.sort(function(a,b){return a.id<b.id?-1:1;}).map(function(x){return x.data().d;}).join("");
@@ -2123,7 +2208,7 @@ var booted=false;
       try{var mine=await db.doc("teams/"+TEAMID).get();if(mine.exists){ME=mine.data();ME.ex=ME.ex||{};ME.sub=ME.sub||{};}}catch(e){}
       db.doc("teams/"+TEAMID).onSnapshot(function(s){if(!s.exists)return;var wasSub=submitted();ME=teamSaver.absorb(s.data());ME.ex=ME.ex||{};ME.sub=ME.sub||{};if($("workBody").__scope)$("workBody").__scope.root=ME;
         if(wasSub!==submitted())renderWork();else{refreshSheet($("workBody"));updateWorkChecks();}renderMessages();applyLock();});
-      db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){TEAM=s.data();renderBrief();$("whoLine").textContent=TEAM.name+" · UNAC Police planning team";updateWorkChecks();}});
+      db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){TEAM=s.data();renderBrief();renderLibrary();$("whoLine").textContent=TEAM.name+" · UNAC Police planning team";updateWorkChecks();}});
     }
     await new Promise(function(res){var first=true;
       db.collection("exercises").onSnapshot(function(q){XDEFS={};q.docs.forEach(function(d){XDEFS[d.id]=d.data();});rebuildExercises();
@@ -2138,7 +2223,7 @@ var booted=false;
       db.collection("roster").onSnapshot(function(q){ROSTER={};q.docs.forEach(function(d){ROSTER[d.id]=d.data();});renderLogins();if(current==="results")renderResults();});
       db.collection("teams").onSnapshot(function(q){TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});if(current==="results")renderResults();if(current==="others")renderOthers();});
       db.doc("fac/ratings").onSnapshot(function(s){if(!ratingsDirty){RATINGS=s.exists?clone(s.data()):{};if(current==="results")renderResults();}});
-      db.doc("fac/participants").onSnapshot(function(s){PEOPLE=s.exists?clone(s.data()):{list:[]};PEOPLE.list=PEOPLE.list||[];renderPeople();});
+      db.doc("fac/participants").onSnapshot(function(s){PEOPLE=s.exists?clone(s.data()):{list:[]};PEOPLE.list=PEOPLE.list||[];renderPeople();if(current==="library")renderReadLog();});
       db.collection("staff").onSnapshot(function(q){STAFF=q.docs.map(function(d){return d.data();});renderStaff();},function(){});
     }
     onLive();

@@ -65,6 +65,14 @@ In **Library**, choose a section (Introduction, Mission and police concepts, Dir
 
 In **Run**, click **Import messages** and choose `carana-messages.json`, then **Save messages**. It holds starter messages for all three exercises with staff notes. Edit them freely.
 
+## Reading log
+
+Whenever someone signed in with a group login opens a document in the Library, CARANA records who opened which document and when. Because a group shares one login, each person chooses their name (from the group’s members in Participants, or types it) the first time they use the Library on their device; **Not you?** switches to another name.
+
+Staff see the record at the bottom of the **Library** tab: a grid with one row per participant and one column per document, showing a tick (or 2×, 3×…) with the last time it was opened, and how many documents each person has opened. Tick **Only before the course started** to see the preparatory phase only. **Download as CSV** gives every single opening; **Clear the log** empties it before a new course. Staff openings aren’t recorded.
+
+The names are what participants choose on their device, so treat the grid as a reliable guide rather than proof.
+
 ## Adding your own scenarios
 
 Open **Exercises**. The three CARANA exercises are built in; you can link each one to its scenario PDF from the Library, and participants then get an **Open the scenario document** button on their Brief page.
