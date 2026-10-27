@@ -315,7 +315,7 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-groups">
   <h1>Groups</h1>
-  <p class="lede">Create one login per group, list who is in each group, and set each group’s task for the selected exercise. Groups keep their logins across exercises.</p>
+  <p class="lede">Create one login per group and set each group’s task for the selected exercise. Groups keep their logins across exercises; place people in groups in the Participants tab.</p>
   <div class="row" style="align-items:end;margin-bottom:10px">
     <div class="field" style="margin:0;max-width:130px"><label for="nTeams">Groups to add</label><input type="number" id="nTeams" min="1" max="30" value="4"></div>
     <div class="field" style="margin:0;max-width:200px"><label for="teamPrefix">Name them</label><input type="text" id="teamPrefix" value="Group" maxlength="24"></div>
@@ -332,6 +332,37 @@ footer p{margin:0 0 8px}
   </div>
 </section>
 
+<section class="view" id="v-people">
+  <h1>Participants</h1>
+  <p class="lede">Register everyone on the course, then place them in groups. Each exercise can have its own grouping; groups still sign in with their shared group login.</p>
+  <div class="panel" style="max-width:1100px;margin-bottom:16px">
+    <h3 style="margin-top:0">Register participants</h3>
+    <div class="row" style="align-items:end">
+      <div class="field" style="margin:0;flex:2;min-width:180px"><label for="pName">Full name</label><input type="text" id="pName" maxlength="80"></div>
+      <div class="field" style="margin:0;flex:1;min-width:110px"><label for="pRank">Rank or title</label><input type="text" id="pRank" maxlength="40"></div>
+      <div class="field" style="margin:0;flex:1;min-width:130px"><label for="pCountry">Country or organization</label><input type="text" id="pCountry" maxlength="60"></div>
+      <div class="field" style="margin:0;flex:1.5;min-width:170px"><label for="pEmail">Email (optional)</label><input type="email" id="pEmail" maxlength="120"></div>
+      <button class="btn primary" id="pAdd">Add participant</button>
+    </div>
+    <details style="margin-top:12px"><summary class="small" style="cursor:pointer;font-weight:600">Add many at once</summary>
+      <div class="field" style="margin-top:8px"><label for="pBulk">One participant per line: name, rank, country, email</label><span class="hint">Paste from a spreadsheet (columns separated by tabs) or type with commas. Only the name is required.</span><textarea id="pBulk" rows="5" placeholder="Jane Doe, Superintendent, Ghana, jane@example.org"></textarea></div>
+      <button class="btn" id="pBulkAdd">Add these participants</button>
+    </details>
+    <p class="err-line" id="pErr"></p>
+  </div>
+  <div class="row" style="align-items:center;margin-bottom:10px">
+    <span class="small" style="font-weight:600">Grouping for</span><div class="seg" id="pExSeg"></div>
+  </div>
+  <div class="row" style="margin-bottom:10px">
+    <button class="btn" id="pDistribute">Place unassigned evenly</button>
+    <button class="btn" id="pShuffle">Shuffle everyone</button>
+    <select id="pCopyFrom" style="width:auto"></select><button class="btn" id="pCopy">Copy grouping</button>
+    <span class="small" id="pNote" role="status"></span>
+  </div>
+  <div id="pCounts" class="small" style="margin-bottom:8px"></div>
+  <div id="pList"></div>
+</section>
+
 <section class="view" id="v-results">
   <h1>Progress and results</h1>
   <p class="lede" id="resultsLede"></p>
@@ -344,6 +375,14 @@ footer p{margin:0 0 8px}
   </div>
   <p class="small" style="max-width:75ch">Rate each section from 0 (not done) to 5 (excellent). Totals count rated sections only. The consolidated plan is rated once and shown for every group.</p>
   <div id="rater"></div>
+</section>
+
+<section class="view" id="v-exercises">
+  <h1>Exercises</h1>
+  <p class="lede">The three CARANA exercises are built in. Add your own scenarios here: write the brief, design the worksheet, set rating criteria and link the scenario PDF from the Library. New exercises appear in Run, Groups and Participants straight away.</p>
+  <div class="row" style="margin-bottom:12px"><button class="btn primary" id="xNew">New exercise</button><label class="btn" for="xImport">Import exercise</label><input type="file" id="xImport" accept=".json,application/json" hidden></div>
+  <div id="xList"></div>
+  <div id="xEdit" style="margin-top:20px"></div>
 </section>
 
 <section class="view" id="v-staff">
@@ -700,8 +739,10 @@ var EX_RBB={
   summary:function(d){var n=rowList(d.eas).length+rowList(d.c1_eas).length+rowList(d.c2_eas).length+rowList(d.c3_eas).length;return n+" expected accomplishments";}
 };
 
+var BUILTINS={colocation:EX_COLOCATION,fpu:EX_FPU,rbb:EX_RBB};
+var BUILTIN_ORDER=["colocation","fpu","rbb"];
 var EXERCISES={colocation:EX_COLOCATION,fpu:EX_FPU,rbb:EX_RBB};
-var EX_ORDER=["colocation","fpu","rbb"];
+var EX_ORDER=BUILTIN_ORDER.slice();
 function plenarySections(ex){return ex.plenarySections||ex.sections.filter(function(s){return !s.stage;}).concat(ex.plenaryExtra||[]);}
 
 /* ---------- Helpers ---------- */
@@ -729,6 +770,7 @@ function liveDefaults(){return {exId:"colocation",status:"idle",duration:90,extr
 function L(){return Object.assign(liveDefaults(),LIVE||{});}
 function exId(){return L().exId;}
 function EX(){return EXERCISES[exId()]||EX_COLOCATION;}
+function knownEx(k){return !!EXERCISES[k];}
 function elapsed(){var l=L();return (l.elapsedBefore||0)+(l.status==="running"?Math.max(0,Date.now()-l.startedAt):0);}
 function myAssign(){return TEAM&&TEAM.assign?(TEAM.assign[exId()]||""):"";}
 function submitted(){return !!(ME.sub&&ME.sub[exId()]);}
@@ -923,7 +965,7 @@ function keepOpen(box,html){var was=box.querySelector("details");var open=was&&w
 
 /* ---------- Navigation ---------- */
 var TEAM_VIEWS=[["brief","Brief"],["work","Worksheet"],["messages","Messages"],["others","Other groups"],["plenary","Consolidated plan"],["library","Library"]];
-var STAFF_VIEWS=[["run","Run"],["groups","Groups"],["results","Results"],["plenary","Consolidated plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
+var STAFF_VIEWS=[["run","Run"],["exercises","Exercises"],["groups","Groups"],["people","Participants"],["results","Results"],["plenary","Consolidated plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
 var current="login";
 function visibleViews(){
   if(!SIGNED)return [];
@@ -939,6 +981,8 @@ function show(id){
   renderTrack();
   if(id==="others")renderOthers();
   if(id==="results")renderResults();
+  if(id==="people")renderPeople();
+  if(id==="exercises")renderXList();
   if(id==="messages"){acks=acks.concat(L().sent.map(function(m){return m.id;}).filter(function(x){return acks.indexOf(x)<0;}));saveAcks();renderTrack();}
   try{if(location.hash.slice(1)!==id)history.replaceState(null,"","#"+id);}catch(e){}
   window.scrollTo(0,0);
@@ -959,11 +1003,11 @@ function renderBrief(){
   $("exTitle").textContent=ex.title;
   $("briefTitle").textContent=ex.title;
   $("briefSub").textContent=ex.subtitle+". Output: "+ex.output+".";
-  $("briefBody").innerHTML=ex.brief();
+  $("briefBody").innerHTML=scenarioDocBtn()+ex.brief();
   $("caranaBody").innerHTML=CARANA_BRIEF;
   var p=L().params||{},box=$("assignBox");
   if(TEAM){
-    var mem=(TEAM.members||[]).filter(Boolean);
+    var mem=membersOf(TEAM,exId());
     box.hidden=false;
     box.innerHTML='<b>'+esc(TEAM.name)+(myAssign()?': '+esc(myAssign()):'')+'</b>'+(mem.length?'<span class="small">'+esc(mem.join(", "))+'</span>':'')+
       (exId()==="fpu"&&p.dday!=null&&p.dday!==""?'<div style="margin-top:6px;font-weight:700">French withdrawal: D-'+esc(p.dday)+'</div>':'')+
@@ -1291,10 +1335,10 @@ function renderLogins(){
   var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});}),ex=EX();
   if(!ts.length){$("logins").innerHTML='<div class="empty" style="margin:10px 0">No groups yet. Choose how many to add, then create their logins.</div>';return;}
   if($("logins").contains(document.activeElement))return;
-  $("logins").innerHTML='<datalist id="assignList">'+ex.assignSuggest.map(function(s){return '<option value="'+esc(s)+'">';}).join("")+'</datalist><div class="tablewrap"><table class="plain logins"><thead><tr><th>Group</th><th>Members (one per line)</th><th>Task in '+esc(ex.title)+'</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
+  $("logins").innerHTML='<datalist id="assignList">'+ex.assignSuggest.map(function(s){return '<option value="'+esc(s)+'">';}).join("")+'</datalist><div class="tablewrap"><table class="plain logins"><thead><tr><th>Group</th><th>Members in '+esc(ex.title)+'</th><th>Task in '+esc(ex.title)+'</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
     ts.map(function(t){var r=ROSTER[t.id]||{};var a=(r.assign||{})[exId()]||"";
       return '<tr><td><input type="text" maxlength="40" data-rename="'+esc(t.id)+'" value="'+esc(t.name)+'" aria-label="Group name"></td>'+
-        '<td><textarea rows="3" data-members="'+esc(t.id)+'" aria-label="Members">'+esc((r.members||[]).join("\n"))+'</textarea></td>'+
+        '<td class="small">'+(membersOf(r,exId()).length?esc(membersOf(r,exId()).join(", ")):'<button class="linkbtn" data-go="people">Place participants</button>')+'</td>'+
         '<td><input type="text" list="assignList" data-assign="'+esc(t.id)+'" value="'+esc(a)+'" placeholder="'+esc(ex.assignHint)+'" aria-label="Task"></td>'+
         '<td class="mono">'+esc(t.login)+'</td><td class="mono">'+esc(t.password)+'</td>'+
         '<td><div class="row"><button class="btn sm" data-newpw="'+esc(t.id)+'">New password</button><button class="btn sm danger" data-delg="'+esc(t.id)+'">Delete</button></div></td></tr>';}).join("")+
@@ -1309,7 +1353,7 @@ async function createLogin(name,taken){
   }
   if(!u)throw new Error("no free login");
   await db.doc("members/"+u.uid).set({teamId:login});
-  await db.doc("roster/"+login).set({uid:u.uid,name:name,members:[],assign:{}});
+  await db.doc("roster/"+login).set({uid:u.uid,name:name,membersBy:{},assign:{}});
   taken[login]=1;
   return {id:login,name:name,login:login,password:pw,uid:u.uid,createdAt:Date.now()};
 }
@@ -1324,12 +1368,12 @@ $("makeTeams").addEventListener("click",async function(){
   catch(e){note((made?made+" created, then ":"")+(e&&e.code==="auth/operation-not-allowed"?"Email/Password sign-in is off in Firebase (README, step 2).":e&&e.code==="auth/too-many-requests"?"Firebase is limiting new accounts. Wait an hour, then add the rest.":"creating a login failed. Check your connection and the database rules."));}
   finally{busyLogins=false;$("makeTeams").disabled=false;renderLogins();}
 });
+$("logins").addEventListener("click",function(e){var g=e.target.closest("[data-go]");if(g)show(g.dataset.go);});
 $("logins").addEventListener("change",function(e){
   var t=e.target,id;
   if((id=t.dataset.rename)){var c=credById(id),nm=t.value.replace(/\s+/g," ").trim();if(!c||!nm){t.value=c?c.name:"";return;}
     if((CREDS.teams||[]).some(function(x){return x!==c&&x.name.toLowerCase()===nm.toLowerCase();})){alert("Another group already has that name.");t.value=c.name;return;}
     c.name=nm;saveCreds();db.doc("roster/"+id).merge({name:nm});db.doc("teams/"+id).merge({teamName:nm}).catch(function(){});}
-  else if((id=t.dataset.members)){db.doc("roster/"+id).merge({members:t.value.split("\n").map(function(x){return x.trim();}).filter(Boolean)});}
   else if((id=t.dataset.assign)){var a={};a[exId()]=t.value.trim();db.doc("roster/"+id).merge({assign:a});}
 });
 $("fillAssign").addEventListener("click",function(){
@@ -1344,6 +1388,7 @@ async function removeLogin(t){
   if(t.uid)await db.doc("members/"+t.uid).delete().catch(function(){});
   await db.doc("roster/"+t.id).delete().catch(function(){});await db.doc("teams/"+t.id).delete().catch(function(){});
   CREDS.teams=(CREDS.teams||[]).filter(function(x){return x!==t;});await saveCreds();
+  var changed=false;(PEOPLE.list||[]).forEach(function(p){Object.keys(p.groups||{}).forEach(function(k){if(p.groups[k]===t.id){delete p.groups[k];changed=true;}});});if(changed)await savePeople();
 }
 $("logins").addEventListener("click",async function(e){
   var b=e.target.closest("[data-newpw],[data-delg]");if(!b||busyLogins)return;var t=credById(b.dataset.newpw||b.dataset.delg);if(!t)return;
@@ -1363,7 +1408,7 @@ $("delAll").addEventListener("click",async function(){
 });
 $("copyLogins").addEventListener("click",function(){
   var ts=CREDS.teams||[];if(!ts.length)return;
-  var txt="CARANA – "+siteUrl()+"\n\n"+ts.map(function(t){var r=ROSTER[t.id]||{};return t.name+((r.members||[]).length?" ("+r.members.join(", ")+")":"")+"\n  Login: "+t.login+"\n  Password: "+t.password;}).join("\n\n");
+  var txt="CARANA – "+siteUrl()+"\n\n"+ts.map(function(t){var r=ROSTER[t.id]||{};return t.name+(membersOf(r,exId()).length?" ("+membersOf(r,exId()).join(", ")+")":"")+"\n  Login: "+t.login+"\n  Password: "+t.password;}).join("\n\n");
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){note("Login list copied.");},function(){note("Copy isn’t available; use the login cards PDF.");});
 });
 $("cardsPdf").addEventListener("click",function(){
@@ -1371,7 +1416,7 @@ $("cardsPdf").addEventListener("click",function(){
   ensurePdf().then(function(){
     var url=siteUrl(),cards=ts.map(function(t){var r=ROSTER[t.id]||{},a=(r.assign||{})[exId()]||"";return {stack:[
       {text:"CARANA · UNAC Police planning exercises",color:"#8A5A1E",bold:true,fontSize:9},{text:t.name,fontSize:20,bold:true,margin:[0,2,0,4]},
-      a?{text:EX().title+": "+a,fontSize:9,margin:[0,0,0,4]}:"",(r.members||[]).length?{text:r.members.join(", "),fontSize:8.5,color:"#566778",margin:[0,0,0,6]}:"",
+      a?{text:EX().title+": "+a,fontSize:9,margin:[0,0,0,4]}:"",membersOf(r,exId()).length?{text:membersOf(r,exId()).join(", "),fontSize:8.5,color:"#566778",margin:[0,0,0,6]}:"",
       {text:"Website",fontSize:8,color:"#566778"},{text:url,fontSize:9.5,margin:[0,0,0,6]},
       {columns:[{stack:[{text:"Login",fontSize:8,color:"#566778"},{text:t.login,fontSize:15,bold:true}]},{stack:[{text:"Password",fontSize:8,color:"#566778"},{text:t.password,fontSize:15,bold:true}]}]},
       {text:"Everyone in the group can sign in with these details on their own device.",fontSize:8,color:"#566778",margin:[0,8,0,0]}],margin:[12,12,12,12]};});
@@ -1379,6 +1424,91 @@ $("cardsPdf").addEventListener("click",function(){
     window.pdfMake.createPdf({pageSize:"A4",pageMargins:[36,40,36,40],content:[{table:{widths:["*","*"],dontBreakRows:true,body:rows},layout:{hLineWidth:function(){return 1;},vLineWidth:function(){return 1;},hLineColor:function(){return "#9AA8B8";},vLineColor:function(){return "#9AA8B8";},hLineStyle:function(){return {dash:{length:4}};},vLineStyle:function(){return {dash:{length:4}};}}}],defaultStyle:{color:"#172A3A"}}).download("carana-group-logins.pdf");
   }).catch(function(){note("Couldn’t create the PDF. Check your connection.");});
 });
+
+
+/* ---------- Staff: participants register ---------- */
+var PEOPLE={list:[]},peopleEx=null;
+function membersOf(r,ex){if(!r)return [];var m=r.membersBy&&r.membersBy[ex];return (m||r.members||[]).filter(Boolean);}
+function personLabel(p){return (p.rank?p.rank+" ":"")+p.name;}
+function groupsSorted(){return (CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});}
+function pEx(){return peopleEx||exId();}
+function savePeople(){return db.doc("fac/participants").set(clone(PEOPLE));}
+// Keep each group's member list (shown to the group and on login cards) in step with the register.
+function syncRoster(ex){
+  var by={};groupsSorted().forEach(function(g){by[g.id]=[];});
+  (PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){var g=(p.groups||{})[ex];if(g&&by[g])by[g].push(personLabel(p));});
+  return Promise.all(Object.keys(by).map(function(gid){var m={};m[ex]=by[gid];var cur=membersOf(ROSTER[gid],ex);if(JSON.stringify(cur)===JSON.stringify(by[gid])&&ROSTER[gid]&&ROSTER[gid].membersBy)return null;return db.doc("roster/"+gid).merge({membersBy:m});}));
+}
+function commitPeople(ex,msg){return savePeople().then(function(){return syncRoster(ex||pEx());}).then(function(){if(msg)toast($("pNote"),msg);},function(){toast($("pNote"),"Couldn’t save. Check your connection.");});}
+function renderPeople(){
+  if(!isStaff)return;
+  var ex=pEx(),gs=groupsSorted(),list=(PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);});
+  $("pExSeg").innerHTML=EX_ORDER.map(function(k){return '<button data-pex="'+k+'" class="'+(k===ex?"on":"")+'">'+esc(EXERCISES[k].title)+'</button>';}).join("");
+  $("pCopyFrom").innerHTML='<option value="">Copy grouping from…</option>'+EX_ORDER.filter(function(k){return k!==ex;}).map(function(k){return '<option value="'+k+'">'+esc(EXERCISES[k].title)+'</option>';}).join("");
+  var counts={},un=0;gs.forEach(function(g){counts[g.id]=0;});list.forEach(function(p){var g=(p.groups||{})[ex];if(g&&counts[g]!=null)counts[g]++;else un++;});
+  $("pCounts").textContent=list.length?list.length+" participants. "+gs.map(function(g){return g.name+": "+counts[g.id];}).join(", ")+(un?". Unassigned: "+un:"")+".":"";
+  if(!gs.length&&list.length)$("pCounts").textContent+=" Create group logins in the Groups tab to place people.";
+  if($("pList").contains(document.activeElement))return;
+  if(!list.length){$("pList").innerHTML='<div class="empty">No participants registered yet.</div>';return;}
+  $("pList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain logins"><thead><tr><th>Name</th><th>Rank or title</th><th>Country or organization</th><th>Email</th><th>Group in '+esc(EXERCISES[ex].title)+'</th><th></th></tr></thead><tbody>'+
+    list.map(function(p){var g=(p.groups||{})[ex]||"";return '<tr><td><input type="text" data-pf="name" data-pid="'+esc(p.id)+'" value="'+esc(p.name)+'" aria-label="Name"></td>'+
+      '<td><input type="text" data-pf="rank" data-pid="'+esc(p.id)+'" value="'+esc(p.rank)+'" aria-label="Rank"></td>'+
+      '<td><input type="text" data-pf="country" data-pid="'+esc(p.id)+'" value="'+esc(p.country)+'" aria-label="Country"></td>'+
+      '<td><input type="email" data-pf="email" data-pid="'+esc(p.id)+'" value="'+esc(p.email)+'" aria-label="Email"></td>'+
+      '<td><select data-pg="'+esc(p.id)+'" aria-label="Group"><option value="">Unassigned</option>'+gs.map(function(x){return '<option value="'+esc(x.id)+'"'+(x.id===g?" selected":"")+'>'+esc(x.name)+'</option>';}).join("")+'</select></td>'+
+      '<td><button class="btn sm danger" data-prm="'+esc(p.id)+'">Remove</button></td></tr>';}).join("")+'</tbody></table></div>';
+}
+function personById(id){return (PEOPLE.list||[]).filter(function(p){return p.id===id;})[0];}
+function addPeople(rows){
+  var have={};(PEOPLE.list||[]).forEach(function(p){have[p.name.toLowerCase()]=1;});
+  var added=0,dup=0;PEOPLE.list=PEOPLE.list||[];
+  rows.forEach(function(r){var n=(r.name||"").replace(/\s+/g," ").trim();if(!n)return;if(have[n.toLowerCase()]){dup++;return;}have[n.toLowerCase()]=1;
+    PEOPLE.list.push({id:newId("p"),name:n,rank:(r.rank||"").trim(),country:(r.country||"").trim(),email:(r.email||"").trim().toLowerCase(),groups:{}});added++;});
+  return {added:added,dup:dup};
+}
+$("pAdd").addEventListener("click",function(){
+  var err=$("pErr");err.textContent="";var n=$("pName").value.trim();if(!n){err.textContent="Enter the participant’s name.";return;}
+  var em=$("pEmail").value.trim();if(em&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){err.textContent="That email address doesn’t look right.";return;}
+  var r=addPeople([{name:n,rank:$("pRank").value,country:$("pCountry").value,email:em}]);
+  if(r.dup){err.textContent="A participant with that name is already registered.";return;}
+  ["pName","pRank","pCountry","pEmail"].forEach(function(id){$(id).value="";});$("pName").focus();
+  commitPeople(null,"Participant added.");renderPeople();
+});
+$("pBulkAdd").addEventListener("click",function(){
+  var rows=$("pBulk").value.split("\n").map(function(l){var c=l.indexOf("\t")>=0?l.split("\t"):l.split(",");return {name:c[0],rank:c[1],country:c[2],email:c[3]};});
+  var r=addPeople(rows);if(!r.added&&!r.dup){$("pErr").textContent="Paste at least one name.";return;}
+  $("pBulk").value="";$("pErr").textContent=r.dup?r.dup+" name"+(r.dup>1?"s were":" was")+" already registered and skipped.":"";
+  commitPeople(null,r.added+" participant"+(r.added===1?"":"s")+" added.");renderPeople();
+});
+$("pList").addEventListener("change",function(e){
+  var t=e.target,p;
+  if(t.dataset.pg&&(p=personById(t.dataset.pg))){p.groups=p.groups||{};if(t.value)p.groups[pEx()]=t.value;else delete p.groups[pEx()];commitPeople();renderPeople();}
+  else if(t.dataset.pf&&(p=personById(t.dataset.pid))){var v=t.value.replace(/\s+/g," ").trim();if(t.dataset.pf==="name"&&!v){t.value=p.name;return;}p[t.dataset.pf]=t.dataset.pf==="email"?v.toLowerCase():v;
+    savePeople().then(function(){return Promise.all(EX_ORDER.map(syncRoster));});}
+});
+$("pList").addEventListener("click",function(e){var b=e.target.closest("[data-prm]");if(!b)return;var p=personById(b.dataset.prm);if(!p||!confirm("Remove "+p.name+" from the course?"))return;
+  PEOPLE.list=PEOPLE.list.filter(function(x){return x!==p;});savePeople().then(function(){return Promise.all(EX_ORDER.map(syncRoster));});renderPeople();});
+$("pExSeg").addEventListener("click",function(e){var b=e.target.closest("[data-pex]");if(b){peopleEx=b.dataset.pex;renderPeople();}});
+function placeEvenly(people){
+  var gs=groupsSorted();if(!gs.length){toast($("pNote"),"Create group logins first.");return false;}
+  var ex=pEx(),counts={};gs.forEach(function(g){counts[g.id]=0;});
+  (PEOPLE.list||[]).forEach(function(p){var g=(p.groups||{})[ex];if(g&&counts[g]!=null&&people.indexOf(p)<0)counts[g]++;});
+  people.forEach(function(p){var best=gs.slice().sort(function(a,b){return (counts[a.id]-counts[b.id])||a.name.localeCompare(b.name,undefined,{numeric:true});})[0];p.groups=p.groups||{};p.groups[ex]=best.id;counts[best.id]++;});
+  return true;
+}
+$("pDistribute").addEventListener("click",function(){var ex=pEx(),gs=groupsSorted();
+  var un=(PEOPLE.list||[]).filter(function(p){var g=(p.groups||{})[ex];return !g||!gs.some(function(x){return x.id===g;});});
+  if(!un.length){toast($("pNote"),"Everyone is already in a group.");return;}
+  if(placeEvenly(un)){commitPeople(null,un.length+" placed.");renderPeople();}});
+$("pShuffle").addEventListener("click",function(){var all=(PEOPLE.list||[]).slice();if(!all.length)return;
+  if(!confirm("Shuffle all participants into new groups for "+EXERCISES[pEx()].title+"?"))return;
+  for(var i=all.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=all[i];all[i]=all[j];all[j]=t;}
+  all.forEach(function(p){if(p.groups)delete p.groups[pEx()];});
+  if(placeEvenly(all)){commitPeople(null,"Groups shuffled.");renderPeople();}});
+$("pCopy").addEventListener("click",function(){var from=$("pCopyFrom").value;if(!from)return;var ex=pEx();
+  if(!confirm("Use the "+EXERCISES[from].title+" grouping for "+EXERCISES[ex].title+"?"))return;
+  (PEOPLE.list||[]).forEach(function(p){p.groups=p.groups||{};if(p.groups[from])p.groups[ex]=p.groups[from];else delete p.groups[ex];});
+  commitPeople(null,"Grouping copied.");renderPeople();});
 
 /* ---------- Staff: results and ratings ---------- */
 var RATE_T=null,ratingsTimer=null,ratingsDirty=false;
@@ -1516,6 +1646,7 @@ $("exportPdf").addEventListener("click",function(){
       c=c.concat(sheetPdf(plenarySections(ex),PLEN,true));}
     ranked.forEach(function(r,i){var t=r.t,rr=R[t.id]||{},cm=rr.comments||{};
       c.push({text:(i+1)+". "+gName(t),style:"h1",pageBreak:"before"});
+      if(membersOf(ROSTER[t.id],exId()).length)c.push({text:"Members: "+membersOf(ROSTER[t.id],exId()).join(", "),style:"small"});
       c.push({text:(rosterAssign(t.id)?rosterAssign(t.id)+". ":"")+"Score "+(r.sc.max?r.sc.pct+"%":"—")+" ("+r.sc.total+" of "+r.sc.max+")",style:"meta"});
       var body=[["Section","Score","Comment"].map(function(h){return {text:h,style:"th"};})];
       ex.rating.forEach(function(it){var src=it.k==="brief"?(R.__plenary||{}):rr;var s=(src.scores||{})[it.k];body.push([it.l,(s===""||s==null)?"Not rated":s+" / 5",txt((src.comments||{})[it.k])]);});
@@ -1560,17 +1691,20 @@ $("libFiles").addEventListener("change",async function(e){
   }
   nt.textContent=done+" document"+(done===1?"":"s")+" added.";
 });
+async function openDoc(id,o){
+  var d=LIB.filter(function(x){return x.id===id;})[0];if(!d){alert("That document is no longer in the library.");return;}
+  var w=window.open("","_blank");if(w)w.document.write("<p style='font-family:sans-serif;padding:20px'>Opening "+esc(d.title)+"…</p>");
+  var label=o.textContent;o.disabled=true;o.textContent="Opening…";
+  try{var q=await db.collection("docs/"+d.id+"/chunks").get();var parts=q.docs.sort(function(a,b){return a.id<b.id?-1:1;}).map(function(x){return x.data().d;}).join("");
+    var bin=atob(parts),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+    var url=URL.createObjectURL(new Blob([arr],{type:"application/pdf"}));
+    if(w)w.location.href=url;else{var a=document.createElement("a");a.href=url;a.download=d.name||"document.pdf";document.body.appendChild(a);a.click();a.remove();}
+  }catch(x){if(w)w.close();alert("Couldn’t open the document. Check your connection.");}
+  finally{o.disabled=false;o.textContent=label;}
+}
 $("libList").addEventListener("click",async function(e){
   var o=e.target.closest("[data-open]"),r=e.target.closest("[data-rm]");
-  if(o){var d=LIB.filter(function(x){return x.id===o.dataset.open;})[0];if(!d)return;
-    var w=window.open("","_blank");if(w)w.document.write("<p style='font-family:sans-serif;padding:20px'>Opening "+esc(d.title)+"…</p>");
-    o.disabled=true;o.textContent="Opening…";
-    try{var q=await db.collection("docs/"+d.id+"/chunks").get();var parts=q.docs.sort(function(a,b){return a.id<b.id?-1:1;}).map(function(x){return x.data().d;}).join("");
-      var bin=atob(parts),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
-      var url=URL.createObjectURL(new Blob([arr],{type:"application/pdf"}));
-      if(w)w.location.href=url;else{var a=document.createElement("a");a.href=url;a.download=d.name||"document.pdf";document.body.appendChild(a);a.click();a.remove();}
-    }catch(x){if(w)w.close();alert("Couldn’t open the document. Check your connection.");}
-    finally{o.disabled=false;o.textContent="Open";}}
+  if(o)openDoc(o.dataset.open,o);
   if(r&&confirm("Remove this document from the library?")){var id=r.dataset.rm;try{var q2=await db.collection("docs/"+id+"/chunks").get();for(var j=0;j<q2.docs.length;j++)await db.doc("docs/"+id+"/chunks/"+q2.docs[j].id).delete();await db.doc("docs/"+id).delete();}catch(x){alert("Couldn’t remove it. Try again.");}}
 });
 $("libList").addEventListener("change",function(e){var s=e.target.closest("[data-cat]");if(s)db.doc("docs/"+s.dataset.cat).merge({cat:s.value});});
@@ -1598,6 +1732,223 @@ $("staffList").addEventListener("click",function(e){var b=e.target.closest("[dat
 $("pwSet").addEventListener("click",function(){
   var pw=$("pwNew").value;if(pw.length<8){$("pwNote").textContent="Use at least 8 characters.";return;}
   updatePassword(AUTH.currentUser,pw).then(function(){$("pwNote").textContent="Password changed.";$("pwNew").value="";},function(e){$("pwNote").textContent=e&&e.code==="auth/requires-recent-login"?"For security, sign out and in again, then change your password.":"Couldn’t change the password.";});
+});
+
+
+/* ---------- Custom exercises ---------- */
+var XDEFS={};          // exercises/{id}: custom definitions, plus scenario-document links for built-in ones
+function slug(s){return String(s||"").toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"").slice(0,20);}
+// Brief text: blank line = new paragraph, "## " = heading, "- " = bullet, **bold**.
+function fmtInline(s){return esc(s).replace(/\*\*(.+?)\*\*/g,"<b>$1</b>");}
+function briefHtmlParas(t){
+  return String(t||"").split(/\n\s*\n/).map(function(block){
+    var out="",para=[],list=[];
+    function fp(){if(para.length){out+="<p>"+para.join(" ")+"</p>";para=[];}}
+    function fl(){if(list.length){out+="<ul>"+list.map(function(x){return "<li>"+x+"</li>";}).join("")+"</ul>";list=[];}}
+    block.split("\n").forEach(function(line){var l=line.trim();if(!l)return;
+      if(/^- /.test(l)){fp();list.push(fmtInline(l.slice(2)));}
+      else if(/^## /.test(l)){fp();fl();out+="<h3>"+fmtInline(l.slice(3))+"</h3>";}
+      else{fl();para.push(fmtInline(l));}});
+    fp();fl();return out;
+  }).join("");
+}
+function genericChecks(sections){
+  return function(d,ctx){
+    var out=[];
+    sections.forEach(function(s){s.fields.forEach(function(f){
+      var v=d[f.id];
+      if((f.t==="text"||f.t==="select")&&!String(v||"").trim())out.push(["warn",f.label+":","not completed yet."]);
+      else if(f.t==="rows"&&!rowList(v).length)out.push(["warn",f.label+":","no rows yet."]);
+      else if(f.t==="table"||f.t==="matrix"||f.t==="grid"){var tot=f.rowsList.length*f.colsList.length,n=0;f.rowsList.forEach(function(r){f.colsList.forEach(function(c){var x=((v||{})[r.id]||{})[c.id];if(x!==undefined&&x!==null&&String(x).trim()!=="")n++;});});
+        if(n<tot)out.push([n?"info":"warn",f.label+":",n+" of "+tot+" cells filled."]);}
+    });});
+    return out;
+  };
+}
+function genericMerge(sections){
+  return function(groups){
+    var o={};
+    sections.forEach(function(s){s.fields.forEach(function(f){
+      if(f.t==="text"){var t=groups.map(function(g){var v=String((g.ex||{})[f.id]||"").trim();return v?"["+g.name+"] "+v:"";}).filter(Boolean).join("\n\n");if(t)o[f.id]=t;}
+      else if(f.t==="rows"){var rows={};groups.forEach(function(g){rowList((g.ex||{})[f.id]).forEach(function(r){var c=clone(r);delete c._id;c.g=g.name;rows[newId("r")]=c;});});o[f.id]=rows;}
+      else if(f.t==="table"){var tab={};groups.forEach(function(g){var src=(g.ex||{})[f.id]||{};Object.keys(src).forEach(function(r){Object.keys(src[r]||{}).forEach(function(c){var v=String(src[r][c]||"").trim();if(!v)return;tab[r]=tab[r]||{};tab[r][c]=(tab[r][c]?tab[r][c]+"\n":"")+"["+g.name+"] "+v;});});});o[f.id]=tab;}
+    });});
+    return o;
+  };
+}
+function buildCustom(id,d){
+  var sections=(d.sections||[]).map(function(s){return {id:s.id,title:s.title||"Section",fields:(s.fields||[]).filter(function(f){return f&&f.t;})};});
+  var rating=(d.rating||[]).filter(function(r){return r&&r.l;}).map(function(r,i){return {k:r.k||("r"+i),l:r.l,g:r.g||""};});
+  rating.push({k:"brief",l:"Consolidated plan and briefing",g:"One coherent product, presented and defended as a team."});
+  return {id:id,custom:true,title:d.title||"Untitled exercise",subtitle:d.subtitle||"",output:d.output||"Group products and briefing",duration:+d.duration||90,
+    assignHint:"Task",assignSuggest:d.assignSuggest||[],
+    brief:function(){return briefHtmlParas(d.brief);},
+    sections:sections,
+    plenaryExtra:[{id:"pb",title:"Briefing",fields:[{t:"text",id:"smt",label:"Briefing: key messages",max:2500,rows:6}]}],
+    rating:rating,checks:genericChecks(sections),merge:genericMerge(sections),
+    summary:function(dd){var n=0,t=0;sections.forEach(function(s){s.fields.forEach(function(f){t++;var v=dd[f.id];if(f.t==="rows"?rowList(v).length:f.t==="text"||f.t==="select"?String(v||"").trim():v&&Object.keys(v).length)n++;});});return n+" of "+t+" parts started";}};
+}
+function rebuildExercises(){
+  EXERCISES={};Object.keys(BUILTINS).forEach(function(k){EXERCISES[k]=BUILTINS[k];});
+  var custom=Object.keys(XDEFS).filter(function(k){return XDEFS[k].custom&&!BUILTINS[k];}).sort(function(a,b){return (XDEFS[a].title||"").localeCompare(XDEFS[b].title||"");});
+  custom.forEach(function(k){EXERCISES[k]=buildCustom(k,XDEFS[k]);});
+  EX_ORDER=BUILTIN_ORDER.concat(custom);
+  FIELD_INDEX={};indexFields();
+}
+function scenarioDocBtn(){
+  var x=XDEFS[exId()]||{},d=x.docId&&LIB.filter(function(l){return l.id===x.docId;})[0];
+  return d?'<p><button class="btn primary" data-opendoc="'+esc(d.id)+'">Open the scenario document</button> <span class="small">'+esc(d.title)+'</span></p>':"";
+}
+document.addEventListener("click",function(e){var b=e.target.closest("[data-opendoc]");if(b)openDoc(b.dataset.opendoc,b);});
+
+/* ---------- Staff: exercise builder ---------- */
+var XEDIT=null,XEDIT_ID=null,xDirty=false;
+var FTYPES=[["text","Written answer"],["select","Choice from a list"],["checks","Checklist"],["rows","Table, groups add rows"],["table","Table with fixed rows"],["matrix","Rating matrix"],["grid","Number grid"]];
+function linesOf(t){return String(t||"").split("\n").map(function(x){return x.trim();}).filter(Boolean);}
+function keepIds(old,labels,prefix){old=old||[];return labels.map(function(l,i){var m=old.filter(function(o){return o.label===l;})[0];return {id:m?m.id:newId(prefix),label:l};});}
+function colsToText(cols){return (cols||[]).filter(function(c){return c.t!=="calc";}).map(function(c){return c.label+(c.t==="num"?": number":c.t==="select"?": choice "+(c.options||[]).join(" | "):c.t==="text"?": short":"");}).join("\n");}
+function textToCols(t,old){
+  old=old||[];
+  return linesOf(t).map(function(line){
+    var m=line.match(/^(.*?):\s*(number|short|choice\s+(.+))\s*$/i),label=m?m[1].trim():line,kind=m?m[2].toLowerCase():"";
+    var o=old.filter(function(c){return c.label===label;})[0],c={id:o?o.id:newId("c"),label:label,w:150};
+    if(/^number/.test(kind)){c.t="num";c.w=90;}else if(/^short/.test(kind))c.t="text";else if(/^choice/.test(kind)){c.t="select";c.options=m[3].split("|").map(function(x){return x.trim();}).filter(Boolean);}else c.t="area";
+    return c;
+  });
+}
+function renderXList(){
+  if(!isStaff)return;
+  $("xList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain"><thead><tr><th>Exercise</th><th>Kind</th><th>Scenario document</th><th></th></tr></thead><tbody>'+
+    EX_ORDER.map(function(k){var e=EXERCISES[k],x=XDEFS[k]||{},d=x.docId&&LIB.filter(function(l){return l.id===x.docId;})[0];
+      return '<tr><td><b>'+esc(e.title)+'</b><div class="small">'+esc(e.subtitle)+'</div></td><td class="small">'+(e.custom?"Custom":"Built in")+(k===exId()?", running":"")+'</td>'+
+        '<td><select data-xdoc="'+esc(k)+'" style="max-width:260px"><option value="">None</option>'+LIB.slice().sort(function(a,b){return a.title.localeCompare(b.title);}).map(function(l){return '<option value="'+esc(l.id)+'"'+(d&&d.id===l.id?" selected":"")+'>'+esc(l.title)+'</option>';}).join("")+'</select></td>'+
+        '<td><div class="row">'+(e.custom?'<button class="btn sm primary" data-xedit="'+esc(k)+'">Edit</button>':'')+'<button class="btn sm" data-xdup="'+esc(k)+'">Duplicate</button>'+(e.custom?'<button class="btn sm" data-xexp="'+esc(k)+'">Export</button><button class="btn sm danger" data-xdel="'+esc(k)+'">Delete</button>':'')+'</div></td></tr>';}).join("")+
+    '</tbody></table></div>';
+}
+function newDef(){return {custom:true,title:"",subtitle:"",output:"",duration:90,brief:"",assignSuggest:[],sections:[{id:newId("s"),title:"Group product",fields:[{t:"text",id:newId("f"),label:"",hint:"",max:2000,rows:4}]}],rating:[]};}
+function defFromBuiltin(k){
+  var e=BUILTINS[k];
+  var secs=e.sections.filter(function(s){return !s.stage;}).map(function(s){return {id:newId("s"),title:s.title,fields:s.fields.filter(function(f){return f.t!=="qa";}).map(function(f){var c=clone(f);
+    if(c.cols)c.cols=c.cols.filter(function(x){return x.t!=="calc";}).map(function(x){var y=clone(x);delete y.list;return y;});
+    if(f.t==="rows"&&f.cols)c.cols=f.cols.filter(function(x){return x.t!=="calc";}).map(function(x){return {id:x.id,label:x.label,t:x.t==="multi"?"area":x.t,options:x.options,w:x.w};});
+    delete c.fromAssign;return c;})};});
+  return {custom:true,title:e.title+" (copy)",subtitle:e.subtitle,output:e.output,duration:e.duration,brief:"",assignSuggest:e.assignSuggest.slice(),sections:secs,rating:e.rating.filter(function(r){return r.k!=="brief";}).map(function(r){return {k:r.k,l:r.l,g:r.g};})};
+}
+function openEditor(id,def){XEDIT_ID=id;XEDIT=def;xDirty=false;renderXEdit();$("xEdit").scrollIntoView({behavior:"smooth",block:"start"});}
+function fieldCfg(f,si,fi){
+  var a=' data-si="'+si+'" data-fi="'+fi+'"';
+  function ta(key,label,val,rows){return '<div class="field" style="flex:1;min-width:220px;margin:0"><label class="small">'+label+'</label><textarea rows="'+(rows||3)+'" data-xcfg="'+key+'"'+a+'>'+esc(val)+'</textarea></div>';}
+  switch(f.t){
+  case "select":return ta("options","Choices, one per line",(f.options||[]).join("\n"));
+  case "checks":return ta("items","Items, one per line",(f.items||[]).map(function(i){return i.label;}).join("\n"));
+  case "rows":return ta("cols","Columns, one per line. Add “: number”, “: short” or “: choice A | B | C”",colsToText(f.cols),4);
+  case "table":return ta("rowsList","Rows, one per line",(f.rowsList||[]).map(function(r){return r.label;}).join("\n"),4)+ta("colsList","Columns, one per line",(f.colsList||[]).map(function(r){return r.label;}).join("\n"),4);
+  case "matrix":return ta("rowsList","Rows (what is rated), one per line",(f.rowsList||[]).map(function(r){return r.label;}).join("\n"),4)+ta("colsList","Columns (criteria), one per line",(f.colsList||[]).map(function(r){return r.label;}).join("\n"),4)+ta("options","Rating choices, one per line",(f.options||["+","0","−"]).filter(Boolean).join("\n"),4);
+  case "grid":return ta("rowsList","Rows, one per line",(f.rowsList||[]).map(function(r){return r.label;}).join("\n"),4)+ta("colsList","Columns, one per line",(f.colsList||[]).map(function(r){return r.label;}).join("\n"),4)+'<div class="field" style="margin:0;max-width:140px"><label class="small">Maximum per row</label><input type="number" min="0" data-xcfg="max"'+a+' value="'+esc(f.max||"")+'"></div>';
+  }
+  return '<p class="small" style="margin:0">Groups write a free answer.</p>';
+}
+function renderXEdit(){
+  var box=$("xEdit");if(!XEDIT){box.innerHTML="";box.className="";return;}
+  var x=XEDIT,h='<div class="row" style="justify-content:space-between"><h2 style="margin:0">'+(XEDIT_ID?"Edit exercise":"New exercise")+'</h2><button class="btn sm" id="xClose">Close</button></div>';
+  h+='<div class="grid" style="margin-top:14px"><div class="field" style="margin:0"><label>Title</label><input type="text" data-x="title" value="'+esc(x.title)+'"></div>'+
+    '<div class="field" style="margin:0"><label>Subtitle</label><input type="text" data-x="subtitle" value="'+esc(x.subtitle)+'"></div>'+
+    '<div class="field" style="margin:0"><label>Expected output</label><input type="text" data-x="output" value="'+esc(x.output)+'" placeholder="e.g. Outline plan and SMT briefing"></div>'+
+    '<div class="field" style="margin:0"><label>Duration (minutes)</label><input type="number" min="10" max="480" data-x="duration" value="'+esc(x.duration)+'"></div></div>';
+  h+='<div class="field" style="max-width:none"><label>Brief for participants</label><span class="hint">Leave a blank line between paragraphs. Start a line with “## ” for a heading or “- ” for a bullet; wrap words in **double asterisks** for bold. Link the full scenario PDF in the exercise list.</span><textarea rows="10" data-x="brief">'+esc(x.brief)+'</textarea></div>';
+  h+='<div class="field" style="max-width:none"><label>Group tasks, one per line</label><span class="hint">Used by “Fill tasks from the exercise” in the Groups tab, in group order.</span><textarea rows="4" data-x="assignSuggest">'+esc((x.assignSuggest||[]).join("\n"))+'</textarea></div>';
+  h+='<h2>Worksheet</h2><p class="small">Every group gets this worksheet. In the consolidation stage CARANA merges the groups’ answers into one shared plan and adds a briefing section.</p>';
+  (x.sections||[]).forEach(function(s,si){
+    h+='<div class="panel" style="max-width:1100px;margin-bottom:14px"><div class="row" style="align-items:end"><div class="field" style="flex:1;margin:0"><label>Section title</label><input type="text" data-xs="title" data-si="'+si+'" value="'+esc(s.title)+'"></div>'+
+      '<button class="btn sm" data-xmove="s|'+si+'|-1">Up</button><button class="btn sm" data-xmove="s|'+si+'|1">Down</button><button class="btn sm danger" data-xrm="s|'+si+'">Remove section</button></div>';
+    (s.fields||[]).forEach(function(f,fi){
+      h+='<div class="ed" style="margin:12px 0 0"><div class="row" style="align-items:end"><div class="field" style="margin:0;max-width:230px"><label class="small">Type</label><select data-xf="t" data-si="'+si+'" data-fi="'+fi+'">'+FTYPES.map(function(t){return '<option value="'+t[0]+'"'+(t[0]===f.t?" selected":"")+'>'+t[1]+'</option>';}).join("")+'</select></div>'+
+        '<div class="field" style="flex:1;min-width:200px;margin:0"><label class="small">Question or label</label><input type="text" data-xf="label" data-si="'+si+'" data-fi="'+fi+'" value="'+esc(f.label)+'"></div>'+
+        '<button class="btn sm" data-xmove="f|'+si+'|'+fi+'|-1">Up</button><button class="btn sm" data-xmove="f|'+si+'|'+fi+'|1">Down</button><button class="btn sm danger" data-xrm="f|'+si+'|'+fi+'">Remove</button></div>'+
+        '<div class="field" style="margin:10px 0 0;max-width:none"><label class="small">Guidance for groups (optional)</label><input type="text" data-xf="hint" data-si="'+si+'" data-fi="'+fi+'" value="'+esc(f.hint)+'"></div>'+
+        '<div class="row" style="align-items:start;margin-top:10px">'+fieldCfg(f,si,fi)+'</div></div>';
+    });
+    h+='<button class="btn sm" data-xaddf="'+si+'" style="margin-top:10px">Add question</button></div>';
+  });
+  h+='<button class="btn" id="xAddS">Add section</button>';
+  h+='<h2>Rating criteria</h2><div class="field" style="max-width:none"><span class="hint">One per line: criterion | what good looks like. A “Consolidated plan and briefing” criterion is added automatically.</span><textarea rows="5" data-x="rating">'+esc((x.rating||[]).map(function(r){return r.l+(r.g?" | "+r.g:"");}).join("\n"))+'</textarea></div>';
+  h+='<div class="savebar'+(xDirty?" dirty":"")+'"><span>'+(xDirty?"Unsaved changes":"Saved")+'</span><button class="btn" id="xPreview">Preview worksheet</button><button class="btn primary" id="xSave">Save exercise</button></div><div id="xPrev"></div>';
+  box.className="rater";box.innerHTML=h;
+}
+function xField(si,fi){return XEDIT.sections[+si].fields[+fi];}
+function xTouch(){xDirty=true;var sb=$("xEdit").querySelector(".savebar");if(sb){sb.classList.add("dirty");sb.querySelector("span").textContent="Unsaved changes";}}
+$("xEdit").addEventListener("input",function(e){
+  var t=e.target;if(!XEDIT)return;
+  if(t.dataset.x){var k=t.dataset.x;
+    if(k==="assignSuggest")XEDIT.assignSuggest=linesOf(t.value);
+    else if(k==="rating")XEDIT.rating=linesOf(t.value).map(function(l,i){var p=l.split("|");var old=(XEDIT.rating||[]).filter(function(r){return r.l===p[0].trim();})[0];return {k:old?old.k:"r"+slug(p[0])+i,l:p[0].trim(),g:(p.slice(1).join("|")||"").trim()};});
+    else if(k==="duration")XEDIT.duration=+t.value||90;else XEDIT[k]=t.value;xTouch();}
+  else if(t.dataset.xs){XEDIT.sections[+t.dataset.si].title=t.value;xTouch();}
+  else if(t.dataset.xf&&t.dataset.xf!=="t"){xField(t.dataset.si,t.dataset.fi)[t.dataset.xf]=t.value;xTouch();}
+  else if(t.dataset.xcfg){var f=xField(t.dataset.si,t.dataset.fi),c=t.dataset.xcfg;
+    if(c==="options")f.options=(f.t==="matrix"?[""]:[]).concat(linesOf(t.value));
+    else if(c==="items")f.items=keepIds(f.items,linesOf(t.value),"i");
+    else if(c==="cols")f.cols=textToCols(t.value,f.cols);
+    else if(c==="rowsList")f.rowsList=keepIds(f.rowsList,linesOf(t.value),"r");
+    else if(c==="colsList")f.colsList=keepIds(f.colsList,linesOf(t.value),"c");
+    else if(c==="max")f.max=+t.value||null;
+    xTouch();}
+});
+$("xEdit").addEventListener("change",function(e){
+  var t=e.target;if(t.dataset.xf!=="t")return;var f=xField(t.dataset.si,t.dataset.fi);f.t=t.value;
+  if(f.t==="text"){f.max=f.max||2000;f.rows=f.rows||4;}
+  if(f.t==="select"&&!f.options)f.options=[];
+  if(f.t==="checks"&&!f.items)f.items=[];
+  if(f.t==="rows"&&!f.cols)f.cols=[];
+  if(/table|matrix|grid/.test(f.t)){f.rowsList=f.rowsList||[];f.colsList=f.colsList||[];}
+  if(f.t==="matrix"&&!(f.options||[]).length)f.options=["","+","0","−"];
+  if(f.t==="matrix"&&f.options[0]!=="")f.options.unshift("");
+  xTouch();renderXEdit();
+});
+$("xEdit").addEventListener("click",function(e){
+  var t=e.target;if(!XEDIT)return;
+  if(t.id==="xClose"){if(xDirty&&!confirm("Close without saving your changes?"))return;XEDIT=null;renderXEdit();return;}
+  if(t.id==="xAddS"){XEDIT.sections.push({id:newId("s"),title:"New section",fields:[]});xTouch();renderXEdit();return;}
+  if(t.dataset.xaddf!=null){XEDIT.sections[+t.dataset.xaddf].fields.push({t:"text",id:newId("f"),label:"",hint:"",max:2000,rows:4});xTouch();renderXEdit();return;}
+  if(t.dataset.xrm){var p=t.dataset.xrm.split("|");if(!confirm("Remove this "+(p[0]==="s"?"section and its questions":"question")+"?"))return;
+    if(p[0]==="s")XEDIT.sections.splice(+p[1],1);else XEDIT.sections[+p[1]].fields.splice(+p[2],1);xTouch();renderXEdit();return;}
+  if(t.dataset.xmove){var q=t.dataset.xmove.split("|"),arr=q[0]==="s"?XEDIT.sections:XEDIT.sections[+q[1]].fields,i=q[0]==="s"?+q[1]:+q[2],d=+q[q.length-1],j=i+d;
+    if(j<0||j>=arr.length)return;var tmp=arr[i];arr[i]=arr[j];arr[j]=tmp;xTouch();renderXEdit();return;}
+  if(t.id==="xPreview"){var ex=buildCustom("preview",XEDIT);renderSheet($("xPrev"),ex.sections,{root:{},base:[],editable:false,ctx:ctxFor("",false)});$("xPrev").insertAdjacentHTML("afterbegin",'<h2>Preview</h2>');return;}
+  if(t.id==="xSave")saveXDef();
+});
+function validDef(x){
+  if(!String(x.title||"").trim())return "Give the exercise a title.";
+  if(!(x.sections||[]).length)return "Add at least one worksheet section.";
+  var bad=null;(x.sections||[]).forEach(function(s){(s.fields||[]).forEach(function(f){if(bad)return;
+    if(!String(f.label||"").trim())bad="Every question needs a label (section “"+s.title+"”).";
+    else if(f.t==="select"&&!(f.options||[]).length)bad="“"+f.label+"” needs at least one choice.";
+    else if(f.t==="checks"&&!(f.items||[]).length)bad="“"+f.label+"” needs at least one item.";
+    else if(f.t==="rows"&&!(f.cols||[]).length)bad="“"+f.label+"” needs at least one column.";
+    else if(/table|matrix|grid/.test(f.t)&&(!(f.rowsList||[]).length||!(f.colsList||[]).length))bad="“"+f.label+"” needs rows and columns.";});});
+  return bad;
+}
+function saveXDef(){
+  var err=validDef(XEDIT);if(err){alert(err);return;}
+  var id=XEDIT_ID||("x"+slug(XEDIT.title)+Date.now().toString(36).slice(-4));
+  var body=clone(XEDIT);body.custom=true;body.at=Date.now();if(XDEFS[id]&&XDEFS[id].docId&&!body.docId)body.docId=XDEFS[id].docId;
+  db.doc("exercises/"+id).set(body).then(function(){XEDIT_ID=id;xDirty=false;renderXEdit();},function(){alert("Couldn’t save the exercise. Check your connection and the database rules.");});
+}
+$("xNew").addEventListener("click",function(){openEditor(null,newDef());});
+$("xList").addEventListener("click",function(e){
+  var b=e.target.closest("button");if(!b)return;
+  if(b.dataset.xedit)openEditor(b.dataset.xedit,clone(XDEFS[b.dataset.xedit]));
+  else if(b.dataset.xdup){var k=b.dataset.xdup;var d=BUILTINS[k]?defFromBuiltin(k):clone(XDEFS[k]);d.title=(BUILTINS[k]?d.title:(d.title+" (copy)"));delete d.docId;openEditor(null,d);xDirty=true;renderXEdit();}
+  else if(b.dataset.xexp){var x=clone(XDEFS[b.dataset.xexp]);delete x.docId;var blob=new Blob([JSON.stringify({carana_exercise:1,exercise:x},null,2)],{type:"application/json"});
+    var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="carana-exercise-"+slug(x.title)+".json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);}
+  else if(b.dataset.xdel){var id=b.dataset.xdel;if(id===exId()){alert("This exercise is running. Switch to another exercise in Run first.");return;}
+    if(!confirm("Delete “"+EXERCISES[id].title+"”? Group answers already given stay in the database but can’t be shown."))return;db.doc("exercises/"+id).delete();if(XEDIT_ID===id){XEDIT=null;renderXEdit();}}
+});
+$("xList").addEventListener("change",function(e){var s=e.target.closest("[data-xdoc]");if(s)db.doc("exercises/"+s.dataset.xdoc).merge({docId:s.value||null});});
+$("xImport").addEventListener("change",function(e){
+  var f=e.target.files[0];e.target.value="";if(!f)return;
+  f.text().then(function(t){var o=JSON.parse(t),x=o.exercise||o;if(!x||!x.sections)throw 0;x.custom=true;delete x.docId;openEditor(null,x);xDirty=true;renderXEdit();})
+   .catch(function(){alert("That file isn’t a CARANA exercise. Use a file exported from this page.");});
 });
 
 /* ---------- Sign-in ---------- */
@@ -1654,15 +2005,20 @@ var booted=false;
         if(wasSub!==submitted())renderWork();else{refreshSheet($("workBody"));updateWorkChecks();}renderMessages();applyLock();});
       db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){TEAM=s.data();renderBrief();$("whoLine").textContent=TEAM.name+" · UNAC Police planning team";updateWorkChecks();}});
     }
+    await new Promise(function(res){var first=true;
+      db.collection("exercises").onSnapshot(function(q){XDEFS={};q.docs.forEach(function(d){XDEFS[d.id]=d.data();});rebuildExercises();
+        if(first){first=false;res();return;}
+        workRenderedFor=null;plenRenderedFor=null;lastEx=null;onLive();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){if(first){first=false;res();}});});
     SIGNED=true;
     db.doc("live/state").onSnapshot(function(s){LIVE=s.exists?s.data():null;onLive();},function(){setStatus("Lost the live connection. Reload the page.",true);});
-    db.collection("docs").onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});renderLibrary();},function(){});
+    db.collection("docs").onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});renderLibrary();renderBrief();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){});
     if(isStaff){
       db.doc("fac/config").onSnapshot(function(s){CFG=s.exists?s.data():{messages:{}};CFG.messages=CFG.messages||{};if(!dirty){DRAFT=clone(CFG);delete DRAFT.updatedAt;if(!$("editor").contains(document.activeElement))renderEditor();}});
-      db.doc("fac/teamCreds").onSnapshot(function(s){if(!busyLogins){CREDS=s.exists?clone(s.data()):{teams:[]};CREDS.teams=CREDS.teams||[];}renderLogins();});
+      db.doc("fac/teamCreds").onSnapshot(function(s){if(!busyLogins){CREDS=s.exists?clone(s.data()):{teams:[]};CREDS.teams=CREDS.teams||[];}renderLogins();renderPeople();});
       db.collection("roster").onSnapshot(function(q){ROSTER={};q.docs.forEach(function(d){ROSTER[d.id]=d.data();});renderLogins();if(current==="results")renderResults();});
       db.collection("teams").onSnapshot(function(q){TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});if(current==="results")renderResults();if(current==="others")renderOthers();});
       db.doc("fac/ratings").onSnapshot(function(s){if(!ratingsDirty){RATINGS=s.exists?clone(s.data()):{};if(current==="results")renderResults();}});
+      db.doc("fac/participants").onSnapshot(function(s){PEOPLE=s.exists?clone(s.data()):{list:[]};PEOPLE.list=PEOPLE.list||[];renderPeople();});
       db.collection("staff").onSnapshot(function(q){STAFF=q.docs.map(function(d){return d.data();});renderStaff();},function(){});
     }
     onLive();
