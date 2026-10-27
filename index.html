@@ -1,0 +1,1675 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CARANA — UN Police planning exercises</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#E7ECEF; --surface:#FAFBFC; --ink:#172A3A; --muted:#566778; --line:#C7D0D8;
+  --un:#2C6DB5; --un-soft:#DCE8F6; --terrain:#8A5A1E; --terrain-soft:#F1E3CC;
+  --amber:#9A6508; --amber-soft:#F6E8C8; --flash:#B3261E; --flash-soft:#F7DEDB; --ok:#2F7A55; --ok-soft:#D9EEE2;
+  --green:#2F7A55; --red:#B3261E; --on-accent:#fff;
+  --sans:"Public Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --serif:"Source Serif 4",Georgia,"Times New Roman",serif;
+  color-scheme:light; box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#0F1822; --surface:#16222F; --ink:#E3E9EF; --muted:#97A6B5; --line:#2A3B4D;
+  --un:#6FA6E6; --un-soft:#1C3049; --terrain:#D8A15A; --terrain-soft:#3A2B17;
+  --amber:#E0A93B; --amber-soft:#3A2E14; --flash:#EF6B60; --flash-soft:#3D1D1B; --ok:#5FBF8B; --ok-soft:#183427;
+  --green:#5FBF8B; --red:#EF6B60; --on-accent:#0F1822; color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --paper:#0F1822; --surface:#16222F; --ink:#E3E9EF; --muted:#97A6B5; --line:#2A3B4D;
+  --un:#6FA6E6; --un-soft:#1C3049; --terrain:#D8A15A; --terrain-soft:#3A2B17;
+  --amber:#E0A93B; --amber-soft:#3A2E14; --flash:#EF6B60; --flash-soft:#3D1D1B; --ok:#5FBF8B; --ok-soft:#183427;
+  --green:#5FBF8B; --red:#EF6B60; --on-accent:#0F1822; color-scheme:dark;}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 140px)}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.5}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--un);outline-offset:2px}
+[hidden]{display:none !important}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1280px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;min-width:0;flex:1}
+.mark{font-weight:700;letter-spacing:.14em;font-size:.95rem;color:var(--surface);background:var(--terrain);padding:5px 10px 4px;border-radius:4px}
+.brand-text{display:flex;flex-direction:column;min-width:0}
+.brand-text b{font-size:1.05rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand-text span{color:var(--muted);font-size:.85rem}
+.clock{display:flex;align-items:center;gap:10px}
+.stage{font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--terrain-soft);color:var(--terrain)}
+.time{font-variant-numeric:tabular-nums;font-size:1.6rem;font-weight:700;min-width:5.2ch;text-align:right}
+.time.warn{color:var(--amber)} .time.over{color:var(--flash)} .time.idle{color:var(--muted)}
+.status{max-width:1280px;margin:0 auto;padding:0 20px 8px;font-size:.86rem;color:var(--muted)}
+.status.alert{color:var(--flash);font-weight:600}
+.track{max-width:1280px;margin:0 auto;padding:0 20px 10px;display:flex;gap:4px;overflow-x:auto}
+.track button{flex:0 0 auto;border:0;background:transparent;padding:8px 12px 6px;border-bottom:3px solid var(--line);color:var(--muted);font-size:.9rem;font-weight:600;white-space:nowrap}
+.track button.sel{color:var(--un);border-bottom-color:var(--un)}
+.track .sep{flex:0 0 18px}
+.track .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--flash);margin-left:6px;vertical-align:middle}
+
+.btn{border:1px solid var(--line);background:var(--surface);padding:8px 14px;border-radius:6px;font-weight:600;font-size:.92rem}
+.btn:hover{border-color:var(--un)}
+.btn.primary{background:var(--un);border-color:var(--un);color:var(--on-accent)}
+.btn.danger{color:var(--flash);border-color:var(--flash)}
+.btn.sm{padding:5px 10px;font-size:.84rem}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.linkbtn{border:0;background:none;padding:0;color:var(--un);font-weight:600;text-decoration:underline;font-size:.86rem}
+label.btn{display:inline-block}
+
+main{max-width:1280px;margin:0 auto;padding:24px 20px 90px}
+.view{display:none} .view.on{display:block}
+h1{font-family:var(--serif);font-weight:600;font-size:2rem;line-height:1.15;margin:0 0 8px}
+h2{font-family:var(--serif);font-weight:600;font-size:1.35rem;margin:30px 0 8px}
+h3{font-size:1rem;margin:18px 0 6px}
+.lede{color:var(--muted);max-width:72ch;margin:0 0 20px}
+.small{font-size:.86rem;color:var(--muted)}
+.doc{font-family:var(--serif);font-size:1.04rem;line-height:1.62;max-width:76ch}
+.doc p{margin:0 0 12px} .doc ul{padding-left:1.2em} .doc li{margin:4px 0}
+.doc h3{font-family:var(--sans)}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:18px 20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:16px;margin-bottom:12px}
+.grid .panel h3{margin-top:0}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.assign{background:var(--terrain-soft);border-left:5px solid var(--terrain);border-radius:0 8px 8px 0;padding:12px 16px;margin:0 0 20px;max-width:900px}
+.assign b{display:block;font-size:1.05rem}
+.lockbanner{background:var(--ok-soft);border-radius:8px;padding:12px 16px;margin:0 0 20px;max-width:900px;font-weight:600}
+details.more{max-width:900px;margin:0 0 20px;background:var(--surface);border:1px solid var(--line);border-radius:8px}
+details.more summary{padding:12px 16px;font-weight:600;cursor:pointer}
+details.more .doc{padding:0 16px 8px}
+
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);max-width:100%}
+table.plain{border-collapse:collapse;width:100%;font-size:.92rem}
+.plain th,.plain td{padding:7px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.plain th{color:var(--muted);font-weight:600}
+
+/* Worksheet */
+.ws-sec{margin:0 0 30px}
+.ws-sec>h2{margin-top:10px}
+.field{margin:0 0 18px;max-width:860px}
+.field>label,.field>.lbl{display:block;font-weight:600;margin-bottom:2px}
+.field .hint{display:block;color:var(--muted);font-size:.86rem;margin-bottom:6px}
+textarea,input[type=text],input[type=number],input[type=email],input[type=password],select{width:100%;border:1px solid var(--line);background:var(--surface);border-radius:6px;padding:9px 11px;line-height:1.4}
+textarea{resize:vertical;min-height:62px}
+textarea:disabled,input:disabled,select:disabled{background:var(--paper);color:var(--ink);opacity:1}
+.count{font-size:.8rem;color:var(--muted);text-align:right}
+.count.over{color:var(--flash)}
+.wide{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--surface);margin-bottom:8px}
+table.ws{border-collapse:collapse;font-size:.9rem;min-width:100%}
+.ws th{position:sticky;top:0;background:var(--surface);text-align:left;font-weight:600;font-size:.82rem;color:var(--muted);padding:8px;border-bottom:1px solid var(--line);vertical-align:bottom}
+.ws td{padding:6px;border-bottom:1px solid var(--line);vertical-align:top}
+.ws td.rh{font-weight:600;font-size:.86rem;min-width:180px;max-width:240px;padding-left:12px}
+.ws textarea{min-height:70px;font-size:.88rem;padding:7px 8px}
+.ws input,.ws select{font-size:.88rem;padding:7px 8px}
+.ws input[type=number]{width:5.5em}
+.ws .calc{font-weight:700;font-variant-numeric:tabular-nums;padding-top:12px;white-space:nowrap}
+.ws .gtag{font-size:.75rem;font-weight:700;color:var(--terrain);display:block;margin-bottom:4px}
+.ws td.del{width:1%}
+.ws.matrix td{text-align:center}
+.ws.matrix select{width:auto;min-width:3.4em;text-align:center}
+.ws.grid td{text-align:center} .ws.grid input{text-align:center}
+.ws tr.tot td{font-weight:700;background:var(--paper)}
+.ws td.bad{color:var(--flash)}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chips label{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:99px;padding:2px 8px;font-size:.8rem;cursor:pointer;white-space:nowrap}
+.chips label:has(input:checked){background:var(--un-soft);border-color:var(--un)}
+.chips input{margin:0}
+.sel-GREEN{border-left:5px solid var(--green) !important} .sel-AMBER{border-left:5px solid var(--amber) !important} .sel-RED{border-left:5px solid var(--red) !important}
+.checklist{display:flex;gap:14px;flex-wrap:wrap}
+.checklist label{display:inline-flex;gap:6px;align-items:center;font-weight:500}
+.checks{list-style:none;padding:0;margin:0}
+.checks li{padding:7px 12px;border-radius:6px;margin-bottom:5px;font-size:.9rem}
+.checks li.err{background:var(--flash-soft)} .checks li.warn{background:var(--amber-soft)} .checks li.info{background:var(--un-soft)} .checks li.ok{background:var(--ok-soft)}
+.checks li b{margin-right:6px}
+.checkbox{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:3;max-width:860px;margin-top:14px}
+.checkbox details{background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.checkbox summary{padding:10px 14px;font-weight:600;cursor:pointer}
+.checkbox .checks{padding:0 12px 10px;max-height:40vh;overflow:auto}
+.submitbox{border:2px solid var(--un);border-radius:10px;padding:16px 20px;max-width:860px;background:var(--surface);margin-top:24px}
+.submitbox h2{margin-top:0}
+.err-line{color:var(--flash);font-weight:600;font-size:.88rem;margin:6px 0 0}
+.err-line:empty{display:none}
+
+/* Messages */
+.msg{background:var(--surface);border:1px solid var(--line);border-radius:8px;margin:0 0 22px;overflow:hidden;max-width:900px}
+.msg-head{display:grid;grid-template-columns:max-content 1fr;gap:2px 14px;padding:12px 18px;border-bottom:1px dashed var(--line);font-size:.86rem}
+.msg-head dt{color:var(--muted)} .msg-head dd{margin:0;font-weight:600}
+.prec{display:inline-block;padding:1px 8px;border-radius:4px;color:var(--on-accent);background:var(--flash)}
+.prec.amber{background:var(--amber)} .prec.blue{background:var(--un)}
+.msg-body{padding:14px 18px 4px;font-family:var(--serif);line-height:1.6}
+.msg-body p{margin:0 0 10px}
+.msg-task{padding:6px 18px 18px}
+.coa{display:block;border:1px solid var(--line);border-radius:6px;padding:10px 12px 10px 38px;margin:0 0 8px;position:relative;cursor:pointer}
+.coa input{position:absolute;left:12px;top:13px}
+.coa:has(input:checked){border-color:var(--un);background:var(--un-soft)}
+.empty{border:1px dashed var(--line);border-radius:8px;padding:26px;color:var(--muted);text-align:center;max-width:860px}
+.overlay{position:fixed;inset:0;z-index:50;background:rgba(10,18,30,.66);display:none;align-items:center;justify-content:center;padding:calc(env(safe-area-inset-top,0px) + 16px) 16px calc(env(safe-area-inset-bottom,0px) + 16px)}
+.overlay.on{display:flex}
+.flash{width:min(720px,100%);max-height:100%;overflow:auto;background:var(--surface);border-radius:10px;border-top:10px solid var(--flash);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.flash.amber{border-top-color:var(--amber)} .flash.blue{border-top-color:var(--un)}
+.flash-strip{padding:14px 20px 0;font-weight:700;color:var(--flash)}
+.flash.amber .flash-strip{color:var(--amber)} .flash.blue .flash-strip{color:var(--un)}
+.flash h2{margin:4px 20px 6px}
+.flash-actions{padding:6px 20px 20px;display:flex;gap:10px;flex-wrap:wrap}
+@media (prefers-reduced-motion:no-preference){.overlay.on .flash{animation:drop .45s cubic-bezier(.2,.8,.2,1)}@keyframes drop{from{transform:translateY(-24px);opacity:0}to{transform:none;opacity:1}}}
+
+/* Login */
+.gate{max-width:460px;margin:40px auto;background:var(--surface);border:1px solid var(--line);border-top:8px solid var(--terrain);border-radius:10px;padding:24px 26px}
+.gate h1{font-size:1.7rem;letter-spacing:.06em}
+.gate .field{max-width:none}
+.gate input{font-size:1.05rem;background:var(--paper)}
+
+/* Staff */
+.ed{border:1px solid var(--line);border-left:5px solid var(--line);border-radius:8px;background:var(--surface);padding:14px 16px;margin:0 0 14px;max-width:960px}
+.ed.sent{border-left-color:var(--ok)}
+.ed-top{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.ed-top b{flex:1;min-width:160px}
+.ed-grid{display:grid;grid-template-columns:2fr 1fr 1fr 110px;gap:10px}
+@media (max-width:700px){.ed-grid{grid-template-columns:1fr 1fr}}
+.ed .field{margin-bottom:10px;max-width:none}
+.ed .field label{font-size:.88rem}
+.pill{font-size:.78rem;font-weight:700;padding:2px 9px;border-radius:99px;background:var(--paper);color:var(--muted)}
+.pill.sent{background:var(--ok-soft);color:var(--ok)} .pill.prog{background:var(--amber-soft);color:var(--amber)}
+.savebar{position:sticky;bottom:calc(env(safe-area-inset-bottom,0px) + 12px);display:flex;gap:10px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 14px;max-width:960px;box-shadow:0 6px 20px rgba(0,0,0,.12);z-index:3}
+.savebar span{flex:1;font-size:.9rem;color:var(--muted)}
+.savebar.dirty span{color:var(--amber);font-weight:600}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:6px;overflow:hidden;flex-wrap:wrap}
+.seg button{border:0;background:var(--surface);padding:7px 12px;font-weight:600;font-size:.9rem}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button.on{background:var(--un);color:var(--on-accent)}
+.exlist{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:14px}
+.excard{text-align:left;border:2px solid var(--line);background:var(--surface);border-radius:10px;padding:14px 16px}
+.excard b{display:block;font-size:1.05rem;margin-bottom:2px}
+.excard.on{border-color:var(--terrain);background:var(--terrain-soft)}
+.secgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;max-width:960px}
+.secgrid label{font-size:.86rem;font-weight:600}
+.secgrid select{margin-top:3px}
+table.logins input,table.logins textarea{min-width:150px}
+table.logins td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;letter-spacing:.02em;white-space:nowrap}
+.rater{margin-top:22px;border:2px solid var(--un);border-radius:10px;background:var(--surface);padding:18px 20px}
+.rater h2{margin-top:0}
+.rrow{display:grid;grid-template-columns:220px 1fr;gap:10px;align-items:start;margin:8px 0;max-width:960px}
+.rrow .g{font-size:.84rem;color:var(--muted);font-weight:400;display:block}
+@media (max-width:640px){.rrow{grid-template-columns:1fr}}
+.score{font-weight:700;font-variant-numeric:tabular-nums}
+.lib{max-width:960px}
+.lib .item{display:flex;gap:12px;align-items:center;border-bottom:1px solid var(--line);padding:10px 4px;flex-wrap:wrap}
+.lib .item b{flex:1;min-width:200px}
+.lib h3{color:var(--terrain)}
+footer{max-width:1280px;margin:0 auto;padding:0 20px 30px;color:var(--muted);font-size:.82rem}
+footer p{margin:0 0 8px}
+@media (max-width:600px){h1{font-size:1.6rem}.time{font-size:1.3rem}.top-inner{padding:10px 14px}main{padding:18px 14px 80px}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-inner">
+    <div class="brand"><span class="mark">CARANA</span><div class="brand-text"><b id="exTitle">UN Police planning exercises</b><span id="whoLine">UNAC Police Component</span></div></div>
+    <div class="clock"><span class="stage" id="stagePill" hidden></span><span class="time idle" id="time">--:--</span><button class="btn primary" id="startBtn" hidden>Start</button></div>
+  </div>
+  <div class="status" id="status">Connecting…</div>
+  <nav class="track" id="track" aria-label="Sections"></nav>
+</header>
+
+<main>
+<div class="lockbanner" id="lockBanner" hidden></div>
+
+<section class="view" id="v-login">
+  <div class="gate">
+    <h1>CARANA</h1>
+    <p class="lede" style="margin-bottom:16px">UNAC Police planning exercises. Sign in with your group’s login and password. Directors, facilitators and mentors: use your email address.</p>
+    <form id="gateForm" novalidate>
+      <div class="field"><label for="gLogin">Login</label><input type="text" id="gLogin" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
+      <div class="field"><label for="gPass">Password</label><input type="password" id="gPass" autocomplete="current-password"></div>
+      <p class="err-line" id="gErr" role="alert"></p>
+      <button class="btn primary" id="gGo" type="submit" style="width:100%;padding:11px;margin-top:6px">Sign in</button>
+    </form>
+  </div>
+</section>
+
+<section class="view" id="v-brief">
+  <div class="assign" id="assignBox" hidden></div>
+  <h1 id="briefTitle">Exercise brief</h1>
+  <p class="lede" id="briefSub"></p>
+  <div class="doc" id="briefBody"></div>
+  <details class="more"><summary>Carana at a glance</summary><div class="doc" id="caranaBody"></div></details>
+</section>
+
+<section class="view" id="v-work">
+  <h1>Group worksheet</h1>
+  <p class="lede" id="workLede">Everyone in your group can edit this page at the same time; changes appear on every device.</p>
+  <div id="workBody"></div>
+  <div class="submitbox" id="submitBox">
+    <h2>Submit your group’s work</h2>
+    <p class="small">Submit when your group has finished. The worksheet locks for everyone in the group; staff can reopen it.</p>
+    <button class="btn primary" id="submitBtn">Submit worksheet</button>
+    <p class="err-line" id="submitErr" role="alert"></p>
+  </div>
+  <div class="checkbox" id="workChecks"></div>
+</section>
+
+<section class="view" id="v-messages">
+  <h1>Incoming messages</h1>
+  <p class="lede">Messages from the HOPC, the SMT and the JOC arrive here during the exercise. Respond to each, then update your plan.</p>
+  <div id="msgList"></div>
+</section>
+
+<section class="view" id="v-others">
+  <h1>Other groups</h1>
+  <p class="lede">Read-only view of every group’s worksheet, for presentations and review.</p>
+  <div class="row" id="othersPick" style="margin-bottom:16px"></div>
+  <div id="othersBody"></div>
+</section>
+
+<section class="view" id="v-plenary">
+  <h1>Consolidated plan</h1>
+  <p class="lede">All groups now work as one team on this single plan. Everyone can edit; changes appear live for all.</p>
+  <div class="row" style="margin-bottom:16px"><button class="btn" id="plenaryPdf">Download as PDF</button><span class="small" id="plenaryNote"></span></div>
+  <div id="plenaryBody"></div>
+  <div class="checkbox" id="plenaryChecks"></div>
+</section>
+
+<section class="view" id="v-library">
+  <h1>Library</h1>
+  <p class="lede">Scenario documents for all CARANA exercises. They open in a new tab.</p>
+  <div class="panel" id="libUpload" hidden style="max-width:960px;margin-bottom:18px">
+    <h3 style="margin-top:0">Add documents</h3>
+    <div class="row" style="align-items:end">
+      <div class="field" style="margin:0;min-width:200px;flex:1"><label for="libCat">Section</label><select id="libCat"><option>Introduction</option><option>Mission and police concepts</option><option>Directives</option><option>Maps</option><option>Exercise instructions</option><option>Other</option></select></div>
+      <label class="btn primary" for="libFiles">Choose PDF files</label><input type="file" id="libFiles" accept="application/pdf,.pdf" multiple hidden>
+    </div>
+    <p class="small" id="libNote">Each file is stored in the database in pieces and is visible only to signed-in users. Up to about 20 MB per file.</p>
+  </div>
+  <div class="lib" id="libList"></div>
+</section>
+
+<!-- Staff views -->
+<section class="view" id="v-run">
+  <h1>Run the exercise</h1>
+  <p class="lede">Choose the exercise, control the clock and the stage, adjust the scenario and send messages. Every group follows these settings live.</p>
+  <h2>Exercise</h2>
+  <div class="exlist" id="exPick"></div>
+  <div class="grid">
+    <div class="panel"><h3>Stage</h3><div class="seg" id="stageSeg"></div><p class="small" id="stageNote"></p></div>
+    <div class="panel"><h3>Clock</h3>
+      <div class="row"><div class="field" style="margin:0;max-width:110px"><label for="durIn" class="small">Minutes</label><input type="number" id="durIn" min="10" max="480"></div><button class="btn" id="durSet">Set</button><button class="btn" id="addTime">+5 min</button></div>
+      <div class="row" style="margin-top:10px"><button class="btn danger" id="resetBtn">Reset run</button></div>
+      <p class="small">Reset stops the clock, withdraws sent messages and returns to group work. Answers are kept.</p></div>
+    <div class="panel" id="paramPanel"></div>
+  </div>
+  <h2>Messages</h2>
+  <p class="small" style="max-width:75ch">Messages for the selected exercise. Set the minute for automatic sending, or leave it empty and use Send now. Options are one per line; leave empty for a free response. Notes stay with staff.</p>
+  <div class="row" style="margin-bottom:12px"><button class="btn" id="exportMsgs">Export messages</button><label class="btn" for="importMsgs">Import messages</label><input type="file" id="importMsgs" accept=".json,application/json" hidden></div>
+  <div id="editor"></div>
+  <div class="row" style="margin:6px 0 16px"><button class="btn" id="addMsg">Add message</button></div>
+  <div class="savebar" id="saveBar"><span id="saveState">All changes saved</span><button class="btn primary" id="saveCfg">Save messages</button></div>
+</section>
+
+<section class="view" id="v-groups">
+  <h1>Groups</h1>
+  <p class="lede">Create one login per group, list who is in each group, and set each group’s task for the selected exercise. Groups keep their logins across exercises.</p>
+  <div class="row" style="align-items:end;margin-bottom:10px">
+    <div class="field" style="margin:0;max-width:130px"><label for="nTeams">Groups to add</label><input type="number" id="nTeams" min="1" max="30" value="4"></div>
+    <div class="field" style="margin:0;max-width:200px"><label for="teamPrefix">Name them</label><input type="text" id="teamPrefix" value="Group" maxlength="24"></div>
+    <button class="btn primary" id="makeTeams">Create group logins</button>
+  </div>
+  <div id="logins"></div>
+  <div class="row" style="margin-top:6px">
+    <button class="btn" id="fillAssign">Fill tasks from the exercise</button>
+    <button class="btn" id="cardsPdf">Download login cards (PDF)</button>
+    <button class="btn" id="copyLogins">Copy login list</button>
+    <button class="btn" id="newPwAll">New passwords for all</button>
+    <button class="btn danger" id="delAll">Delete all group logins</button>
+    <span class="small" id="loginNote" role="status"></span>
+  </div>
+</section>
+
+<section class="view" id="v-results">
+  <h1>Progress and results</h1>
+  <p class="lede" id="resultsLede"></p>
+  <div id="teams"></div>
+  <div class="row" style="margin-top:12px">
+    <button class="btn primary" id="exportPdf">Export results as PDF</button>
+    <label class="small"><input type="checkbox" id="pdfAnswers" checked> Include each group’s worksheet</label>
+    <button class="btn danger" id="clearTeams">Clear answers for this exercise</button>
+    <span class="small" id="copyNote"></span>
+  </div>
+  <p class="small" style="max-width:75ch">Rate each section from 0 (not done) to 5 (excellent). Totals count rated sections only. The consolidated plan is rated once and shown for every group.</p>
+  <div id="rater"></div>
+</section>
+
+<section class="view" id="v-staff">
+  <h1>Staff</h1>
+  <p class="lede">Directors, facilitators and mentors all have the same rights. Add colleagues here; they sign in with their email and the password shown once.</p>
+  <div class="panel" style="max-width:960px">
+    <div class="row" style="align-items:end">
+      <div class="field" style="margin:0;flex:1;min-width:160px"><label for="stName">Name</label><input type="text" id="stName" maxlength="60"></div>
+      <div class="field" style="margin:0;flex:1;min-width:200px"><label for="stEmail">Email</label><input type="email" id="stEmail" maxlength="120"></div>
+      <div class="field" style="margin:0;max-width:170px"><label for="stRole">Role</label><select id="stRole"><option>Director</option><option>Facilitator</option><option>Mentor</option></select></div>
+      <button class="btn primary" id="stAdd">Add staff member</button>
+    </div>
+    <p class="err-line" id="stErr"></p>
+    <p class="small" id="stNote"></p>
+  </div>
+  <div id="staffList" style="margin-top:14px"></div>
+  <h2>Your password</h2>
+  <div class="panel" style="max-width:520px">
+    <div class="field"><label for="pwNew">New password (at least 8 characters)</label><input type="password" id="pwNew" autocomplete="new-password"></div>
+    <button class="btn" id="pwSet">Change my password</button><p class="small" id="pwNote"></p>
+  </div>
+</section>
+</main>
+
+<footer><p>CARANA is a fictional training scenario. Scenario documents © FüAkBw.</p><button class="linkbtn" id="signOutBtn" hidden>Sign out</button></footer>
+
+<div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="flashTitle"><div class="flash" id="flashBox"></div></div>
+<datalist id="stationList"></datalist>
+
+<script src="firebase-config.js" onload="window.__cfgLoaded=true"></script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, initializeAuth, inMemoryPersistence, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { initializeFirestore, doc as fDoc, collection as fCollection, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+(function(){
+"use strict";
+/* =====================================================================
+   CARANA — scenario data and exercise definitions
+   ===================================================================== */
+var PROVINCES=["Galasi (capital zone)","Fellari","Guthar","Hanno","Barin","Leppko","Mahbek","Tereni","Koloni"];
+var PROV_SHORT=function(p){return String(p||"").split(" (")[0];};
+// CNP police stations, TAM report §4.3.2
+var CNP_STATIONS=[["Galasi",12,"incl. Police Academy"],["Cereni",5],["Lora",3],["Turen",4],["Maldosa",5],["Corma",3],["Amsan",3],["Folsa",3],["Arum",2],["Maui",2],["Muka",1],["Xalksa",2],["Faron",4],["Focca",1],["Treppek",1],["Tekkla",1],["Torta",1],["Lisbo",1],["Maroni",4],["Kalei",2],["Akkabar",2],["Ames",1],["Karo",1],["Sureen",2]];
+var SECTORS=["Command, planning and administration","Institutional capacity-building","Community-oriented policing","Investigations and serious and organized crime","SGBV and vulnerable persons","Border and transnational crime","Training and professional development"];
+var MODALITIES=["Permanent / regular","Periodic","Mobile","Specialist"];
+var SEC_LEVELS=["GREEN","AMBER","RED"];
+var ACTIVITY_VERBS=/^(the )?(unpol|un police|we )?\s*(will )?(mentor|mentoring|train|training|conduct|provide|support|monitor|advis|deliver|assist|co-?locat|deploy|organi[sz]e|hold|facilitate|carry out|implement|establish)/i;
+
+var CARANA_BRIEF='<p>Carana is a Fasian state of about 17–25 million people (figures differ between documents), divided into eight provinces and the capital zone of Galasi. After years of civil war between the government forces (FDC), the Mouvement Patriotique de Carana (MPC) in the West and the Combattants Indépendants du Sud Carana (CISC) in the South, the parties signed the Kalari Peace Agreement. Security Council resolution 1544 (2026) established the <b>United Nations Assistance Mission in Carana (UNAC)</b> under Chapter VII for an initial 12 months.</p>'+
+'<p>UNAC’s police component is authorized up to <b>1,882 police officers</b>: 922 individual police officers (IPOs) and six formed police units, organized in three sectors (Sector I Galasi, Sector II Alur, Sector III Corma). Its mandate is to assist the transitional government in monitoring and restructuring the Carana Police, to develop a police training programme, and to contribute to protection of civilians, which the Council places ahead of all other tasks when deciding how to use capacity.</p>'+
+'<p>The Carana National Police (CNP) work in population centres under the Ministry of Interior; the Gendarmerie (Ministry of Defence) covers rural areas and borders. Both are short of trained staff, equipment and pay, are mostly ethnic Falin, and are widely distrusted. Estimates of their strength range from about 9,000 to 17,500. In MPC-held Koloni, Tereni and Mahbek there are only about 50 trained officers and up to 300 MPC appointees; in CISC-held southern Leppko there is no policing at all.</p>'+
+'<p>Key threats: armed groups and warlords exploiting diamonds, copper and wood in northern Leppko; ELF and CISC splinter groups in the South; El Hasar incursions from Katasi in the West; youth gangs and crime in Galasi’s suburbs and IDP camps; trafficking networks from Sumora through Galasi into central Carana; and some 1.1 million IDPs, many now returning west.</p>'+
+'<p class="small">Full documents are in the Library: strategic assessment, TAM report, resolution 1544, mission and police concepts, deployment map, C2 structure and the directives on the use of force.</p>';
+
+function stationTable(){
+  return '<div class="tablewrap"><table class="plain"><thead><tr><th>Location</th><th>CNP stations</th><th>Location</th><th>CNP stations</th></tr></thead><tbody>'+
+    (function(){var h="";for(var i=0;i<CNP_STATIONS.length;i+=2){var a=CNP_STATIONS[i],b=CNP_STATIONS[i+1]||["",""];
+      h+='<tr><td>'+a[0]+(a[2]?' <span class="small">('+a[2]+')</span>':'')+'</td><td>'+a[1]+'</td><td>'+b[0]+'</td><td>'+b[1]+'</td></tr>';}return h;})()+
+    '</tbody></table></div><p class="small">Source: TAM report, §4.3.2. Former training facilities in Alur, Norke, Maki, Kika and Lora are held by MPC or CISC and not in use.</p>';
+}
+
+/* ---------- Exercise 1: Colocation ---------- */
+var EX_COLOCATION={
+  id:"colocation",title:"Colocation plan",subtitle:"Developing the UNAC Police–CNP colocation plan",
+  duration:90,output:"Outline colocation plan and SMT briefing",
+  assignHint:"Provinces, e.g. Galasi, Fellari",
+  assignSuggest:["Galasi, Fellari","Guthar, Hanno","Barin, Leppko, Mahbek","Tereni, Koloni"],
+  brief:function(){return '<p>The Police Commissioner has directed the UN Police middle managers to develop a mission-wide <b>UNPOL–CNP Colocation Plan</b>. Colocation is not just UNPOL presence in CNP buildings: it is a way of delivering sustained <b>monitoring, mentoring and advising (MMA)</b> that strengthens CNP capability.</p>'+
+    '<p>Each group plans for its assigned locations. For each arrangement, start from the CNP capacity or performance problem, then weigh four factors together:</p>'+
+    '<ul><li><b>UNPOL-to-CNP ratio.</b> Targeted CNP personnel ÷ UNPOL advisers (200 targeted, 10 UNPOL = 1:20). There is no prescribed ratio; justify yours.</li>'+
+    '<li><b>Security.</b> GREEN: permanent colocation feasible. AMBER: possible with restrictions; consider periodic, mobile or specialist engagement. RED: permanent colocation not feasible.</li>'+
+    '<li><b>Priority policing sector.</b> Don’t try to cover every sector everywhere.</li>'+
+    '<li><b>Modality.</b> Permanent/regular, periodic, mobile or specialist; combine where justified.</li></ul>'+
+    '<p>Every arrangement needs a purpose that describes a CNP capability, not an UNPOL activity: <i>“The purpose of colocation is to strengthen the ability of the CNP to …”</i>. Don’t assume every location needs permanent presence, or that the largest CNP presence gets the most UNPOL.</p>'+
+    '<p>After the group presentations, all participants form one planning team to consolidate a single plan: remove duplication, close gaps, align ratios and focus scarce specialists. Expect injects on the security situation and on UNPOL availability before you brief the Police SMT.</p>'+
+    '<h3>CNP police stations</h3>'+stationTable();},
+  sections:[
+    {id:"s1",title:"Assigned area analysis",fields:[
+      {t:"text",id:"priorities",label:"Principal CNP capacity or performance problems in your area",hint:"What is weak, where, and why it matters. Start here before counting officers.",max:1200,rows:5}
+    ]},
+    {id:"s2",title:"Colocation arrangements",fields:[
+      {t:"rows",id:"arr",label:"Arrangements",addLabel:"Add arrangement",cols:[
+        {id:"prov",label:"Province",t:"select",options:PROVINCES,w:140},
+        {id:"site",label:"Location / station",t:"text",list:"stationList",w:120},
+        {id:"problem",label:"CNP capacity problem",t:"area",w:200},
+        {id:"cnp",label:"CNP counterpart, unit or function",t:"area",w:170},
+        {id:"sector",label:"Priority sector",t:"select",options:SECTORS,w:170},
+        {id:"sec",label:"Security",t:"select",options:SEC_LEVELS,w:95},
+        {id:"target",label:"Targeted CNP",t:"num",w:80},
+        {id:"unpol",label:"UNPOL officers",t:"num",w:80},
+        {id:"ratio",label:"Ratio",t:"calc",w:70,calc:function(r){var a=+r.target,b=+r.unpol;return (a>0&&b>0)?"1:"+(Math.round(a/b*10)/10):"–";}},
+        {id:"comp",label:"UNPOL competencies",t:"area",w:150},
+        {id:"mod",label:"Modality",t:"multi",options:MODALITIES,w:150},
+        {id:"purpose",label:"Purpose: strengthen the ability of the CNP to …",t:"area",w:230}
+      ]}
+    ]}
+  ],
+  plenaryExtra:[
+    {id:"p1",title:"Consolidation review",fields:[
+      {t:"text",id:"review",label:"Duplications, inconsistencies, gaps and competing requirements found",max:1500,rows:5},
+      {t:"text",id:"inj1",label:"Changes after the security update (Inject 1)",hint:"Which objectives remain valid, what modality changed, what happened to the ratios.",max:1500,rows:4},
+      {t:"text",id:"inj2",label:"Changes after the reduced UNPOL availability (Inject 2)",hint:"What you kept, reduced, made periodic, mobile or specialist, and why. No equal cuts across the board.",max:1500,rows:4},
+      {t:"text",id:"smt",label:"SMT briefing: key messages",hint:"Where, why, which sectors, how many officers, which ratios, how security shaped the plan, what CNP capacity each arrangement strengthens.",max:2000,rows:6}
+    ]}
+  ],
+  rating:[
+    {k:"analysis",l:"Needs analysis and priority sectors",g:"Starts from CNP capacity problems; priorities drawn from the scenario, not every sector everywhere."},
+    {k:"ratio",l:"Ratios and UNPOL numbers",g:"Targeted CNP population identified; ratios justified by scope and intensity of engagement; consistent across similar engagements."},
+    {k:"security",l:"Security and modality",g:"Modality fits GREEN/AMBER/RED; RED never permanent; combined modalities justified."},
+    {k:"purpose",l:"Capacity-building purpose",g:"Each purpose states a CNP capability, not an UNPOL activity."},
+    {k:"adapt",l:"Adaptation to injects",g:"Objectives kept where valid, modality changed rather than dropped; reductions prioritized, not equal percentages."},
+    {k:"brief",l:"SMT briefing",g:"Collective ownership of the whole plan; clear explanation of locations, ratios, modalities and use of available UNPOL."}
+  ],
+  checks:function(d,ctx){
+    var out=[],rows=rowList(d.arr),total=0,bySector={};
+    var ass=(ctx.assign||"").toLowerCase();
+    if(!rows.length)out.push(["warn","No arrangements yet.","Add at least one colocation arrangement."]);
+    rows.forEach(function(r,i){
+      var n="Arrangement "+(i+1)+(r.site||r.prov?" ("+[r.site,PROV_SHORT(r.prov)].filter(Boolean).join(", ")+")":"")+":";
+      var eff=(ctx.sec&&ctx.sec[PROV_SHORT(r.prov)])||r.sec;
+      var mods=r.mod||[];var perm=mods.indexOf("Permanent / regular")>=0;
+      if(!r.prov)out.push(["warn",n,"choose a province."]);
+      if(!r.sector)out.push(["warn",n,"choose a priority sector."]);
+      if(!(+r.target>0)||!(+r.unpol>0))out.push(["warn",n,"enter targeted CNP and UNPOL numbers to calculate the ratio."]);
+      else if(+r.unpol>+r.target)out.push(["warn",n,"more UNPOL than targeted CNP personnel. Check the targeted population."]);
+      if(!mods.length)out.push(["warn",n,"choose a modality."]);
+      if(eff==="RED"&&perm)out.push(["err",n,"permanent colocation is not feasible in a RED area"+(ctx.sec&&ctx.sec[PROV_SHORT(r.prov)]?" (updated security assessment)":"")+". Consider periodic, mobile or specialist engagement."]);
+      else if(eff==="AMBER"&&perm&&mods.length===1)out.push(["warn",n,"AMBER area with permanent presence only. Explain the restrictions or combine modalities."]);
+      if(ctx.sec&&ctx.sec[PROV_SHORT(r.prov)]&&r.sec&&ctx.sec[PROV_SHORT(r.prov)]!==r.sec)out.push(["warn",n,"security is now "+ctx.sec[PROV_SHORT(r.prov)]+" in "+PROV_SHORT(r.prov)+". Update the row and review the modality."]);
+      var p=(r.purpose||"").trim();
+      if(!p)out.push(["warn",n,"complete the purpose statement."]);
+      else if(ACTIVITY_VERBS.test(p))out.push(["warn",n,"the purpose describes an UNPOL activity. State the CNP capability to be strengthened."]);
+      if(ass&&r.prov&&ass.indexOf(PROV_SHORT(r.prov).toLowerCase())<0&&!ctx.plenary)out.push(["info",n,PROV_SHORT(r.prov)+" is outside your assigned area ("+ctx.assign+")."]);
+      if(/tereni|koloni|mahbek/i.test(r.prov||"")&&+r.target>350)out.push(["info",n,"MPC-held area: only about 50 trained officers and up to 300 MPC appointees. Check the targeted CNP number."]);
+      if(/leppko/i.test(r.prov||""))out.push(["info",n,"there is no regular policing in CISC-held southern Leppko. Who is the counterpart?"]);
+      total+=(+r.unpol||0);
+      if(+r.target>0&&+r.unpol>0&&r.sector){(bySector[r.sector]=bySector[r.sector]||[]).push(+r.target/+r.unpol);}
+    });
+    Object.keys(bySector).forEach(function(s){var v=bySector[s];if(v.length>1){var mx=Math.max.apply(null,v),mn=Math.min.apply(null,v);
+      if(mn>0&&mx/mn>3)out.push(["warn","Ratios: "+s+".","ratios range from 1:"+Math.round(mn)+" to 1:"+Math.round(mx)+". Justify the difference or align them."]);}});
+    if(ctx.ceiling&&total>ctx.ceiling)out.push(["err","UNPOL total:",total+" requested, but only "+ctx.ceiling+" are available for colocation. Reduce by priority, not equal cuts."]);
+    else if(total)out.push(["info","UNPOL total:",total+" officers"+(ctx.ceiling?" of "+ctx.ceiling+" available.":".")]);
+    return out;
+  },
+  merge:function(groups){
+    var arr={};groups.forEach(function(g){var d=g.ex||{};rowList(d.arr).forEach(function(r){var id=newId("r");var c=clone(r);c.g=g.name;arr[id]=c;});});
+    var pr=groups.map(function(g){var t=((g.ex||{}).priorities||"").trim();return t?"["+g.name+"] "+t:"";}).filter(Boolean).join("\n\n");
+    return {priorities:pr,arr:arr};
+  },
+  summary:function(d){var r=rowList(d.arr);var t=r.reduce(function(s,x){return s+(+x.unpol||0);},0);return r.length+" arrangements, "+t+" UNPOL";}
+};
+
+/* ---------- Exercise 2: FPU OPLAN ---------- */
+var FPU_UNITS=[{id:"fpuA",label:"FPU A (ready)"},{id:"fpuB",label:"FPU B (refresher; 1 of 3 APCs)"},{id:"fpuC",label:"FPU C (refresher; tear gas expired)"}];
+var FPU_LOCS=[{id:"galasi",label:"Galasi"},{id:"koloni",label:"Koloni"},{id:"leppko",label:"Leppko"},{id:"reserve",label:"Reserve"}];
+var COA_ROWS=[{id:"c1",label:"COA 1: FPU deployment or rotation to Leppko/Koloni"},{id:"c2",label:"COA 2: temporary FPU platoons (≤30 days)"},{id:"c3",label:"COA 3: IPOs with CNP/Gendarmerie"},{id:"c4",label:"COA 4: hybrid or alternative"}];
+var COA_CRIT=["Protection of civilians","Operational effectiveness","Operational readiness","Public order capacity left in Galasi","Mobility","Sustainability","Command and control","Logistics and welfare","Human rights and use of force","Conduct and discipline","Political and community","Adaptability"].map(function(l,i){return {id:"k"+(i+1),label:l};});
+var TASK_ACTORS=["FPU A","FPU B","FPU C","IPOs","Sector II","CNP","Gendarmerie","FPU Coordination Office","UNAC Operations / JOC","JMAC","UNAC Military Component","Human Rights","Conduct and Discipline","Logistics","Public Information / Strategic Communications"];
+var LOG_ITEMS=["FPU B: APC deficiencies","FPU B: vehicle deficiencies","FPU C: expired tear gas","Accommodation","Transport","Fuel","Maintenance","Communications","Medical support / CASEVAC","Food and water","Personnel welfare","Re-supply"];
+
+var EX_FPU={
+  id:"fpu",title:"Working with FPUs",subtitle:"Operational planning and an outline UNAC Police OPLAN",
+  duration:90,output:"Outline UNAC Police OPLAN and SMT operational briefing",
+  assignHint:"Part of the OPLAN, e.g. COA analysis and mission",
+  assignSuggest:["Situation, COA analysis, mission and intent","CONOPS phases and deployment plan","Command and control, logistics and sustainment","Human rights, C&D, stakeholders, strategic communications, contingencies and transition"],
+  brief:function(){return '<p><b>Situation.</b> The French Light Infantry Unit dispersed the armed groups in Koloni and Leppko and will withdraw in <b>14 days</b>; the date cannot change. No heavily armed combatants remain, but scattered members could reorganize and intimidate communities if a policing vacuum develops. At the same time, JMAC expects minority communities to demonstrate in Galasi City in the coming weeks against perceived discrimination and slow implementation of the Kalari Peace Agreement. Date, size and character are unknown; nothing suggests it will be violent, but it is politically sensitive.</p>'+
+    '<p><b>Two simultaneous requirements.</b> (1) Koloni and Leppko: prevent or respond to a security and policing vacuum after the withdrawal and keep an effective POC posture. (2) Galasi: keep enough police capability and reserve for a significant, sensitive public-order situation.</p>'+
+    '<h3>Available FPUs (all from Mosana, based in Galasi)</h3><ul>'+
+    '<li><b>FPU A</b>: passed its periodic verification; operationally ready, well led, disciplined. Your strongest capability.</li>'+
+    '<li><b>FPU B</b>: new rotation failed its in-mission assessment; needs 4–6 weeks of refresher training. Only 1 of 3 APCs and none of 4 soft-skinned carriers operational.</li>'+
+    '<li><b>FPU C</b>: new rotation failed its in-mission assessment; needs 4–6 weeks of refresher training. Tear gas stocks expired and not yet replaced.</li></ul>'+
+    '<p><b>Conduct and discipline.</b> Two members of FPU B and two of FPU C have been accused of sexual exploitation in Galasi. Investigations have just begun; the allegations are unsubstantiated and must not be treated as proof, but they must be mitigated in your plan while respecting due process.</p>'+
+    '<h3>Advice received</h3><ul>'+
+    '<li><b>Deputy Commissioner Operations:</b> rotate FPUs B and C to Leppko to support IPOs and CNP; keep FPU A in Galasi. Issues: readiness, cost, time, political sensitivity, less capability in Galasi.</li>'+
+    '<li><b>FPU Coordinator:</b> temporary rotations of two platoons from B and C, each up to 30 days. Issues: readiness, supervision and conduct away from base, welfare, reluctance to act, command of detached platoons, commanders’ resistance.</li>'+
+    '<li><b>Sector II Commander:</b> reinforce with IPOs for enhanced patrols and policing support.</li></ul>'+
+    '<p>You may select, modify, combine or replace these proposals. Your plan must be justified, feasible, commanded, sustainable, responsive, flexible and consistent with protection and policing responsibilities. For the deployment plan, count each FPU as four platoons. Mentors play the Police SMT and will challenge your reasoning rather than look for one right answer.</p>';},
+  sections:[
+    {id:"f1",title:"Courses of action",fields:[
+      {t:"text",id:"coa4",label:"Describe COA 4 (your hybrid or alternative)",max:1000,rows:3},
+      {t:"matrix",id:"coa",label:"COA comparison",hint:"Rate each COA against each criterion: + favourable, 0 neutral, − unfavourable.",rowsList:COA_ROWS,colsList:COA_CRIT,options:["","+","0","−"]},
+      {t:"select",id:"coaPick",label:"Recommended COA",options:COA_ROWS.map(function(r){return r.label;})},
+      {t:"text",id:"coaWhy",label:"Why this COA",max:1200,rows:4}
+    ]},
+    {id:"f2",title:"Situation, mission and intent",fields:[
+      {t:"text",id:"situation",label:"Situation: what the information means operationally",hint:"Threat, risks to civilians, Galasi public order, CNP/Gendarmerie capability, FPU limitations, assumptions, constraints, major risks.",max:2000,rows:6},
+      {t:"text",id:"mission",label:"Mission statement (one sentence)",max:500,rows:3},
+      {t:"checks",id:"missionCheck",label:"Does the mission say…",items:[{id:"who",label:"Who"},{id:"what",label:"What"},{id:"where",label:"Where"},{id:"when",label:"When"},{id:"why",label:"For what purpose"}]},
+      {t:"text",id:"purpose",label:"HOPC’s intent: purpose",max:600,rows:2},
+      {t:"text",id:"keytasks",label:"HOPC’s intent: key tasks",max:1000,rows:3},
+      {t:"text",id:"endstate",label:"HOPC’s intent: desired end state",max:800,rows:3}
+    ]},
+    {id:"f3",title:"Concept of operations",fields:[
+      {t:"text",id:"ph1",label:"Phase 1: now to D-14",hint:"Reconnaissance, threat assessment, information requirements, community engagement, CNP/Gendarmerie coordination, handover with the French unit, readiness remediation, logistics, vulnerable locations, Galasi public-order preparedness, command arrangements.",max:2000,rows:5},
+      {t:"text",id:"ph2",label:"Phase 2: transition (French withdrawal)",hint:"How you prevent or mitigate a policing vacuum.",max:1500,rows:4},
+      {t:"text",id:"ph3",label:"Phase 3: maintain and stabilize",hint:"Patrol posture, presence, CNP/Gendarmerie support, protection, community engagement, reserve and reinforcement, monitoring.",max:1500,rows:4},
+      {t:"text",id:"ph4",label:"Additional phase (optional)",max:1000,rows:2}
+    ]},
+    {id:"f4",title:"Deployment plan and reserve",fields:[
+      {t:"grid",id:"dep",label:"FPU platoons by location",hint:"Four platoons per FPU. Reserve means held back for redeployment on order.",rowsList:FPU_UNITS,colsList:FPU_LOCS,max:4},
+      {t:"text",id:"ipos",label:"IPOs and other police capabilities by location",max:800,rows:3},
+      {t:"text",id:"bases",label:"Operating bases, key routes, priority population centres",max:1000,rows:3},
+      {t:"text",id:"resWhat",label:"Reserve: what is it?",max:300,rows:2},
+      {t:"text",id:"resWhere",label:"Reserve: where is it located?",max:300,rows:2},
+      {t:"text",id:"resWhy",label:"Reserve: what is its purpose?",max:300,rows:2},
+      {t:"text",id:"resWho",label:"Reserve: who authorizes its deployment?",max:300,rows:2}
+    ]},
+    {id:"f5",title:"Tasks, command and control",fields:[
+      {t:"table",id:"tasks",label:"Tasks and responsibilities",rowsList:TASK_ACTORS.map(function(a,i){return {id:"a"+i,label:a};}),colsList:[{id:"task",label:"Operational tasks"}]},
+      {t:"text",id:"c2",label:"Command and control",hint:"Command arrangements, sector responsibilities, FPU command, reporting lines, coordination with CNP/Gendarmerie and the military, incident and situation reporting, authority for reinforcement and redeployment. If you detach platoons: how command, discipline, logistics and supervision are kept.",max:2000,rows:6}
+    ]},
+    {id:"f6",title:"Logistics and sustainment",fields:[
+      {t:"table",id:"log",label:"Deficiencies and mitigation",rowsList:LOG_ITEMS.map(function(a,i){return {id:"l"+i,label:a};}),colsList:[{id:"prevents",label:"What it prevents the unit from doing"},{id:"mitigation",label:"Mitigation"}]}
+    ]},
+    {id:"f7",title:"Human rights, conduct and discipline, engagement",fields:[
+      {t:"text",id:"hrcd",label:"Human rights, conduct and discipline",hint:"Allegations against FPU B and C personnel, supervision, accountability, protection, community confidence, public-order policing and use of force, with due process.",max:2000,rows:5},
+      {t:"text",id:"stake",label:"Stakeholder engagement",hint:"Who, why, when, by whom, and the outcome you want: CNP, Gendarmerie, local authorities, community, minority and women’s representatives, civilian components, military, humanitarians, PCC representatives.",max:2000,rows:5},
+      {t:"text",id:"stratcom",label:"Strategic communications",hint:"Audiences and messages: protection, impartial policing, national police role, peaceful assembly, changes in posture, misconduct allegations without prejudging investigations.",max:1500,rows:4}
+    ]},
+    {id:"f8",title:"Contingencies and transition",fields:[
+      {t:"table",id:"cont",label:"Contingencies",rowsList:[{id:"A",label:"A: armed-group activity re-emerges in Koloni or Leppko"},{id:"B",label:"B: Galasi demonstration while resources are away"},{id:"C",label:"C: Galasi demonstration turns violent"},{id:"D",label:"D: an FPU element outside Galasi becomes ineffective"}],colsList:[{id:"trigger",label:"Trigger / decision point"},{id:"action",label:"Action"},{id:"who",label:"Who decides"}]},
+      {t:"text",id:"transition",label:"End state and transition conditions",hint:"When can the additional posture in Koloni and Leppko be reduced? Threat, protection risks, CNP/Gendarmerie presence and capability, freedom of movement, community confidence, UNAC’s ability to respond again.",max:1500,rows:4}
+    ]}
+  ],
+  plenaryExtra:[
+    {id:"pb",title:"SMT operational briefing",fields:[
+      {t:"text",id:"smt",label:"Briefing: recommended OPLAN and key reasoning",hint:"Be ready for: what is your reserve, where, what for, and who can deploy it?",max:2500,rows:7}
+    ]}
+  ],
+  rating:[
+    {k:"coa",l:"Assessment and COA analysis",g:"Situation explained operationally; COAs compared on all criteria; recommendation justified."},
+    {k:"mission",l:"Mission and HOPC’s intent",g:"One-sentence mission with who, what, where, when, why; purpose, key tasks and end state coherent."},
+    {k:"conops",l:"CONOPS, deployment and reserve",g:"Phased; POC posture in Koloni/Leppko; public-order capacity and a real reserve kept for Galasi; readiness respected."},
+    {k:"c2log",l:"Command, control and logistics",g:"Clear C2 including detached elements; each deficiency’s operational effect explained and mitigated."},
+    {k:"hrcd",l:"Human rights, C&D, engagement",g:"Allegations managed with due process; supervision and accountability; stakeholder and communication plans support the operation."},
+    {k:"cont",l:"Contingencies and transition",g:"A–D have triggers, actions and authority; transition conditions prevent an open-ended deployment."},
+    {k:"brief",l:"SMT briefing",g:"Concise, defends choices under questioning, one Operations Pillar voice."}
+  ],
+  checks:function(d,ctx){
+    var out=[],dep=d.dep||{};
+    function cell(u,l){return +((dep[u]||{})[l])||0;}
+    FPU_UNITS.forEach(function(u){var t=FPU_LOCS.reduce(function(s,l){return s+cell(u.id,l.id);},0);
+      if(t>4)out.push(["err",u.label.split(" (")[0]+":","more than four platoons allocated."]);
+      else if(t>0&&t<4)out.push(["info",u.label.split(" (")[0]+":",(4-t)+" platoon(s) not allocated."]);});
+    var reserve=FPU_UNITS.reduce(function(s,u){return s+cell(u.id,"reserve");},0);
+    if(!reserve&&!(d.resWhat||"").trim())out.push(["err","Reserve:","no reserve identified. The SMT will ask what it is, where, what for and who can deploy it."]);
+    if(!(d.resWho||"").trim())out.push(["warn","Reserve:","state who authorizes its deployment."]);
+    if(cell("fpuA","galasi")+cell("fpuA","reserve")===0&&FPU_LOCS.some(function(l){return cell("fpuA",l.id);}))out.push(["warn","Galasi:","no FPU A platoons left in Galasi or in reserve. Who handles a significant public-order event?"]);
+    ["fpuB","fpuC"].forEach(function(u){var away=cell(u,"koloni")+cell(u,"leppko");
+      if(away)out.push(["warn",(u==="fpuB"?"FPU B":"FPU C")+":","deployed outside Galasi before completing refresher training. Explain supervision, readiness remediation and conduct safeguards."]);});
+    if(cell("fpuB","koloni")+cell("fpuB","leppko"))out.push(["warn","FPU B mobility:","only one APC operational. How do these platoons move and get extracted?"]);
+    if(cell("fpuC","galasi")+cell("fpuC","reserve"))out.push(["info","FPU C public order:","tear gas expired. Mitigate before using FPU C for crowd control."]);
+    if(!d.coaPick)out.push(["warn","COA:","choose a recommended COA."]);
+    var m=d.coa||{},filled=0;COA_ROWS.forEach(function(r){COA_CRIT.forEach(function(c){if((m[r.id]||{})[c.id])filled++;});});
+    if(filled<COA_ROWS.length*COA_CRIT.length)out.push(["info","COA comparison:",filled+" of "+COA_ROWS.length*COA_CRIT.length+" cells rated."]);
+    var mc=d.missionCheck||{};if((d.mission||"").trim()&&["who","what","where","when","why"].some(function(k){return !mc[k];}))out.push(["warn","Mission:","check it states who, what, where, when and for what purpose."]);
+    var ct=d.cont||{};["A","B","C","D"].forEach(function(k){var r=ct[k]||{};if(!(r.trigger||"").trim()||!(r.action||"").trim())out.push(["warn","Contingency "+k+":","needs a trigger and an action."]);});
+    if(!(d.transition||"").trim())out.push(["warn","Transition:","define when the additional posture can be reduced."]);
+    return out;
+  },
+  merge:function(groups){
+    var o={};
+    function cat(id){var t=groups.map(function(g){var v=((g.ex||{})[id]||"").trim();return v?"["+g.name+"] "+v:"";}).filter(Boolean).join("\n\n");if(t)o[id]=t;}
+    ["coa4","coaWhy","situation","mission","purpose","keytasks","endstate","ph1","ph2","ph3","ph4","ipos","bases","resWhat","resWhere","resWhy","resWho","c2","hrcd","stake","stratcom","transition"].forEach(cat);
+    ["tasks","log","cont"].forEach(function(t){var tab={};groups.forEach(function(g){var src=(g.ex||{})[t]||{};Object.keys(src).forEach(function(r){Object.keys(src[r]||{}).forEach(function(c){var v=(src[r][c]||"").trim();if(!v)return;tab[r]=tab[r]||{};tab[r][c]=(tab[r][c]?tab[r][c]+"\n":"")+"["+g.name+"] "+v;});});});o[t]=tab;});
+    return o;
+  },
+  summary:function(d){return d.coaPick?d.coaPick.split(":")[0]+" recommended":"No COA chosen";}
+};
+
+/* ---------- Exercise 3: RBB ---------- */
+var RBB_COMPONENTS=["Component 1: Security, protection of civilians and human rights","Component 2: Political process, reconciliation and elections","Component 3: Restoration and extension of State authority"];
+var QA_CRIT=[{id:"q1",label:"Supported by the mandate"},{id:"q2",label:"EAs describe change, not activity"},{id:"q3",label:"Indicators measure that change"},{id:"q4",label:"Indicators realistically measurable"},{id:"q5",label:"Outputs within the mission’s control"},{id:"q6",label:"Clear link outputs → results"},{id:"q7",label:"No duplication"},{id:"q8",label:"Nothing important missing"}];
+var EA_COLS=[
+  {id:"ea",label:"Expected accomplishment",t:"area",w:220},
+  {id:"diff",label:"What will be different if we succeed?",t:"area",w:200},
+  {id:"ind",label:"Indicators of achievement (one per line, with baseline and target)",t:"area",w:240},
+  {id:"out",label:"Outputs (one per line)",t:"area",w:240}
+];
+function compKey(s){var m=String(s||"").match(/component\s*(\d)/i)||String(s||"").match(/\b([123])\b/);return m?"c"+m[1]:"";}
+var EX_RBB={
+  id:"rbb",title:"Results-based budgeting",subtitle:"The UN Police contribution to the Carana mission RBB framework",
+  duration:90,output:"Outline police RBB and SMT briefing",
+  assignHint:"RBB component",
+  assignSuggest:[RBB_COMPONENTS[0],RBB_COMPONENTS[1],RBB_COMPONENTS[2],RBB_COMPONENTS[2]+" (with Group 3)"],
+  brief:function(){return '<p>You are senior UNAC Police members assigned to the <b>RBB Planning Working Group</b>. The mission is preparing its RBB framework for the coming budget period, and the HOPC wants a coherent results framework reflecting the mandate (resolution 1544), the situation in Carana and the contribution expected from UN Police.</p>'+
+    '<p>The framework’s first three substantive components are: <b>1.</b> Security, protection of civilians and human rights; <b>2.</b> Political process, reconciliation and elections; <b>3.</b> Restoration and extension of State authority. Two groups work on Component 3 and must coordinate so their expected accomplishments, indicators, outputs and external factors differ.</p>'+
+    '<h3>Phase I: component planning</h3><ul>'+
+    '<li><b>Introductory paragraph:</b> main challenges, priorities for the budget period, strategic approach, contribution to the mandate.</li>'+
+    '<li><b>Expected accomplishments:</b> test each one with “what will be different if we succeed?”</li>'+
+    '<li><b>Indicators of achievement</b> that show progress, with baselines and targets.</li>'+
+    '<li><b>Outputs:</b> products and services the mission delivers.</li>'+
+    '<li><b>External factors:</b> conditions outside the mission’s control.</li></ul>'+
+    '<h3>Phase II: cross-component review</h3><p>Each group presents; the others act as a quality-assurance panel using the checklist in your worksheet.</p>'+
+    '<h3>Phase III: one mission RBB</h3><p>All participants merge the components into one coherent police RBB proposal and present it to the SMT.</p>';},
+  sections:[
+    {id:"r1",title:"Component framework",fields:[
+      {t:"select",id:"comp",label:"Component",options:RBB_COMPONENTS,fromAssign:true},
+      {t:"text",id:"intro",label:"Component introductory paragraph",hint:"Main challenges, priorities, strategic approach, contribution to mandate implementation.",max:1500,rows:5},
+      {t:"rows",id:"eas",label:"Expected accomplishments",addLabel:"Add expected accomplishment",cols:EA_COLS},
+      {t:"text",id:"ext",label:"External factors",hint:"Conditions outside the mission’s control that affect the results.",max:1000,rows:3}
+    ]},
+    {id:"r2",title:"Quality-assurance review of other groups",stage:"review",fields:[
+      {t:"qa",id:"qa",label:"Rate each other group’s framework",colsList:QA_CRIT,options:["","Yes","Partly","No"]}
+    ]}
+  ],
+  plenarySections:[
+    {id:"pc1",title:RBB_COMPONENTS[0],fields:[{t:"text",id:"c1_intro",label:"Introductory paragraph",max:1500,rows:4},{t:"rows",id:"c1_eas",label:"Expected accomplishments",addLabel:"Add expected accomplishment",cols:EA_COLS},{t:"text",id:"c1_ext",label:"External factors",max:1000,rows:3}]},
+    {id:"pc2",title:RBB_COMPONENTS[1],fields:[{t:"text",id:"c2_intro",label:"Introductory paragraph",max:1500,rows:4},{t:"rows",id:"c2_eas",label:"Expected accomplishments",addLabel:"Add expected accomplishment",cols:EA_COLS},{t:"text",id:"c2_ext",label:"External factors",max:1000,rows:3}]},
+    {id:"pc3",title:RBB_COMPONENTS[2],fields:[{t:"text",id:"c3_intro",label:"Introductory paragraph",max:1500,rows:4},{t:"rows",id:"c3_eas",label:"Expected accomplishments",addLabel:"Add expected accomplishment",cols:EA_COLS},{t:"text",id:"c3_ext",label:"External factors",max:1000,rows:3}]},
+    {id:"pb",title:"SMT briefing",fields:[{t:"text",id:"smt",label:"Key messages for the SMT",max:2000,rows:6}]}
+  ],
+  rating:[
+    {k:"intro",l:"Introductory paragraph",g:"Challenges, priorities, approach and contribution to the mandate are clear and specific."},
+    {k:"ea",l:"Expected accomplishments",g:"Describe change, not activity; pass “what will be different?”; supported by the mandate."},
+    {k:"ind",l:"Indicators",g:"Measure the change; realistic baselines and targets."},
+    {k:"out",l:"Outputs and external factors",g:"Outputs within the mission’s control and linked to results; external factors genuinely outside control."},
+    {k:"qa",l:"Quality-assurance contribution",g:"Constructive, specific review of other components."},
+    {k:"brief",l:"Consolidation and SMT briefing",g:"One coherent police RBB, no duplication between components, defended as a team."}
+  ],
+  checks:function(d,ctx){
+    var out=[];
+    function eaChecks(rows,prefix){
+      if(!rows.length)out.push(["warn",prefix+"no expected accomplishments yet.",""]);
+      rows.forEach(function(r,i){var n=prefix+"EA "+(i+1)+":";var ea=(r.ea||"").trim();
+        if(!ea)out.push(["warn",n,"write the expected accomplishment."]);
+        else if(/^(to )?(provide|conduct|train|training|support|assist|organi[sz]e|deliver|hold|deploy|monitor|advise|mentor|facilitate|implement|establish)\b/i.test(ea))out.push(["warn",n,"this reads as an activity. Describe the change that results."]);
+        if(ea&&!(r.diff||"").trim())out.push(["info",n,"answer “what will be different if we succeed?”"]);
+        var ind=(r.ind||"").split("\n").map(function(x){return x.trim();}).filter(Boolean);
+        if(!ind.length)out.push(["warn",n,"add at least one indicator."]);
+        ind.forEach(function(x,j){if(!/\d/.test(x))out.push(["warn",n,"indicator "+(j+1)+" has no baseline or target figure."]);});
+        var o=(r.out||"").split("\n").map(function(x){return x.trim();}).filter(Boolean);
+        if(!o.length)out.push(["warn",n,"add the outputs the mission will deliver."]);
+        o.forEach(function(x,j){if(/\b(improved|increased|reduced|strengthened|enhanced)\b/i.test(x)&&!/\d/.test(x))out.push(["info",n,"output "+(j+1)+" sounds like a result. Outputs are products and services the mission delivers."]);});
+      });
+    }
+    if(ctx.plenary){
+      ["c1","c2","c3"].forEach(function(c,i){if(!(d[c+"_intro"]||"").trim())out.push(["warn","Component "+(i+1)+":","introductory paragraph missing."]);eaChecks(rowList(d[c+"_eas"]),"Component "+(i+1)+": ");if(!(d[c+"_ext"]||"").trim())out.push(["warn","Component "+(i+1)+":","external factors missing."]);});
+    } else {
+      if(!(d.intro||"").trim())out.push(["warn","Introduction:","write the component introductory paragraph."]);
+      eaChecks(rowList(d.eas),"");
+      if(!(d.ext||"").trim())out.push(["warn","External factors:","list conditions outside the mission’s control."]);
+    }
+    return out;
+  },
+  merge:function(groups){
+    var o={c1_eas:{},c2_eas:{},c3_eas:{}};
+    groups.forEach(function(g){var d=g.ex||{};var k=compKey(d.comp||g.assign)||"c1";
+      if((d.intro||"").trim())o[k+"_intro"]=(o[k+"_intro"]?o[k+"_intro"]+"\n\n":"")+"["+g.name+"] "+d.intro.trim();
+      if((d.ext||"").trim())o[k+"_ext"]=(o[k+"_ext"]?o[k+"_ext"]+"\n\n":"")+"["+g.name+"] "+d.ext.trim();
+      rowList(d.eas).forEach(function(r){var c=clone(r);c.g=g.name;o[k+"_eas"][newId("r")]=c;});});
+    return o;
+  },
+  summary:function(d){var n=rowList(d.eas).length+rowList(d.c1_eas).length+rowList(d.c2_eas).length+rowList(d.c3_eas).length;return n+" expected accomplishments";}
+};
+
+var EXERCISES={colocation:EX_COLOCATION,fpu:EX_FPU,rbb:EX_RBB};
+var EX_ORDER=["colocation","fpu","rbb"];
+function plenarySections(ex){return ex.plenarySections||ex.sections.filter(function(s){return !s.stage;}).concat(ex.plenaryExtra||[]);}
+
+/* ---------- Helpers ---------- */
+function $(id){return document.getElementById(id);}
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c];});}
+function fmt(ms){var neg=ms<0;ms=Math.abs(ms);var m=Math.floor(ms/60000),s=Math.floor(ms%60000/1000);return (neg?"−":"")+m+":"+(s<10?"0":"")+s;}
+function clone(o){return o==null?o:JSON.parse(JSON.stringify(o));}
+function newId(p){return (p||"m")+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function paras(t){return String(t||"").split(/\n\s*\n/).map(function(p){return p.trim();}).filter(Boolean);}
+function rowList(o){return Object.keys(o||{}).map(function(k){return Object.assign({_id:k},o[k]);}).filter(function(r){return !r.x;}).sort(function(a,b){return ((a.o||0)-(b.o||0))||(a._id<b._id?-1:1);});}
+function getPath(o,p){for(var i=0;i<p.length;i++){if(o==null)return undefined;o=o[p[i]];}return o;}
+function setPath(o,p,v){for(var i=0;i<p.length-1;i++){if(o[p[i]]==null||typeof o[p[i]]!=="object")o[p[i]]={};o=o[p[i]];}o[p[p.length-1]]=v;}
+function setStatus(t,alert){var s=$("status");s.textContent=t;s.classList.toggle("alert",!!alert);}
+function timeOf(ts){return ts?new Date(ts).toLocaleTimeString([], {hour:"2-digit",minute:"2-digit"}):"";}
+function pkey(p){return p.join("\u0001");}
+function toast(el,t){el.textContent=t;setTimeout(function(){if(el.textContent===t)el.textContent="";},4000);}
+
+/* ---------- State ---------- */
+var db=null,AUTH=null,AUTHUSER=null,uid=null,CONF=null,DOMAIN="",fsRef=null;
+var isStaff=false,TEAMID=null,TEAM=null,SIGNED=false;
+var LIVE=null,CFG=null,DRAFT=null,dirty=false,CREDS={teams:[]},TEAMS=[],ROSTER={},RATINGS={},STAFF=[],LIB=[];
+var ME={teamName:"",ex:{},sub:{}};
+var PLEN={},PLEN_EX=null,plenUnsub=null,teamsUnsub=null,acks=[];
+function liveDefaults(){return {exId:"colocation",status:"idle",duration:90,extra:0,startedAt:0,elapsedBefore:0,sent:[],stage:"group",shareWork:false,params:{}};}
+function L(){return Object.assign(liveDefaults(),LIVE||{});}
+function exId(){return L().exId;}
+function EX(){return EXERCISES[exId()]||EX_COLOCATION;}
+function elapsed(){var l=L();return (l.elapsedBefore||0)+(l.status==="running"?Math.max(0,Date.now()-l.startedAt):0);}
+function myAssign(){return TEAM&&TEAM.assign?(TEAM.assign[exId()]||""):"";}
+function submitted(){return !!(ME.sub&&ME.sub[exId()]);}
+function ctxFor(assign,plenary){var p=L().params||{};return {assign:assign||"",sec:p.sec||{},ceiling:+p.ceiling||0,plenary:!!plenary};}
+function loadAcks(){try{acks=JSON.parse(localStorage.getItem("carana-acks:"+(TEAMID||"staff")+":"+exId())||"[]");}catch(e){acks=[];}}
+function saveAcks(){try{localStorage.setItem("carana-acks:"+(TEAMID||"staff")+":"+exId(),JSON.stringify(acks));}catch(e){}}
+
+/* ---------- Field-by-field saving, so people editing together don't overwrite each other ---------- */
+function makeSaver(docPath,root){
+  var S={pend:{},inflight:{},saving:false,again:false,timer:null};
+  S.change=function(path){S.pend[pkey(path)]=path;clearTimeout(S.timer);S.timer=setTimeout(S.push,1200);};
+  S.busy=function(path){var k=pkey(path);return !!(S.pend[k]||S.inflight[k]);};
+  S.push=function(){
+    var p=docPath();if(!db||!p)return Promise.resolve();
+    if(S.saving){S.again=true;return Promise.resolve();}
+    var keys=Object.keys(S.pend);if(!keys.length)return Promise.resolve();
+    S.saving=true;S.inflight=S.pend;S.pend={};
+    var body={updatedAt:Date.now()},r=root();if(r===ME&&TEAM&&TEAM.name)body.teamName=TEAM.name;
+    keys.forEach(function(k){var path=S.inflight[k],o=body;
+      for(var i=0;i<path.length-1;i++){o[path[i]]=o[path[i]]||{};o=o[path[i]];}
+      var v=getPath(r,path);o[path[path.length-1]]=v===undefined?null:v;});
+    return db.doc(p).merge(body).then(function(){
+      S.saving=false;S.inflight={};
+      if(S.again||Object.keys(S.pend).length){S.again=false;return S.push();}
+    },function(){
+      S.saving=false;Object.keys(S.inflight).forEach(function(k){if(!S.pend[k])S.pend[k]=S.inflight[k];});S.inflight={};
+      setStatus("Your latest changes couldn’t be saved. Check your connection; they will be retried.",true);
+      clearTimeout(S.timer);S.timer=setTimeout(S.push,5000);
+    });
+  };
+  // Merge a server snapshot into local data, keeping fields that are still being saved.
+  S.absorb=function(serverData){
+    var local=root(),fresh=clone(serverData)||{};
+    Object.keys(S.pend).concat(Object.keys(S.inflight)).forEach(function(k){var path=(S.pend[k]||S.inflight[k]);setPath(fresh,path,getPath(local,path));});
+    return fresh;
+  };
+  return S;
+}
+var teamSaver=makeSaver(function(){return TEAMID?"teams/"+TEAMID:null;},function(){return ME;});
+var plenSaver=makeSaver(function(){return PLEN_EX?"plenary/"+PLEN_EX:null;},function(){return PLEN;});
+
+/* ---------- Worksheet renderer ---------- */
+// scope: {root, base, editable, saver, ctx, groups}
+function sval(scope,p){return getPath(scope.root,scope.base.concat(p));}
+function sset(scope,p,v){setPath(scope.root,scope.base.concat(p),v);if(scope.saver)scope.saver.change(scope.base.concat(p));}
+function dp(p){return esc(p.join("|"));}
+function dis(scope){return scope.editable?"":" disabled";}
+
+function renderSheet(host,sections,scope){
+  host.__scope=scope;
+  var stage=L().stage;
+  host.innerHTML=sections.filter(function(s){return !s.stage||(!scope.ctx.plenary&&(scope.showStage||stage!=="group"));}).map(function(s){
+    return '<section class="ws-sec"><h2>'+esc(s.title)+'</h2>'+s.fields.map(function(f){return fieldHtml(f,scope);}).join("")+'</section>';
+  }).join("");
+  refreshDerived(host);
+}
+function fieldHtml(f,scope){
+  var v=sval(scope,[f.id]);
+  var hint=f.hint?'<span class="hint">'+esc(f.hint)+'</span>':"";
+  switch(f.t){
+  case "text":
+    v=v||"";
+    return '<div class="field"><label for="f_'+esc(f.id)+'">'+esc(f.label)+'</label>'+hint+'<textarea id="f_'+esc(f.id)+'" rows="'+(f.rows||3)+'" data-p="'+dp([f.id])+'" data-k="text" data-max="'+(f.max||2000)+'"'+dis(scope)+'>'+esc(v)+'</textarea><div class="count" data-count="'+dp([f.id])+'">'+String(v).length+' / '+(f.max||2000)+'</div></div>';
+  case "select":
+    if(!v&&f.fromAssign&&scope.editable&&scope.ctx.assign){var k=compKey(scope.ctx.assign);var m=f.options.filter(function(o){return compKey(o)===k;})[0];if(m){v=m;sset(scope,[f.id],m);}}
+    return '<div class="field"><label>'+esc(f.label)+'</label>'+hint+'<select data-p="'+dp([f.id])+'" data-k="select"'+dis(scope)+'><option value="">Choose…</option>'+f.options.map(function(o){return '<option'+(o===v?" selected":"")+'>'+esc(o)+'</option>';}).join("")+'</select></div>';
+  case "checks":
+    v=v||{};
+    return '<div class="field"><span class="lbl">'+esc(f.label)+'</span>'+hint+'<div class="checklist">'+f.items.map(function(it){return '<label><input type="checkbox" data-p="'+dp([f.id,it.id])+'" data-k="bool"'+(v[it.id]?" checked":"")+dis(scope)+'> '+esc(it.label)+'</label>';}).join("")+'</div></div>';
+  case "rows":
+    return '<div class="field" style="max-width:none"><span class="lbl">'+esc(f.label)+'</span>'+hint+'<div data-rows="'+esc(f.id)+'">'+rowsHtml(f,scope)+'</div></div>';
+  case "matrix": case "grid": case "table": case "qa":
+    return '<div class="field" style="max-width:none"><span class="lbl">'+esc(f.label)+'</span>'+hint+'<div class="wide">'+gridHtml(f,scope)+'</div></div>';
+  }
+  return "";
+}
+function cellInput(col,path,val,scope){
+  var d=dis(scope);
+  switch(col.t){
+  case "select": return '<select data-p="'+dp(path)+'" data-k="select"'+d+' class="'+(col.id==="sec"&&val?"sel-"+esc(val):"")+'"><option value=""></option>'+col.options.map(function(o){return '<option'+(o===val?" selected":"")+'>'+esc(o)+'</option>';}).join("")+'</select>';
+  case "num": return '<input type="number" min="0" inputmode="numeric" data-p="'+dp(path)+'" data-k="num" value="'+(val==null||val===""?"":esc(val))+'"'+d+'>';
+  case "text": return '<input type="text" data-p="'+dp(path)+'" data-k="text" value="'+esc(val||"")+'"'+(col.list?' list="'+col.list+'"':"")+d+'>';
+  case "multi": val=val||[];return '<div class="chips" data-p="'+dp(path)+'" data-k="multi">'+col.options.map(function(o){return '<label><input type="checkbox" data-v="'+esc(o)+'"'+(val.indexOf(o)>=0?" checked":"")+d+'>'+esc(o)+'</label>';}).join("")+'</div>';
+  case "calc": return '';
+  default: return '<textarea data-p="'+dp(path)+'" data-k="text"'+d+'>'+esc(val||"")+'</textarea>';
+  }
+}
+function rowsHtml(f,scope){
+  var rows=rowList(sval(scope,[f.id]));
+  var h='<div class="wide" data-sig="'+esc(rows.map(function(r){return r._id;}).join(","))+'"><table class="ws"><thead><tr><th>#</th>'+f.cols.map(function(c){return '<th style="min-width:'+(c.w||120)+'px">'+esc(c.label)+'</th>';}).join("")+(scope.editable?'<th></th>':'')+'</tr></thead><tbody>';
+  if(!rows.length)h+='<tr><td colspan="'+(f.cols.length+2)+'" class="small" style="padding:14px">None yet.</td></tr>';
+  rows.forEach(function(r,i){
+    h+='<tr data-row="'+esc(r._id)+'"><td class="small" style="padding-top:12px">'+(i+1)+'</td>'+f.cols.map(function(c,ci){
+      var inner=c.t==="calc"?'<div class="calc" data-calc="'+esc(f.id)+'|'+esc(r._id)+'|'+esc(c.id)+'">'+esc(c.calc(r))+'</div>':cellInput(c,[f.id,r._id,c.id],r[c.id],scope);
+      return '<td>'+(ci===0&&r.g?'<span class="gtag">'+esc(r.g)+'</span>':'')+inner+'</td>';}).join("")+
+      (scope.editable?'<td class="del"><button class="btn sm" data-delrow="'+esc(f.id)+'|'+esc(r._id)+'" aria-label="Delete row '+(i+1)+'">✕</button></td>':'')+'</tr>';
+  });
+  h+='</tbody></table></div>';
+  if(scope.editable)h+='<button class="btn sm" data-addrow="'+esc(f.id)+'">'+esc(f.addLabel||"Add row")+'</button>';
+  return h;
+}
+function gridHtml(f,scope){
+  var v=sval(scope,[f.id])||{};
+  var rowsL=f.t==="qa"?(scope.groups||[]):f.rowsList,cols=f.colsList.slice();
+  if(f.t==="qa")cols=cols.concat([{id:"note",label:"Comments"}]);
+  if(f.t==="qa"&&!rowsL.length)return '<p class="small" style="padding:12px">Other groups’ worksheets appear here during the review stage.</p>';
+  var cls=f.t==="matrix"||f.t==="qa"?"ws matrix":f.t==="grid"?"ws grid":"ws";
+  var h='<table class="'+cls+'"><thead><tr><th></th>'+cols.map(function(c){return '<th style="min-width:'+(f.t==="table"?220:f.t==="grid"?80:90)+'px">'+esc(c.label)+'</th>';}).join("")+(f.t==="grid"?'<th>Total</th>':'')+'</tr></thead><tbody>';
+  rowsL.forEach(function(r){
+    var rv=v[r.id]||{};
+    h+='<tr><td class="rh">'+esc(r.label||r.name)+'</td>'+cols.map(function(c){
+      var path=[f.id,r.id,c.id],val=rv[c.id];
+      if(c.id==="note"||f.t==="table")return '<td><textarea data-p="'+dp(path)+'" data-k="text"'+dis(scope)+'>'+esc(val||"")+'</textarea></td>';
+      if(f.t==="grid")return '<td><input type="number" min="0" max="'+(f.max||99)+'" data-p="'+dp(path)+'" data-k="num" value="'+(val==null?"":esc(val))+'"'+dis(scope)+'></td>';
+      return '<td><select data-p="'+dp(path)+'" data-k="select"'+dis(scope)+'>'+f.options.map(function(o){return '<option value="'+esc(o)+'"'+(o===val?" selected":"")+'>'+(o||"·")+'</option>';}).join("")+'</select></td>';
+    }).join("")+(f.t==="grid"?'<td class="calc" data-gridrow="'+esc(f.id)+'|'+esc(r.id)+'"></td>':'')+'</tr>';
+  });
+  if(f.t==="grid")h+='<tr class="tot"><td>Total</td>'+cols.map(function(c){return '<td data-gridcol="'+esc(f.id)+'|'+esc(c.id)+'"></td>';}).join("")+'<td></td></tr>';
+  return h+'</tbody></table>';
+}
+function readEl(el){
+  var k=el.dataset.k;
+  if(k==="multi")return Array.prototype.map.call(el.querySelectorAll("input:checked"),function(i){return i.dataset.v;});
+  if(k==="bool")return el.checked;
+  if(k==="num"){if(el.value==="")return null;var n=+el.value;return isNaN(n)||n<0?0:n;}
+  return el.value;
+}
+function writeEl(el,v){
+  var k=el.dataset.k;
+  if(k==="multi"){v=v||[];el.querySelectorAll("input").forEach(function(i){i.checked=v.indexOf(i.dataset.v)>=0;});return;}
+  if(k==="bool"){el.checked=!!v;return;}
+  if(k==="num"){el.value=v==null?"":v;return;}
+  el.value=v==null?"":v;
+  if(el.tagName==="SELECT"&&el.closest(".ws")){el.className=el.dataset.p.split("|").pop()==="sec"&&v?"sel-"+v:"";}
+}
+function refreshDerived(host){
+  var scope=host.__scope;if(!scope)return;
+  host.querySelectorAll("[data-calc]").forEach(function(el){var p=el.dataset.calc.split("|");var f=findField(scope.sections||allFields(host),p[0]);var row=sval(scope,[p[0],p[1]])||{};var col=f&&f.cols.filter(function(c){return c.id===p[2];})[0];if(col)el.textContent=col.calc(row);});
+  host.querySelectorAll("[data-gridrow]").forEach(function(el){var p=el.dataset.gridrow.split("|");var r=(sval(scope,[p[0]])||{})[p[1]]||{};var t=0;Object.keys(r).forEach(function(k){t+=+r[k]||0;});el.textContent=t;var f=findFieldAny(p[0]);el.classList.toggle("bad",!!(f&&f.max&&t>f.max));});
+  host.querySelectorAll("[data-gridcol]").forEach(function(el){var p=el.dataset.gridcol.split("|");var g=sval(scope,[p[0]])||{};var t=0;Object.keys(g).forEach(function(r){t+=+((g[r]||{})[p[1]])||0;});el.textContent=t;});
+  host.querySelectorAll("[data-count]").forEach(function(el){var p=el.dataset.count.split("|");var v=String(sval(scope,p)||"");var ta=host.querySelector('[data-p="'+el.dataset.count+'"]');var mx=ta?+ta.dataset.max:2000;el.textContent=v.length+" / "+mx;el.classList.toggle("over",v.length>mx);});
+}
+var FIELD_INDEX={};
+function indexFields(){EX_ORDER.forEach(function(k){var e=EXERCISES[k];e.sections.concat(e.plenaryExtra||[],e.plenarySections||[]).forEach(function(s){s.fields.forEach(function(f){FIELD_INDEX[k+":"+f.id]=f;FIELD_INDEX["*:"+f.id]=FIELD_INDEX["*:"+f.id]||f;});});});}
+function findFieldAny(id){return FIELD_INDEX[exId()+":"+id]||FIELD_INDEX["*:"+id];}
+function findField(_,id){return findFieldAny(id);}
+function allFields(){return null;}
+
+// Events on any worksheet container
+function wireSheet(host,onChange){
+  host.addEventListener("input",function(e){
+    var el=e.target.closest("[data-p]");if(!el||!host.__scope||!host.__scope.editable)return;
+    var p=el.dataset.p.split("|");sset(host.__scope,p,readEl(el));refreshDerived(host);if(onChange)onChange();
+  });
+  host.addEventListener("change",function(e){
+    var el=e.target.closest("[data-p]");if(!el||!host.__scope||!host.__scope.editable)return;
+    if(el.tagName==="SELECT"||el.dataset.k==="multi"||el.dataset.k==="bool"){var p=el.dataset.p.split("|");sset(host.__scope,p,readEl(el));writeEl(el,readEl(el));refreshDerived(host);if(onChange)onChange();}
+  });
+  host.addEventListener("click",function(e){
+    var s=host.__scope;if(!s||!s.editable)return;
+    var a=e.target.closest("[data-addrow]"),d=e.target.closest("[data-delrow]");
+    if(a){var fid=a.dataset.addrow,id=newId("r");sset(s,[fid,id,"o"],Date.now());rerenderRows(host,fid);
+      var tr=host.querySelector('[data-row="'+id+'"]');if(tr){var i=tr.querySelector("input,select,textarea");if(i)i.focus();}if(onChange)onChange();}
+    if(d){var q=d.dataset.delrow.split("|");if(!confirm("Delete this row?"))return;sset(s,[q[0],q[1],"x"],true);rerenderRows(host,q[0]);if(onChange)onChange();}
+  });
+}
+function rerenderRows(host,fid){
+  var box=host.querySelector('[data-rows="'+fid+'"]');var f=findFieldAny(fid);if(!box||!f)return;
+  box.innerHTML=rowsHtml(f,host.__scope);refreshDerived(host);
+}
+// Apply data that arrived from other devices without disturbing what the user is typing.
+function refreshSheet(host){
+  var s=host.__scope;if(!s)return;
+  host.querySelectorAll("[data-rows]").forEach(function(box){
+    var fid=box.dataset.rows,sig=rowList(sval(s,[fid])).map(function(r){return r._id;}).join(",");
+    var cur=box.querySelector("[data-sig]");if(cur&&cur.dataset.sig!==sig&&!box.contains(document.activeElement))rerenderRows(host,fid);
+  });
+  host.querySelectorAll("[data-p]").forEach(function(el){
+    if(el===document.activeElement||el.contains(document.activeElement))return;
+    var p=el.dataset.p.split("|");if(s.saver&&s.saver.busy(s.base.concat(p)))return;
+    writeEl(el,sval(s,p));
+  });
+  refreshDerived(host);
+}
+function checksHtml(list,title){
+  var errs=list.filter(function(c){return c[0]==="err";}).length,warns=list.filter(function(c){return c[0]==="warn";}).length;
+  var head=title+": "+(errs||warns?(errs?errs+" problem"+(errs>1?"s":""):"")+(errs&&warns?", ":"")+(warns?warns+" to review":""):"no problems found");
+  if(!list.length)list=[["ok","All clear.","Nothing flagged so far."]];
+  return '<details'+(errs?" open":"")+'><summary>'+esc(head)+'</summary><ul class="checks">'+list.map(function(c){return '<li class="'+c[0]+'"><b>'+esc(c[1])+'</b>'+esc(c[2])+'</li>';}).join("")+'</ul></details>';
+}
+function keepOpen(box,html){var was=box.querySelector("details");var open=was&&was.open;box.innerHTML=html;var d=box.querySelector("details");if(d&&was)d.open=open;}
+
+/* ---------- Navigation ---------- */
+var TEAM_VIEWS=[["brief","Brief"],["work","Worksheet"],["messages","Messages"],["others","Other groups"],["plenary","Consolidated plan"],["library","Library"]];
+var STAFF_VIEWS=[["run","Run"],["groups","Groups"],["results","Results"],["plenary","Consolidated plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
+var current="login";
+function visibleViews(){
+  if(!SIGNED)return [];
+  if(isStaff)return STAFF_VIEWS;
+  var st=L().stage;
+  return TEAM_VIEWS.filter(function(v){if(v[0]==="others")return st!=="group";if(v[0]==="plenary")return st==="plenary";return true;});
+}
+function show(id){
+  var vis=visibleViews().map(function(v){return v[0];});
+  if(!SIGNED)id="login";else if(vis.indexOf(id)<0)id=vis[0];
+  current=id;
+  document.querySelectorAll("main>.view").forEach(function(s){s.classList.toggle("on",s.id==="v-"+id);});
+  renderTrack();
+  if(id==="others")renderOthers();
+  if(id==="results")renderResults();
+  if(id==="messages"){acks=acks.concat(L().sent.map(function(m){return m.id;}).filter(function(x){return acks.indexOf(x)<0;}));saveAcks();renderTrack();}
+  try{if(location.hash.slice(1)!==id)history.replaceState(null,"","#"+id);}catch(e){}
+  window.scrollTo(0,0);
+}
+window.addEventListener("hashchange",function(){var h=location.hash.slice(1);if(h&&h!==current)show(h);});
+function renderTrack(){
+  if(!SIGNED){$("track").innerHTML="";return;}
+  var unseen=L().sent.filter(function(m){return acks.indexOf(m.id)<0;}).length;
+  $("track").innerHTML=visibleViews().map(function(v){
+    return '<button class="'+(v[0]===current?"sel":"")+'" data-go="'+v[0]+'">'+esc(v[1])+(v[0]==="messages"&&unseen&&!isStaff?'<span class="dot" aria-label="'+unseen+' new"></span>':"")+'</button>';
+  }).join("");
+}
+$("track").addEventListener("click",function(e){var b=e.target.closest("[data-go]");if(b)show(b.dataset.go);});
+
+/* ---------- Brief ---------- */
+function renderBrief(){
+  var ex=EX();
+  $("exTitle").textContent=ex.title;
+  $("briefTitle").textContent=ex.title;
+  $("briefSub").textContent=ex.subtitle+". Output: "+ex.output+".";
+  $("briefBody").innerHTML=ex.brief();
+  $("caranaBody").innerHTML=CARANA_BRIEF;
+  var p=L().params||{},box=$("assignBox");
+  if(TEAM){
+    var mem=(TEAM.members||[]).filter(Boolean);
+    box.hidden=false;
+    box.innerHTML='<b>'+esc(TEAM.name)+(myAssign()?': '+esc(myAssign()):'')+'</b>'+(mem.length?'<span class="small">'+esc(mem.join(", "))+'</span>':'')+
+      (exId()==="fpu"&&p.dday!=null&&p.dday!==""?'<div style="margin-top:6px;font-weight:700">French withdrawal: D-'+esc(p.dday)+'</div>':'')+
+      (exId()==="colocation"&&p.ceiling?'<div style="margin-top:6px;font-weight:700">UNPOL available for colocation: '+esc(p.ceiling)+'</div>':'');
+  } else box.hidden=true;
+}
+
+/* ---------- Group worksheet ---------- */
+var workRenderedFor=null,checkTimer=null;
+function workScope(){return {root:ME,base:["ex",exId()],editable:!!TEAMID&&!submitted(),saver:teamSaver,ctx:ctxFor(myAssign(),false),groups:otherGroups()};}
+function renderWork(){
+  if(!TEAMID)return;
+  renderSheet($("workBody"),EX().sections,workScope());
+  workRenderedFor=exId()+":"+L().stage+":"+submitted()+":"+otherGroups().map(function(g){return g.id;}).join(",");
+  updateWorkChecks();applyLock();
+}
+function updateWorkChecks(){if(!TEAMID)return;keepOpen($("workChecks"),checksHtml(EX().checks(getPath(ME,["ex",exId()])||{},ctxFor(myAssign(),false)),"Plan check"));}
+wireSheet($("workBody"),function(){clearTimeout(checkTimer);checkTimer=setTimeout(updateWorkChecks,300);});
+function applyLock(){
+  var lock=!!TEAMID&&submitted();
+  $("lockBanner").hidden=!lock;
+  if(lock)$("lockBanner").textContent="Your group submitted this worksheet at "+timeOf(ME.sub[exId()].at)+". It is locked; ask staff if you need to change something.";
+  $("submitBox").hidden=!TEAMID||lock;
+}
+$("submitBtn").addEventListener("click",function(){
+  var err=$("submitErr");err.textContent="";
+  if(!TEAMID){err.textContent="Sign in with your group login first.";return;}
+  var probs=EX().checks(getPath(ME,["ex",exId()])||{},ctxFor(myAssign(),false)).filter(function(c){return c[0]==="err";}).length;
+  if(!confirm((probs?probs+" problem"+(probs>1?"s are":" is")+" still flagged in the plan check. ":"")+"Submit your group’s worksheet now? It locks for everyone in the group."))return;
+  ME.sub=ME.sub||{};ME.sub[exId()]={at:Date.now()};teamSaver.change(["sub",exId()]);teamSaver.push();renderWork();onLive();
+});
+
+/* ---------- Other groups (review) ---------- */
+var VIEW_TEAMS=[],othersPick=null;
+function otherGroups(){return (isStaff?TEAMS:VIEW_TEAMS).filter(function(t){return t.id!==TEAMID;}).map(function(t){return {id:t.id,name:gName(t)};}).sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});}
+function renderOthers(){
+  var list=(isStaff?TEAMS:VIEW_TEAMS).slice().sort(function(a,b){return (a.data.teamName||"").localeCompare(b.data.teamName||"",undefined,{numeric:true});});
+  if(!list.length){$("othersPick").innerHTML="";$("othersBody").innerHTML='<div class="empty">Other groups’ worksheets appear here once staff open the review stage.</div>';return;}
+  if(!othersPick||!list.some(function(t){return t.id===othersPick;}))othersPick=list[0].id;
+  $("othersPick").innerHTML=list.map(function(t){return '<button class="btn sm'+(t.id===othersPick?" primary":"")+'" data-pick="'+esc(t.id)+'">'+esc(gName(t))+(t.id===TEAMID?" (yours)":"")+'</button>';}).join("");
+  var t=list.filter(function(x){return x.id===othersPick;})[0];
+  var host=$("othersBody");
+  renderSheet(host,EX().sections.filter(function(s){return !s.stage;}),{root:t.data,base:["ex",exId()],editable:false,ctx:ctxFor(rosterAssign(t.id),false)});
+}
+$("othersPick").addEventListener("click",function(e){var b=e.target.closest("[data-pick]");if(b){othersPick=b.dataset.pick;renderOthers();}});
+function gName(t){return (ROSTER[t.id]&&ROSTER[t.id].name)||t.data.teamName||t.id;}
+function rosterAssign(id){var r=ROSTER[id];return r&&r.assign?(r.assign[exId()]||""):"";}
+
+/* ---------- Consolidated plan ---------- */
+var plenRenderedFor=null;
+function plenScope(){return {root:PLEN,base:[],editable:isStaff||(!!TEAMID&&L().stage==="plenary"),saver:plenSaver,ctx:ctxFor("",true)};}
+function plenaryEmpty(){return !Object.keys(PLEN||{}).filter(function(k){return k!=="updatedAt";}).length;}
+function renderPlenary(){
+  var host=$("plenaryBody");
+  if(plenaryEmpty()){
+    host.__scope=null;
+    host.innerHTML='<div class="empty">'+(isStaff?'No consolidated plan yet for this exercise. <div style="margin-top:12px"><button class="btn primary" id="buildPlen">Build it from the group worksheets</button></div>':'The consolidated plan appears here when staff start the consolidation stage.')+'</div>';
+    $("plenaryChecks").innerHTML="";plenRenderedFor=null;return;
+  }
+  renderSheet(host,plenarySections(EX()),plenScope());
+  if(isStaff)host.insertAdjacentHTML("afterbegin",'<div class="row" style="margin-bottom:12px"><button class="btn sm" id="buildPlen">Rebuild from group worksheets</button><span class="small">Replaces the consolidated plan with a fresh merge of all groups’ current work.</span></div>');
+  plenRenderedFor=exId()+":"+plenScope().editable;
+  updatePlenChecks();
+}
+function updatePlenChecks(){if(plenaryEmpty())return;keepOpen($("plenaryChecks"),checksHtml(EX().checks(PLEN,ctxFor("",true)),"Plan check"));}
+wireSheet($("plenaryBody"),function(){clearTimeout(checkTimer);checkTimer=setTimeout(updatePlenChecks,300);});
+$("plenaryBody").addEventListener("click",function(e){if(e.target.id==="buildPlen")buildPlenary(true);});
+function groupsForMerge(){
+  return TEAMS.map(function(t){return {id:t.id,name:gName(t),assign:rosterAssign(t.id),ex:getPath(t.data,["ex",exId()])||{}};})
+    .sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});
+}
+function buildPlenary(ask){
+  if(!isStaff)return Promise.resolve();
+  if(ask&&!plenaryEmpty()&&!confirm("Replace the current consolidated plan with a fresh merge of the group worksheets? Edits made in the consolidated plan will be lost."))return Promise.resolve();
+  var merged=EX().merge(groupsForMerge());merged.updatedAt=Date.now();
+  PLEN=merged;plenSaver.pend={};
+  return db.doc("plenary/"+exId()).set(merged).then(function(){renderPlenary();},function(){alert("Couldn’t build the consolidated plan. Check your connection.");});
+}
+function subscribePlenary(){
+  if(PLEN_EX===exId())return;
+  if(plenUnsub){plenUnsub();plenUnsub=null;}
+  PLEN_EX=exId();PLEN={};plenSaver.pend={};plenSaver.inflight={};
+  plenUnsub=db.doc("plenary/"+PLEN_EX).onSnapshot(function(s){
+    PLEN=plenSaver.absorb(s.exists?s.data():{});if($("plenaryBody").__scope)$("plenaryBody").__scope.root=PLEN;
+    var key=exId()+":"+plenScope().editable;
+    if(plenRenderedFor!==key||!$("plenaryBody").__scope)renderPlenary();else{refreshSheet($("plenaryBody"));updatePlenChecks();}
+  },function(){});
+}
+$("plenaryPdf").addEventListener("click",function(){
+  if(plenaryEmpty()){toast($("plenaryNote"),"Nothing to export yet.");return;}
+  ensurePdf().then(function(){
+    var c=[{text:"CARANA · "+EX().title,style:"kicker"},{text:"Consolidated plan",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"}),style:"meta"}].concat(sheetPdf(plenarySections(EX()),PLEN,true));
+    window.pdfMake.createPdf(pdfDoc(c)).download("carana-"+exId()+"-consolidated-plan.pdf");
+  }).catch(function(){toast($("plenaryNote"),"Couldn’t create the PDF. Check your connection.");});
+});
+
+/* ---------- Messages ---------- */
+function precClass(p){return p==="FLASH"?"":p==="IMMEDIATE"?"amber":"blue";}
+var PRECS=["FLASH","IMMEDIATE","PRIORITY","ROUTINE"];
+function headHtml(m,n){return '<dl class="msg-head"><dt>Precedence</dt><dd><span class="prec '+precClass(m.prec)+'">'+esc(m.prec)+'</span></dd><dt>From</dt><dd>'+esc(m.from||"UNAC Police")+'</dd><dt>To</dt><dd>'+esc(isStaff?"All groups":(TEAM?TEAM.name:"All groups"))+'</dd><dt>Serial</dt><dd>Message '+n+'</dd></dl>';}
+function bodyHtml(m){return '<div class="msg-body">'+paras(m.body).map(function(p){return "<p>"+esc(p)+"</p>";}).join("")+'</div>';}
+function renderMessages(){
+  var sent=L().sent;
+  if(!sent.length){$("msgList").innerHTML='<div class="empty">No messages yet.</div>';return;}
+  if($("msgList").contains(document.activeElement))return;
+  var base=["ex",exId(),"msg"],lock=!TEAMID||submitted(),h="";
+  for(var i=sent.length-1;i>=0;i--){
+    var m=sent[i],opts=(m.options||[]).filter(Boolean),r=getPath(ME,base.concat([m.id]))||{};
+    h+='<article class="msg"><h2 style="margin:16px 18px 0">'+esc(m.title)+'</h2>'+headHtml(m,i+1)+bodyHtml(m);
+    if(!isStaff)h+='<div class="msg-task">'+(m.question?'<h3>'+esc(m.question)+'</h3>':'')+
+      opts.map(function(o,j){return '<label class="coa"><input type="radio" name="coa_'+esc(m.id)+'" data-m="'+esc(m.id)+'" value="'+j+'"'+(r.pick===j?" checked":"")+(lock?" disabled":"")+'><b>Option '+String.fromCharCode(65+j)+'.</b> '+esc(o)+'</label>';}).join("")+
+      '<div class="field" style="margin-top:12px"><label for="why_'+esc(m.id)+'">'+(opts.length?"Justification and changes to your plan":"Your response")+'</label><textarea id="why_'+esc(m.id)+'" data-msg="'+esc(m.id)+'" rows="4"'+(lock?" disabled":"")+'>'+esc(r.text||"")+'</textarea></div><button class="btn" data-go-work>Update the worksheet</button></div>';
+    h+='</article>';
+  }
+  $("msgList").innerHTML=h;
+}
+$("msgList").addEventListener("change",function(e){var t=e.target;if(t.type==="radio"&&TEAMID){setPath(ME,["ex",exId(),"msg",t.dataset.m,"pick"],+t.value);teamSaver.change(["ex",exId(),"msg",t.dataset.m,"pick"]);}});
+$("msgList").addEventListener("input",function(e){var t=e.target;if(t.dataset.msg&&TEAMID){setPath(ME,["ex",exId(),"msg",t.dataset.msg,"text"],t.value);teamSaver.change(["ex",exId(),"msg",t.dataset.msg,"text"]);}});
+$("msgList").addEventListener("click",function(e){if(e.target.closest("[data-go-work]"))show(L().stage==="plenary"?"plenary":"work");});
+var queue=[],showing=null;
+function checkNew(){
+  if(isStaff)return;
+  L().sent.forEach(function(m){if(acks.indexOf(m.id)<0&&queue.indexOf(m.id)<0&&showing!==m.id)queue.push(m.id);});
+  queue=queue.filter(function(id){return L().sent.some(function(m){return m.id===id;});});
+  if(!showing)nextFlash();
+}
+function nextFlash(){
+  var id=queue.shift();if(!id){showing=null;$("overlay").classList.remove("on");return;}
+  var idx=-1;L().sent.forEach(function(m,i){if(m.id===id)idx=i;});if(idx<0){nextFlash();return;}
+  var m=L().sent[idx];showing=id;
+  var box=$("flashBox");box.className="flash "+precClass(m.prec);
+  box.innerHTML='<div class="flash-strip">'+esc(m.prec)+' message received</div><h2 id="flashTitle">'+esc(m.title)+'</h2>'+headHtml(m,idx+1)+bodyHtml(m)+'<div class="flash-actions"><button class="btn primary" id="ackGo">Acknowledge and respond</button><button class="btn" id="ackLater">Acknowledge</button></div>';
+  $("overlay").classList.add("on");setTimeout(function(){var b=$("ackGo");if(b)b.focus();},50);
+}
+$("overlay").addEventListener("click",function(e){
+  if(e.target.id!=="ackGo"&&e.target.id!=="ackLater")return;
+  if(showing&&acks.indexOf(showing)<0){acks.push(showing);saveAcks();}
+  var go=e.target.id==="ackGo";showing=null;
+  if(queue.length)nextFlash();else{$("overlay").classList.remove("on");if(go)show("messages");else renderTrack();}
+});
+
+/* ---------- Clock and live state ---------- */
+function tick(){
+  var l=L(),t=$("time");
+  if(!LIVE||l.status==="idle"){t.textContent=fmt((l.duration+l.extra)*60000);t.className="time idle";}
+  else{var rem=(l.duration+l.extra)*60000-elapsed();t.textContent=fmt(rem);t.className="time"+(rem<0?" over":rem<10*60000?" warn":"");}
+  var b=$("startBtn");
+  if(isStaff){b.hidden=false;b.textContent=l.status==="idle"?"Start":l.status==="running"?"Pause":"Resume";b.classList.toggle("primary",l.status!=="running");autoSend();}
+  var sp=$("stagePill");if(SIGNED){sp.hidden=false;sp.textContent={group:"Group work",review:"Review",plenary:"Consolidation"}[l.stage]||"";}
+}
+setInterval(tick,1000);
+var liveChain=Promise.resolve();
+function writeLive(patch){
+  liveChain=liveChain.then(function(){var ref=db.doc("live/state");return ref.get().then(function(s){return s.exists?ref.update(patch):ref.set(Object.assign(liveDefaults(),patch));});})
+    .catch(function(){setStatus("Couldn’t update the run. Check your connection and try again.",true);});
+  return liveChain;
+}
+$("startBtn").addEventListener("click",function(){var l=L();if(l.status==="running")writeLive({status:"paused",elapsedBefore:elapsed(),startedAt:0});else writeLive({status:"running",startedAt:Date.now()});});
+var lastEx=null,lastStage=null;
+function onLive(){
+  if(!SIGNED)return;
+  var l=L(),exChanged=lastEx!==l.exId,stageChanged=lastStage!==l.stage;
+  if(exChanged){loadAcks();queue=[];}
+  lastEx=l.exId;lastStage=l.stage;
+  subscribePlenary();
+  if(!isStaff){if(l.stage!=="group")subscribeTeamsView();else if(teamsUnsub){teamsUnsub();teamsUnsub=null;VIEW_TEAMS=[];}}
+  renderBrief();tick();renderTrack();renderMessages();checkNew();
+  var wkey=exId()+":"+l.stage+":"+submitted()+":"+otherGroups().map(function(g){return g.id;}).join(",");
+  if(TEAMID&&(exChanged||stageChanged||workRenderedFor!==wkey))renderWork();else if(TEAMID)updateWorkChecks();
+  if(exChanged||plenRenderedFor!==exId()+":"+plenScope().editable)renderPlenary();
+  if(isStaff){renderRun();if(current==="results")renderResults();if(current==="groups")renderLogins();}
+  if(current==="others")renderOthers();
+  if(visibleViews().map(function(v){return v[0];}).indexOf(current)<0)show(visibleViews()[0][0]);
+  var st={group:"Group work",review:"Review: groups can see each other’s worksheets",plenary:"Consolidation: everyone works on the consolidated plan"}[l.stage];
+  if(isStaff)setStatus(l.status==="idle"?EX().title+" is ready. Set up groups and messages, then start.":l.status==="paused"?"Paused. "+st+".":"Running. "+st+". Keep this page open so scheduled messages go out.");
+  else if(submitted()&&l.stage==="group")setStatus("Worksheet submitted. Wait for the next stage.");
+  else setStatus(l.status==="idle"?"Waiting for staff to start. Read the brief in the meantime.":l.status==="paused"?"Staff have paused the exercise.":st+". Your work saves automatically.");
+}
+function subscribeTeamsView(){
+  if(teamsUnsub)return;
+  teamsUnsub=db.collection("teams").onSnapshot(function(q){VIEW_TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});
+    var wkey=exId()+":"+L().stage+":"+submitted()+":"+otherGroups().map(function(g){return g.id;}).join(",");if(workRenderedFor!==wkey&&!$("workBody").contains(document.activeElement))renderWork();
+    if(current==="others")renderOthers();},function(){teamsUnsub=null;});
+}
+
+/* ---------- Staff: run panel ---------- */
+var STAGES=[["group","Group work"],["review","Review"],["plenary","Consolidation"]];
+function renderRun(){
+  var l=L();
+  $("exPick").innerHTML=EX_ORDER.map(function(k){var e=EXERCISES[k];return '<button class="excard'+(k===l.exId?" on":"")+'" data-ex="'+k+'"><b>'+esc(e.title)+'</b><span class="small">'+esc(e.subtitle)+'</span></button>';}).join("");
+  $("stageSeg").innerHTML=STAGES.map(function(s){return '<button data-stage="'+s[0]+'" class="'+(l.stage===s[0]?"on":"")+'">'+s[1]+'</button>';}).join("");
+  $("stageNote").textContent={group:"Groups work on their own worksheets.",review:"Groups can read each other’s worksheets (for presentations and peer review).",plenary:"Everyone edits the single consolidated plan."}[l.stage];
+  if(document.activeElement!==$("durIn"))$("durIn").value=l.duration;
+  if(!$("paramPanel").contains(document.activeElement))renderParams();
+  if(!$("editor").contains(document.activeElement))renderEditor();
+}
+$("exPick").addEventListener("click",function(e){
+  var b=e.target.closest("[data-ex]");if(!b)return;var k=b.dataset.ex,l=L();if(k===l.exId)return;
+  if((l.status!=="idle"||l.sent.length)&&!confirm("Switch to "+EXERCISES[k].title+"? This resets the clock, stage and sent messages of the current run. All answers are kept."))return;
+  if(dirty&&!confirm("You have unsaved message changes. Switch anyway?"))return;
+  dirty=false;
+  writeLive({exId:k,status:"idle",startedAt:0,elapsedBefore:0,extra:0,sent:[],stage:"group",shareWork:false,params:{},duration:EXERCISES[k].duration});
+});
+$("stageSeg").addEventListener("click",function(e){
+  var b=e.target.closest("[data-stage]");if(!b)return;var s=b.dataset.stage;
+  var go=function(){writeLive({stage:s,shareWork:s!=="group"});};
+  if(s==="plenary"&&plenaryEmpty()){if(confirm("Build the consolidated plan from all groups’ worksheets now?"))buildPlenary(false).then(go);else go();}
+  else go();
+});
+$("durSet").addEventListener("click",function(){var n=Math.max(10,Math.min(480,parseInt($("durIn").value,10)||90));writeLive({duration:n});});
+$("addTime").addEventListener("click",function(){writeLive({extra:(L().extra||0)+5});});
+$("resetBtn").addEventListener("click",function(){if(confirm("Reset this run? The clock stops, sent messages are withdrawn and the stage returns to group work. Answers are kept."))writeLive({status:"idle",startedAt:0,elapsedBefore:0,extra:0,sent:[],stage:"group",shareWork:false});});
+function renderParams(){
+  var p=L().params||{},box=$("paramPanel"),k=exId();
+  if(k==="colocation"){
+    var sec=p.sec||{};
+    box.innerHTML='<h3>Scenario settings</h3><p class="small">Inject 1: change the security level of selected provinces. Inject 2: set how many UNPOL are available.</p><div class="secgrid">'+
+      PROVINCES.map(function(pr){var s=PROV_SHORT(pr);return '<label>'+esc(s)+'<select data-sec="'+esc(s)+'"><option value="">No change</option>'+SEC_LEVELS.map(function(l){return '<option'+(sec[s]===l?" selected":"")+'>'+l+'</option>';}).join("")+'</select></label>';}).join("")+
+      '</div><div class="row" style="margin-top:10px;align-items:end"><div class="field" style="margin:0;max-width:180px"><label class="small" for="ceilIn">UNPOL available</label><input type="number" id="ceilIn" min="0" value="'+(p.ceiling||"")+'" placeholder="No limit"></div><button class="btn primary" id="applyParams">Apply and notify groups</button></div>';
+  } else if(k==="fpu"){
+    box.innerHTML='<h3>Scenario settings</h3><p class="small">Days until the French Light Infantry Unit withdraws. Shown to every group.</p><div class="row" style="align-items:end"><div class="field" style="margin:0;max-width:140px"><label class="small" for="ddayIn">D-minus days</label><input type="number" id="ddayIn" min="0" max="60" value="'+(p.dday!=null?p.dday:14)+'"></div><button class="btn primary" id="applyParams">Apply and notify groups</button></div>';
+  } else box.innerHTML='<h3>Scenario settings</h3><p class="small">This exercise has no scenario settings. Use messages for any injects.</p>';
+}
+$("paramPanel").addEventListener("click",function(e){
+  if(e.target.id!=="applyParams")return;
+  var k=exId(),old=L().params||{},np=clone(old)||{},lines=[];
+  if(k==="colocation"){
+    var sec={};$("paramPanel").querySelectorAll("[data-sec]").forEach(function(s){if(s.value)sec[s.dataset.sec]=s.value;});
+    var ceil=parseInt($("ceilIn").value,10)||0;
+    Object.keys(sec).forEach(function(s){if((old.sec||{})[s]!==sec[s])lines.push(s+": "+sec[s]);});
+    np.sec=sec;np.ceiling=ceil||null;
+    var body="";
+    if(lines.length)body+="The D/HOPC CBD, on behalf of the HOPC, issues an updated security assessment.\n\n"+lines.join("\n")+"\n\nIn RED areas permanent colocation is no longer feasible; periodic, mobile or specialist engagement may remain possible. Review the affected arrangements: do the capacity-building objectives remain valid, should the modality change, are fewer officers needed, and what happens to the ratios?";
+    if(ceil&&ceil!==+old.ceiling)body+=(body?"\n\n":"")+"The number of UNPOL officers available for colocation is now "+ceil+". Reduce the consolidated plan to this figure. Do not cut every location by the same percentage: keep what is essential to the highest-priority CNP needs, and consider periodic, mobile or specialist arrangements instead of permanent presence.";
+    if(!body){alert("Nothing has changed.");return;}
+    if(!confirm("Apply these settings and send a message to all groups?"))return;
+    writeLive({params:np}).then(function(){sendMessage({id:newId("p"),title:lines.length?"Updated security assessment":"Reduced UNPOL availability",prec:"FLASH",from:"D/HOPC CBD for the HOPC",body:body,question:"",options:""});});
+  } else if(k==="fpu"){
+    var d=parseInt($("ddayIn").value,10);if(isNaN(d))return;np.dday=d;
+    if(!confirm("Set the French withdrawal to D-"+d+" and notify all groups?"))return;
+    writeLive({params:np}).then(function(){sendMessage({id:newId("p"),title:"Time update: D-"+d,prec:"PRIORITY",from:"Deputy HOPC Operations",body:"The French Light Infantry Unit now withdraws in "+d+" day"+(d===1?"":"s")+". Check that your plan, phases and decision points still match the timeline.",question:"",options:""});});
+  }
+});
+
+/* ---------- Staff: message editor ---------- */
+var pendingSend={};
+function draftList(){if(!DRAFT)return null;DRAFT.messages=DRAFT.messages||{};DRAFT.messages[exId()]=DRAFT.messages[exId()]||[];return DRAFT.messages[exId()];}
+function cfgList(){return CFG&&CFG.messages&&CFG.messages[exId()]||[];}
+function sentIds(){return L().sent.map(function(m){return m.sourceId;});}
+function sendMessage(src){
+  if(pendingSend[src.id]||sentIds().indexOf(src.id)>=0)return;
+  pendingSend[src.id]=1;
+  var entry={id:newId(),sourceId:src.id,title:src.title||"Message",prec:src.prec||"FLASH",from:src.from||"",body:src.body||"",question:src.question||"",
+    options:String(src.options||"").split("\n").map(function(x){return x.trim();}).filter(Boolean),sentAtMin:Math.round(elapsed()/60000)};
+  var sent=L().sent.slice();sent.push(entry);
+  writeLive({sent:sent}).then(function(){delete pendingSend[src.id];});
+}
+function autoSend(){
+  if(!CFG||L().status!=="running")return;var mins=elapsed()/60000;
+  cfgList().forEach(function(m){if(m.sendAt!==""&&m.sendAt!=null&&!isNaN(+m.sendAt)&&mins>=+m.sendAt)sendMessage(m);});
+}
+function letterOpts(v,none){return '<option value="">'+none+'</option>'+"ABCDEF".split("").map(function(l){return '<option'+(v===l?" selected":"")+'>'+l+'</option>';}).join("");}
+function renderEditor(){
+  var ms=draftList();
+  if(!ms){$("editor").innerHTML='<div class="empty">Loading messages…</div>';return;}
+  if(!ms.length){$("editor").innerHTML='<div class="empty">No messages for '+esc(EX().title)+' yet. Add one, or import the CARANA message file.</div>';renderSaveBar();return;}
+  var sids=sentIds();
+  var order=ms.map(function(m,i){return i;}).sort(function(a,b){var x=ms[a].sendAt,y=ms[b].sendAt;x=(x===""||x==null)?1e9:+x;y=(y===""||y==null)?1e9:+y;return x-y;});
+  $("editor").innerHTML=order.map(function(i){
+    var m=ms[i],isSent=sids.indexOf(m.id)>=0,hasT=m.sendAt!==""&&m.sendAt!=null;
+    var pill=isSent?'<span class="pill sent">Sent</span>':hasT?'<span class="pill">At minute '+esc(m.sendAt)+'</span>':'<span class="pill">Manual</span>';
+    return '<div class="ed'+(isSent?" sent":"")+'" data-i="'+i+'"><div class="ed-top"><b>'+esc(m.title||"Untitled message")+'</b>'+pill+
+      '<button class="btn sm primary" data-send="'+i+'"'+(isSent?" disabled":"")+'>'+(isSent?"Sent":"Send now")+'</button><button class="btn sm danger" data-del="'+i+'">Delete</button></div>'+
+      '<div class="ed-grid"><div class="field"><label>Title</label><input type="text" data-k="title" value="'+esc(m.title)+'"></div>'+
+      '<div class="field"><label>From</label><input type="text" data-k="from" value="'+esc(m.from)+'"></div>'+
+      '<div class="field"><label>Precedence</label><select data-k="prec">'+PRECS.map(function(p){return '<option'+(m.prec===p?" selected":"")+'>'+p+'</option>';}).join("")+'</select></div>'+
+      '<div class="field"><label>Send at minute</label><input type="number" min="0" max="480" data-k="sendAt" value="'+esc(m.sendAt)+'"></div></div>'+
+      '<div class="field"><label>Message text</label><textarea data-k="body" rows="5">'+esc(m.body)+'</textarea></div>'+
+      '<div class="field"><label>Question for groups</label><input type="text" data-k="question" value="'+esc(m.question)+'"></div>'+
+      '<div class="field"><label>Options, one per line</label><textarea data-k="options" rows="3">'+esc(m.options)+'</textarea></div>'+
+      '<div class="field"><label>Staff notes (never shown to groups)</label><textarea data-k="notes" rows="3">'+esc(m.notes)+'</textarea></div></div>';
+  }).join("");
+  renderSaveBar();
+}
+function editorInput(t){var card=t.closest(".ed");if(!card||!t.dataset.k)return;draftList()[+card.dataset.i][t.dataset.k]=t.value;if(t.dataset.k==="title")card.querySelector(".ed-top b").textContent=t.value||"Untitled message";dirty=true;renderSaveBar();}
+$("editor").addEventListener("input",function(e){editorInput(e.target);});
+$("editor").addEventListener("change",function(e){if(e.target.tagName==="SELECT")editorInput(e.target);});
+$("editor").addEventListener("click",function(e){
+  var s=e.target.closest("[data-send]"),d=e.target.closest("[data-del]");
+  if(s){var m=draftList()[+s.dataset.send];if(!(m.body||"").trim()){alert("Add message text before sending.");return;}if(confirm("Send “"+(m.title||"this message")+"” to all groups now?")){sendMessage(m);if(dirty)saveCfg();}}
+  if(d&&confirm("Delete this message? Groups that already received it keep it.")){draftList().splice(+d.dataset.del,1);dirty=true;renderEditor();}
+});
+$("addMsg").addEventListener("click",function(){if(!DRAFT)DRAFT={messages:{}};draftList().push({id:newId(),title:"",from:"HOPC",prec:"FLASH",sendAt:"",body:"",question:"",options:"",notes:""});dirty=true;renderEditor();});
+function renderSaveBar(){$("saveBar").classList.toggle("dirty",dirty);$("saveState").textContent=dirty?"Unsaved changes: scheduled sending uses the saved version":"All changes saved";$("saveCfg").disabled=!dirty;}
+function saveCfg(){var body=clone(DRAFT);body.updatedAt=Date.now();$("saveCfg").disabled=true;return db.doc("fac/config").set(body).then(function(){dirty=false;renderSaveBar();},function(){$("saveState").textContent="Couldn’t save. Try again.";$("saveCfg").disabled=false;});}
+$("saveCfg").addEventListener("click",saveCfg);
+window.addEventListener("beforeunload",function(e){if(dirty){e.preventDefault();e.returnValue="";}});
+$("exportMsgs").addEventListener("click",function(){
+  if(!DRAFT)return;var blob=new Blob([JSON.stringify({messages:DRAFT.messages||{}},null,2)],{type:"application/json"});
+  var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="carana-messages.json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);
+});
+$("importMsgs").addEventListener("change",function(e){
+  var f=e.target.files[0];if(!f)return;
+  f.text().then(function(t){
+    var o=JSON.parse(t),src=o.messages||o;
+    var norm=function(list){return list.map(function(m){return {id:newId(),title:String(m.title||""),from:String(m.from||""),prec:PRECS.indexOf(m.prec)>=0?m.prec:"FLASH",sendAt:m.sendAt==null?"":String(m.sendAt),body:String(m.body||""),question:String(m.question||""),options:Array.isArray(m.options)?m.options.join("\n"):String(m.options||""),notes:String(m.notes||"")};});};
+    if(!DRAFT)DRAFT={messages:{}};DRAFT.messages=DRAFT.messages||{};
+    var n=0;
+    if(Array.isArray(src)){DRAFT.messages[exId()]=norm(src);n=src.length;}
+    else{if(!confirm("Replace the messages of every exercise in this file?"))return;EX_ORDER.forEach(function(k){if(Array.isArray(src[k])){DRAFT.messages[k]=norm(src[k]);n+=src[k].length;}});}
+    dirty=true;renderEditor();alert(n+" messages imported. Click Save messages to keep them.");
+  }).catch(function(){alert("That file isn’t a message file. Use a .json file exported from this page.");});
+  e.target.value="";
+});
+
+/* ---------- Staff: groups and logins ---------- */
+var CA=null,busyLogins=false;
+function creator(){if(!CA){var a2=initializeApp(CONF,"creator");CA=initializeAuth(a2,{persistence:inMemoryPersistence});}return CA;}
+function genPw(n){var al="abcdefghjkmnpqrstuvwxyz23456789",b=new Uint32Array(n||8),o="";crypto.getRandomValues(b);for(var i=0;i<b.length;i++)o+=al[b[i]%al.length];return o;}
+function loginSlug(n){return String(n).toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"").slice(0,24);}
+function credById(id){return (CREDS.teams||[]).filter(function(t){return t.id===id;})[0];}
+function saveCreds(){return db.doc("fac/teamCreds").set(clone(CREDS));}
+function siteUrl(){return location.origin+location.pathname.replace(/index\.html$/,"");}
+function renderLogins(){
+  var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});}),ex=EX();
+  if(!ts.length){$("logins").innerHTML='<div class="empty" style="margin:10px 0">No groups yet. Choose how many to add, then create their logins.</div>';return;}
+  if($("logins").contains(document.activeElement))return;
+  $("logins").innerHTML='<datalist id="assignList">'+ex.assignSuggest.map(function(s){return '<option value="'+esc(s)+'">';}).join("")+'</datalist><div class="tablewrap"><table class="plain logins"><thead><tr><th>Group</th><th>Members (one per line)</th><th>Task in '+esc(ex.title)+'</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
+    ts.map(function(t){var r=ROSTER[t.id]||{};var a=(r.assign||{})[exId()]||"";
+      return '<tr><td><input type="text" maxlength="40" data-rename="'+esc(t.id)+'" value="'+esc(t.name)+'" aria-label="Group name"></td>'+
+        '<td><textarea rows="3" data-members="'+esc(t.id)+'" aria-label="Members">'+esc((r.members||[]).join("\n"))+'</textarea></td>'+
+        '<td><input type="text" list="assignList" data-assign="'+esc(t.id)+'" value="'+esc(a)+'" placeholder="'+esc(ex.assignHint)+'" aria-label="Task"></td>'+
+        '<td class="mono">'+esc(t.login)+'</td><td class="mono">'+esc(t.password)+'</td>'+
+        '<td><div class="row"><button class="btn sm" data-newpw="'+esc(t.id)+'">New password</button><button class="btn sm danger" data-delg="'+esc(t.id)+'">Delete</button></div></td></tr>';}).join("")+
+    '</tbody></table></div>';
+}
+async function createLogin(name,taken){
+  var base=loginSlug(name)||"group",login=base,n=2,pw=genPw(8),u=null;
+  while(taken[login])login=base+(n++);
+  for(var tries=0;tries<6&&!u;tries++){
+    try{var cr=await createUserWithEmailAndPassword(creator(),login+"@"+DOMAIN,pw);u=cr.user;await signOut(creator());}
+    catch(e){if(e&&e.code==="auth/email-already-in-use"){login=base+(n++);continue;}throw e;}
+  }
+  if(!u)throw new Error("no free login");
+  await db.doc("members/"+u.uid).set({teamId:login});
+  await db.doc("roster/"+login).set({uid:u.uid,name:name,members:[],assign:{}});
+  taken[login]=1;
+  return {id:login,name:name,login:login,password:pw,uid:u.uid,createdAt:Date.now()};
+}
+function note(t){$("loginNote").textContent=t||"";}
+$("makeTeams").addEventListener("click",async function(){
+  if(busyLogins)return;
+  var n=Math.max(1,Math.min(30,parseInt($("nTeams").value,10)||0)),prefix=($("teamPrefix").value||"Group").replace(/\s+/g," ").trim()||"Group";
+  var ts=CREDS.teams||(CREDS.teams=[]),taken={},names={};ts.forEach(function(t){taken[t.login]=1;names[t.name.toLowerCase()]=1;});
+  busyLogins=true;$("makeTeams").disabled=true;var k=1,made=0;
+  try{for(var i=0;i<n;i++){while(names[(prefix+" "+k).toLowerCase()])k++;var name=prefix+" "+k;names[name.toLowerCase()]=1;note("Creating "+name+"… ("+(i+1)+" of "+n+")");ts.push(await createLogin(name,taken));made++;await saveCreds();}
+    note(made+" group login"+(made>1?"s":"")+" created.");}
+  catch(e){note((made?made+" created, then ":"")+(e&&e.code==="auth/operation-not-allowed"?"Email/Password sign-in is off in Firebase (README, step 2).":e&&e.code==="auth/too-many-requests"?"Firebase is limiting new accounts. Wait an hour, then add the rest.":"creating a login failed. Check your connection and the database rules."));}
+  finally{busyLogins=false;$("makeTeams").disabled=false;renderLogins();}
+});
+$("logins").addEventListener("change",function(e){
+  var t=e.target,id;
+  if((id=t.dataset.rename)){var c=credById(id),nm=t.value.replace(/\s+/g," ").trim();if(!c||!nm){t.value=c?c.name:"";return;}
+    if((CREDS.teams||[]).some(function(x){return x!==c&&x.name.toLowerCase()===nm.toLowerCase();})){alert("Another group already has that name.");t.value=c.name;return;}
+    c.name=nm;saveCreds();db.doc("roster/"+id).merge({name:nm});db.doc("teams/"+id).merge({teamName:nm}).catch(function(){});}
+  else if((id=t.dataset.members)){db.doc("roster/"+id).merge({members:t.value.split("\n").map(function(x){return x.trim();}).filter(Boolean)});}
+  else if((id=t.dataset.assign)){var a={};a[exId()]=t.value.trim();db.doc("roster/"+id).merge({assign:a});}
+});
+$("fillAssign").addEventListener("click",function(){
+  var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});}),sug=EX().assignSuggest;
+  if(!ts.length)return;if(!confirm("Fill each group’s task for "+EX().title+" in order from the exercise document? Existing tasks for this exercise are replaced."))return;
+  ts.forEach(function(t,i){var a={};a[exId()]=sug[i]||"";db.doc("roster/"+t.id).merge({assign:a});});
+});
+async function newPassword(t){var c=creator(),np=genPw(8);await signInWithEmailAndPassword(c,t.login+"@"+DOMAIN,t.password);await updatePassword(c.currentUser,np);await signOut(c);t.password=np;await saveCreds();}
+async function removeLogin(t){
+  var c=creator();
+  try{await signInWithEmailAndPassword(c,t.login+"@"+DOMAIN,t.password);await deleteUser(c.currentUser);}catch(e){if(!(e&&(e.code==="auth/user-not-found"||e.code==="auth/invalid-credential")))throw e;}
+  if(t.uid)await db.doc("members/"+t.uid).delete().catch(function(){});
+  await db.doc("roster/"+t.id).delete().catch(function(){});await db.doc("teams/"+t.id).delete().catch(function(){});
+  CREDS.teams=(CREDS.teams||[]).filter(function(x){return x!==t;});await saveCreds();
+}
+$("logins").addEventListener("click",async function(e){
+  var b=e.target.closest("[data-newpw],[data-delg]");if(!b||busyLogins)return;var t=credById(b.dataset.newpw||b.dataset.delg);if(!t)return;
+  if(b.dataset.delg&&!confirm("Delete "+t.name+"’s login and all its answers? This can’t be undone."))return;
+  if(b.dataset.newpw&&!confirm("Give "+t.name+" a new password? Devices using the old one are signed out within the hour."))return;
+  busyLogins=true;b.disabled=true;
+  try{if(b.dataset.delg){await removeLogin(t);note(t.name+" deleted.");}else{await newPassword(t);note("New password set for "+t.name+".");}}catch(x){note("That didn’t work. Check your connection and try again.");}
+  finally{busyLogins=false;renderLogins();}
+});
+$("newPwAll").addEventListener("click",async function(){
+  var ts=(CREDS.teams||[]).slice();if(!ts.length||busyLogins)return;if(!confirm("Give every group a new password? Use this before a new course."))return;
+  busyLogins=true;var done=0;try{for(var i=0;i<ts.length;i++){note("Updating "+ts[i].name+"…");await newPassword(ts[i]);done++;}note("New passwords set for "+done+" groups.");}catch(e){note("Stopped after "+done+". Try again for the rest.");}finally{busyLogins=false;renderLogins();}
+});
+$("delAll").addEventListener("click",async function(){
+  var ts=(CREDS.teams||[]).slice();if(!ts.length||busyLogins)return;if(!confirm("Delete all "+ts.length+" group logins and their answers? This can’t be undone."))return;
+  busyLogins=true;var done=0;try{for(var i=0;i<ts.length;i++){note("Deleting "+ts[i].name+"…");await removeLogin(ts[i]);done++;}note("All group logins deleted.");}catch(e){note("Stopped after "+done+". Try again for the rest.");}finally{busyLogins=false;renderLogins();}
+});
+$("copyLogins").addEventListener("click",function(){
+  var ts=CREDS.teams||[];if(!ts.length)return;
+  var txt="CARANA – "+siteUrl()+"\n\n"+ts.map(function(t){var r=ROSTER[t.id]||{};return t.name+((r.members||[]).length?" ("+r.members.join(", ")+")":"")+"\n  Login: "+t.login+"\n  Password: "+t.password;}).join("\n\n");
+  (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){note("Login list copied.");},function(){note("Copy isn’t available; use the login cards PDF.");});
+});
+$("cardsPdf").addEventListener("click",function(){
+  var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});if(!ts.length){note("Create group logins first.");return;}
+  ensurePdf().then(function(){
+    var url=siteUrl(),cards=ts.map(function(t){var r=ROSTER[t.id]||{},a=(r.assign||{})[exId()]||"";return {stack:[
+      {text:"CARANA · UNAC Police planning exercises",color:"#8A5A1E",bold:true,fontSize:9},{text:t.name,fontSize:20,bold:true,margin:[0,2,0,4]},
+      a?{text:EX().title+": "+a,fontSize:9,margin:[0,0,0,4]}:"",(r.members||[]).length?{text:r.members.join(", "),fontSize:8.5,color:"#566778",margin:[0,0,0,6]}:"",
+      {text:"Website",fontSize:8,color:"#566778"},{text:url,fontSize:9.5,margin:[0,0,0,6]},
+      {columns:[{stack:[{text:"Login",fontSize:8,color:"#566778"},{text:t.login,fontSize:15,bold:true}]},{stack:[{text:"Password",fontSize:8,color:"#566778"},{text:t.password,fontSize:15,bold:true}]}]},
+      {text:"Everyone in the group can sign in with these details on their own device.",fontSize:8,color:"#566778",margin:[0,8,0,0]}],margin:[12,12,12,12]};});
+    var rows=[];for(var i=0;i<cards.length;i+=2)rows.push([cards[i],cards[i+1]||{text:""}]);
+    window.pdfMake.createPdf({pageSize:"A4",pageMargins:[36,40,36,40],content:[{table:{widths:["*","*"],dontBreakRows:true,body:rows},layout:{hLineWidth:function(){return 1;},vLineWidth:function(){return 1;},hLineColor:function(){return "#9AA8B8";},vLineColor:function(){return "#9AA8B8";},hLineStyle:function(){return {dash:{length:4}};},vLineStyle:function(){return {dash:{length:4}};}}}],defaultStyle:{color:"#172A3A"}}).download("carana-group-logins.pdf");
+  }).catch(function(){note("Couldn’t create the PDF. Check your connection.");});
+});
+
+/* ---------- Staff: results and ratings ---------- */
+var RATE_T=null,ratingsTimer=null,ratingsDirty=false;
+var SCALE=[["","Not rated"],["0","0 · Not done"],["1","1 · Poor"],["2","2 · Weak"],["3","3 · Adequate"],["4","4 · Good"],["5","5 · Excellent"]];
+function exRatings(){RATINGS[exId()]=RATINGS[exId()]||{};return RATINGS[exId()];}
+function scoreTeam(id){
+  var R=exRatings(),r=R[id]||{},pl=R.__plenary||{},tot=0,max=0,un=0;
+  EX().rating.forEach(function(it){var v=(it.k==="brief"?pl.scores:r.scores||{})||{};var s=v[it.k];if(s===""||s==null)un++;else{tot+=+s;max+=5;}});
+  return {total:tot,max:max,pct:max?Math.round(tot/max*100):0,unrated:un};
+}
+function teamList(){return TEAMS.slice().sort(function(a,b){return gName(a).localeCompare(gName(b),undefined,{numeric:true});});}
+function renderResults(){
+  if(!isStaff)return;
+  var ex=EX(),ts=teamList();
+  var subs=ts.filter(function(t){return getPath(t.data,["sub",exId()]);}).length;
+  $("resultsLede").textContent=ex.title+": "+subs+" of "+ts.length+" groups have submitted.";
+  if(!ts.length){$("teams").innerHTML='<div class="empty">No group has started this exercise yet.</div>';renderRater();return;}
+  $("teams").innerHTML='<div class="tablewrap"><table class="plain"><thead><tr><th>Group</th><th>Task</th><th>Status</th><th>Progress</th><th>Plan check</th><th>Score</th><th></th></tr></thead><tbody>'+
+    ts.map(function(t){var d=getPath(t.data,["ex",exId()])||{},sub=getPath(t.data,["sub",exId()]),sc=scoreTeam(t.id);
+      var ch=ex.checks(d,ctxFor(rosterAssign(t.id),false)),errs=ch.filter(function(c){return c[0]==="err";}).length,warns=ch.filter(function(c){return c[0]==="warn";}).length;
+      return '<tr><td><b>'+esc(gName(t))+'</b></td><td class="small">'+esc(rosterAssign(t.id))+'</td><td>'+(sub?'<span class="pill sent">Submitted '+timeOf(sub.at)+'</span>':'<span class="pill prog">In progress</span>')+'</td>'+
+        '<td class="small">'+esc(ex.summary(d))+'</td><td class="small">'+(errs?errs+" problems, ":"")+warns+" to review</td>"+
+        '<td class="score">'+(sc.max?sc.pct+"%":"–")+(sc.unrated?'<div class="small">'+sc.unrated+' to rate</div>':'')+'</td>'+
+        '<td><div class="row"><button class="btn sm primary" data-rate="'+esc(t.id)+'">Rate</button>'+(sub?'<button class="btn sm" data-reopen="'+esc(t.id)+'">Reopen</button>':'')+'</div></td></tr>';}).join("")+
+    '<tr><td><b>Consolidated plan</b></td><td class="small">All groups</td><td></td><td class="small">'+(plenaryEmpty()?"Not built yet":esc(ex.summary(PLEN)))+'</td><td></td><td></td><td><button class="btn sm primary" data-rate="__plenary">Rate</button></td></tr>'+
+    '</tbody></table></div>';
+  renderRater();
+}
+$("teams").addEventListener("click",function(e){
+  var r=e.target.closest("[data-rate]"),o=e.target.closest("[data-reopen]");
+  if(r){RATE_T=r.dataset.rate;$("rater").dataset.team="";renderRater();$("rater").scrollIntoView({behavior:"smooth",block:"start"});}
+  if(o&&confirm("Reopen this group’s worksheet so they can edit again?")){var s={};s[exId()]=null;db.doc("teams/"+o.dataset.reopen).merge({sub:s}).catch(function(){alert("Couldn’t reopen. Try again.");});}
+});
+function rateRow(it,R){var sc=(R.scores||{})[it.k],cm=(R.comments||{})[it.k]||"";
+  return '<div class="rrow"><label>'+esc(it.l)+'<span class="g">'+esc(it.g)+'</span><select class="rate" data-key="'+esc(it.k)+'" style="margin-top:6px">'+SCALE.map(function(o){return '<option value="'+o[0]+'"'+(String(sc==null?"":sc)===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select></label><textarea class="ratec" data-key="'+esc(it.k)+'" placeholder="Comment for the report (optional)">'+esc(cm)+'</textarea></div>';}
+function renderRater(){
+  var host=$("rater");if(!RATE_T){host.innerHTML="";host.className="";return;}
+  if(host.contains(document.activeElement)&&host.dataset.team===RATE_T+":"+exId())return;
+  var ex=EX(),isPl=RATE_T==="__plenary",R=exRatings()[RATE_T]||{};
+  var items=ex.rating.filter(function(it){return isPl?it.k==="brief":it.k!=="brief";});
+  var t=TEAMS.filter(function(x){return x.id===RATE_T;})[0];
+  if(!isPl&&!t){host.innerHTML="";return;}
+  host.className="rater";host.dataset.team=RATE_T+":"+exId();
+  var name=isPl?"Consolidated plan and SMT briefing":gName(t);
+  var data=isPl?PLEN:(getPath(t.data,["ex",exId()])||{});
+  var ch=ex.checks(data,isPl?ctxFor("",true):ctxFor(rosterAssign(RATE_T),false));
+  host.innerHTML='<div class="row" style="justify-content:space-between"><h2>Rating: '+esc(name)+'</h2><button class="btn sm" id="closeRater">Close</button></div>'+
+    (isPl?'':'<p class="score">'+totalText(scoreTeam(RATE_T))+'</p>')+
+    items.map(function(it){return rateRow(it,R);}).join("")+
+    '<div class="rrow"><label>Overall comment</label><textarea class="ratec" data-key="overall" placeholder="Strengths, areas to improve, learning points">'+esc((R.comments||{}).overall||"")+'</textarea></div>'+
+    '<h3>Plan check</h3><ul class="checks">'+(ch.length?ch:[["ok","All clear.",""]]).map(function(c){return '<li class="'+c[0]+'"><b>'+esc(c[1])+'</b>'+esc(c[2])+'</li>';}).join("")+'</ul>'+
+    (isPl?'':msgAnswersHtml(t))+
+    '<h3>Worksheet</h3><div id="raterSheet"></div>';
+  renderSheet($("raterSheet"),isPl?plenarySections(ex):ex.sections,{root:isPl?PLEN:t.data,base:isPl?[]:["ex",exId()],editable:false,showStage:true,ctx:isPl?ctxFor("",true):ctxFor(rosterAssign(RATE_T),false),groups:otherGroups()});
+}
+function msgAnswersHtml(t){
+  var sent=L().sent;if(!sent.length)return "";
+  return '<h3>Message responses</h3>'+sent.map(function(m,i){var c=getPath(t.data,["ex",exId(),"msg",m.id])||{};var cfg=cfgList().filter(function(x){return x.id===m.sourceId;})[0];
+    return '<div class="panel" style="margin-bottom:8px;max-width:960px"><b>Message '+(i+1)+': '+esc(m.title)+'</b>'+((m.options||[]).length?'<div>Option chosen: '+(c.pick!=null?String.fromCharCode(65+c.pick)+". "+esc(m.options[c.pick]||""):"none")+'</div>':'')+
+      '<div class="small" style="white-space:pre-wrap;margin-top:4px">'+esc(c.text||"(no response)")+'</div>'+(cfg&&cfg.notes?'<div class="small" style="margin-top:6px"><b>Your notes:</b> '+esc(cfg.notes)+'</div>':'')+'</div>';}).join("");
+}
+function totalText(sc){return "Total: "+sc.total+" / "+sc.max+(sc.max?" ("+sc.pct+"%)":"")+(sc.unrated?" · "+sc.unrated+" not rated":"");}
+function rateEdit(t){
+  if(!RATE_T)return;var R=exRatings();var r=R[RATE_T]=R[RATE_T]||{scores:{},comments:{}};r.scores=r.scores||{};r.comments=r.comments||{};
+  if(t.classList.contains("rate"))r.scores[t.dataset.key]=t.value;else r.comments[t.dataset.key]=t.value;
+  ratingsDirty=true;clearTimeout(ratingsTimer);ratingsTimer=setTimeout(function(){db.doc("fac/ratings").set(clone(RATINGS)).then(function(){ratingsDirty=false;},function(){setStatus("Couldn’t save ratings. Check your connection.",true);});},900);
+  if(t.classList.contains("rate")){var sc=$("rater").querySelector(".score");if(sc&&RATE_T!=="__plenary")sc.textContent=totalText(scoreTeam(RATE_T));}
+}
+$("rater").addEventListener("change",function(e){if(e.target.classList.contains("rate"))rateEdit(e.target);});
+$("rater").addEventListener("input",function(e){if(e.target.classList.contains("ratec"))rateEdit(e.target);});
+$("rater").addEventListener("click",function(e){if(e.target.id==="closeRater"){RATE_T=null;renderRater();renderResults();}});
+$("clearTeams").addEventListener("click",function(){
+  if(!confirm("Delete every group’s answers, the consolidated plan and your ratings for "+EX().title+"? Logins are kept. This can’t be undone."))return;
+  var k=exId(),ps=TEAMS.map(function(t){var e={},s={};e[k]=null;s[k]=null;return db.doc("teams/"+t.id).merge({ex:e,sub:s});});
+  ps.push(db.doc("plenary/"+k).delete());delete RATINGS[k];ps.push(db.doc("fac/ratings").set(clone(RATINGS)));
+  Promise.all(ps).then(function(){toast($("copyNote"),"Cleared.");},function(){setStatus("Some answers couldn’t be cleared.",true);});
+});
+
+/* ---------- PDF ---------- */
+function loadScript(src){return new Promise(function(res,rej){var x=document.createElement("script");x.src=src;x.onload=res;x.onerror=rej;document.head.appendChild(x);});}
+function ensurePdf(){if(window.pdfMake&&window.pdfMake.vfs)return Promise.resolve();return loadScript("https://cdn.jsdelivr.net/npm/pdfmake@0.2.15/build/pdfmake.min.js").then(function(){return loadScript("https://cdn.jsdelivr.net/npm/pdfmake@0.2.15/build/vfs_fonts.js");});}
+var TL={hLineWidth:function(){return .5;},vLineWidth:function(){return 0;},hLineColor:function(){return "#C7D0D8";},paddingTop:function(){return 3;},paddingBottom:function(){return 3;},fillColor:function(i){return i===0?"#EEF2F6":null;}};
+function txt(v){return (v==null||v==="")?"—":String(v);}
+function sheetPdf(sections,data,plenary,groups){
+  var c=[];data=data||{};
+  sections.forEach(function(s){
+    if(s.stage&&plenary)return;
+    c.push({text:s.title,style:"h2"});
+    s.fields.forEach(function(f){
+      var v=data[f.id];
+      if(f.t==="text"||f.t==="select"){c.push({text:f.label,style:"label"});c.push({text:txt(v),style:"ans"});}
+      else if(f.t==="checks"){v=v||{};c.push({text:f.label+" "+f.items.map(function(i){return i.label+(v[i.id]?" ✓":" ✗");}).join("   "),style:"ans"});}
+      else if(f.t==="rows"){var rows=rowList(v);c.push({text:f.label+" ("+rows.length+")",style:"h3"});
+        rows.forEach(function(r,i){var body=f.cols.map(function(col){var val=col.t==="calc"?col.calc(r):col.t==="multi"?(r[col.id]||[]).join(", "):r[col.id];return [{text:col.label,style:"th"},{text:txt(val),fontSize:8.5}];});
+          if(r.g)body.unshift([{text:"From",style:"th"},{text:r.g,fontSize:8.5}]);
+          c.push({text:"#"+(i+1),bold:true,fontSize:9,margin:[0,6,0,2]});c.push({table:{widths:[120,"*"],body:body},layout:TL});});}
+      else {var rl=f.t==="qa"?(groups||[]):f.rowsList,cols=f.colsList.slice();if(f.t==="qa")cols.push({id:"note",label:"Comments"});v=v||{};
+        if(f.t==="qa"&&!rl.length)return;
+        c.push({text:f.label,style:"h3"});
+        var transpose=(f.t==="matrix"||f.t==="qa")&&cols.length>rl.length+1;
+        var body;
+        if(transpose){body=[[{text:"",style:"th"}].concat(rl.map(function(r){return {text:r.label||r.name,style:"th"};}))];
+          cols.forEach(function(col){body.push([{text:col.label,fontSize:8}].concat(rl.map(function(r){return {text:txt((v[r.id]||{})[col.id]),fontSize:8,alignment:col.id==="note"?"left":"center"};})));});
+          c.push({table:{headerRows:1,widths:[110].concat(rl.map(function(){return "*";})),body:body},layout:TL});}
+        else{body=[[{text:"",style:"th"}].concat(cols.map(function(col){return {text:col.label,style:"th"};}))];
+          rl.forEach(function(r){body.push([{text:r.label||r.name,fontSize:8}].concat(cols.map(function(col){return {text:txt((v[r.id]||{})[col.id]),fontSize:8};})));});
+          c.push({table:{headerRows:1,widths:[110].concat(cols.map(function(){return "*";})),body:body},layout:TL});}
+      }
+    });
+  });
+  return c;
+}
+function pdfDoc(content){
+  return {pageSize:"A4",pageMargins:[44,52,44,52],info:{title:"CARANA"},content:content,
+    footer:function(cp,pc){return {columns:[{text:"CARANA · UNAC Police planning exercises",color:"#566778",fontSize:8},{text:cp+" / "+pc,alignment:"right",color:"#566778",fontSize:8}],margin:[44,20,44,0]};},
+    defaultStyle:{fontSize:9.5,lineHeight:1.25,color:"#172A3A"},
+    styles:{kicker:{fontSize:10,bold:true,color:"#8A5A1E"},title:{fontSize:22,bold:true,margin:[0,2,0,4]},meta:{fontSize:9.5,color:"#566778",margin:[0,0,0,10]},
+      h1:{fontSize:17,bold:true,color:"#2C6DB5",margin:[0,0,0,4]},h2:{fontSize:12.5,bold:true,margin:[0,14,0,5]},h3:{fontSize:10.5,bold:true,color:"#2C6DB5",margin:[0,10,0,4]},
+      th:{bold:true,fontSize:8.5},label:{fontSize:8.5,bold:true,color:"#566778",margin:[0,6,0,1]},ans:{fontSize:9.5,margin:[0,0,0,2]},p:{fontSize:9.5,margin:[0,0,0,6]},small:{fontSize:8.5,color:"#566778"}}};
+}
+$("exportPdf").addEventListener("click",function(){
+  var btn=$("exportPdf"),ts=teamList();if(!ts.length){alert("No results to export yet.");return;}
+  btn.disabled=true;btn.textContent="Preparing PDF…";
+  ensurePdf().then(function(){
+    var ex=EX(),withAns=$("pdfAnswers").checked,R=exRatings();
+    var ranked=ts.map(function(t){return {t:t,sc:scoreTeam(t.id)};}).sort(function(a,b){return b.sc.pct-a.sc.pct;});
+    var c=[{text:"CARANA · "+ex.title,style:"kicker"},{text:"Results report",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"})+", "+ts.length+" groups, "+L().duration+"-minute run",style:"meta"},
+      {text:"Sections are rated from 0 (not done) to 5 (excellent). Percentages use rated sections only. The SMT briefing is rated once for the consolidated plan and counts for every group.",style:"p"},
+      {text:"Ranking",style:"h2"},
+      {table:{headerRows:1,widths:[16,"*",110,60,45,45],body:[["#","Group","Task","Points","Score","Unrated"].map(function(h){return {text:h,style:"th"};})].concat(ranked.map(function(r,i){return [String(i+1),{text:gName(r.t),bold:true},rosterAssign(r.t.id)||"—",r.sc.total+" / "+r.sc.max,{text:r.sc.max?r.sc.pct+"%":"—",bold:true},String(r.sc.unrated)];}))},layout:TL}];
+    if(L().sent.length){c.push({text:"Messages sent",style:"h2"});L().sent.forEach(function(m,i){c.push({text:(i+1)+". "+m.title+" (minute "+(m.sentAtMin||0)+")",style:"ans"});});}
+    if(!plenaryEmpty()){var pl=R.__plenary||{};c.push({text:"Consolidated plan",style:"h1",pageBreak:"before"});
+      c.push({table:{widths:[160,50,"*"],body:[["Section","Score","Comment"].map(function(h){return {text:h,style:"th"};}),["SMT briefing",(pl.scores||{}).brief?pl.scores.brief+" / 5":"Not rated",txt((pl.comments||{}).brief)]]},layout:TL});
+      if((pl.comments||{}).overall)c.push({text:pl.comments.overall,style:"p",margin:[0,6,0,0]});
+      c=c.concat(sheetPdf(plenarySections(ex),PLEN,true));}
+    ranked.forEach(function(r,i){var t=r.t,rr=R[t.id]||{},cm=rr.comments||{};
+      c.push({text:(i+1)+". "+gName(t),style:"h1",pageBreak:"before"});
+      c.push({text:(rosterAssign(t.id)?rosterAssign(t.id)+". ":"")+"Score "+(r.sc.max?r.sc.pct+"%":"—")+" ("+r.sc.total+" of "+r.sc.max+")",style:"meta"});
+      var body=[["Section","Score","Comment"].map(function(h){return {text:h,style:"th"};})];
+      ex.rating.forEach(function(it){var src=it.k==="brief"?(R.__plenary||{}):rr;var s=(src.scores||{})[it.k];body.push([it.l,(s===""||s==null)?"Not rated":s+" / 5",txt((src.comments||{})[it.k])]);});
+      c.push({table:{headerRows:1,widths:[160,50,"*"],body:body},layout:TL});
+      if(cm.overall){c.push({text:"Overall comment",style:"h3"});c.push({text:cm.overall,style:"p"});}
+      if(!withAns)return;
+      var d=getPath(t.data,["ex",exId()])||{};
+      var ch=ex.checks(d,ctxFor(rosterAssign(t.id),false)).filter(function(x){return x[0]!=="info";});
+      if(ch.length){c.push({text:"Plan check at export",style:"h3"});ch.forEach(function(x){c.push({text:x[1]+" "+x[2],style:"small"});});}
+      L().sent.forEach(function(m,k){var a=getPath(d,["msg",m.id])||{};c.push({text:"Message "+(k+1)+": "+m.title,style:"h3"});if((m.options||[]).length)c.push({text:"Option chosen: "+(a.pick!=null?String.fromCharCode(65+a.pick):"none"),style:"ans"});c.push({text:txt(a.text),style:"ans"});});
+      c=c.concat(sheetPdf(ex.sections,d,false,otherGroups()));
+    });
+    window.pdfMake.createPdf(pdfDoc(c)).download("carana-"+exId()+"-results.pdf");
+  }).catch(function(){alert("Couldn’t create the PDF. Check your connection.");}).then(function(){btn.disabled=false;btn.textContent="Export results as PDF";});
+});
+
+/* ---------- Library ---------- */
+var LIB_CATS=["Introduction","Mission and police concepts","Directives","Maps","Exercise instructions","Other"];
+var CHUNK=900000;
+function renderLibrary(){
+  $("libUpload").hidden=!isStaff;
+  if(!LIB.length){$("libList").innerHTML='<div class="empty">'+(isStaff?"No documents yet. Add the CARANA PDFs above.":"No documents have been added yet.")+'</div>';return;}
+  var cats=LIB_CATS.filter(function(c){return LIB.some(function(d){return d.cat===c;});});
+  LIB.forEach(function(d){if(cats.indexOf(d.cat)<0)cats.push(d.cat);});
+  $("libList").innerHTML=cats.map(function(cat){return '<h3>'+esc(cat)+'</h3>'+LIB.filter(function(d){return d.cat===cat;}).sort(function(a,b){return a.title.localeCompare(b.title,undefined,{numeric:true});}).map(function(d){
+    return '<div class="item"><b>'+esc(d.title)+'</b><span class="small">'+Math.round((d.size||0)/1024)+' KB</span><button class="btn sm primary" data-open="'+esc(d.id)+'">Open</button>'+
+      (isStaff?'<select data-cat="'+esc(d.id)+'" aria-label="Section" style="width:auto">'+LIB_CATS.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+c+'</option>';}).join("")+'</select><button class="btn sm danger" data-rm="'+esc(d.id)+'">Remove</button>':'')+'</div>';}).join("");}).join("");
+}
+function b64(buf){var bin="",bytes=new Uint8Array(buf),step=0x8000;for(var i=0;i<bytes.length;i+=step)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+step));return btoa(bin);}
+$("libFiles").addEventListener("change",async function(e){
+  var files=Array.prototype.slice.call(e.target.files||[]);e.target.value="";if(!files.length)return;
+  var cat=$("libCat").value,nt=$("libNote"),done=0;
+  for(var i=0;i<files.length;i++){
+    var f=files[i];if(f.size>20*1024*1024){nt.textContent=f.name+" is larger than 20 MB and was skipped.";continue;}
+    nt.textContent="Uploading "+f.name+" ("+(i+1)+" of "+files.length+")…";
+    try{
+      var data=b64(await f.arrayBuffer()),id=newId("d"),n=Math.ceil(data.length/CHUNK);
+      for(var k=0;k<n;k++)await db.doc("docs/"+id+"/chunks/"+String(k).padStart(3,"0")).set({d:data.slice(k*CHUNK,(k+1)*CHUNK)});
+      await db.doc("docs/"+id).set({title:f.name.replace(/\.pdf$/i,"").replace(/_/g," "),name:f.name,cat:cat,size:f.size,n:n,at:Date.now()});
+      done++;
+    }catch(x){nt.textContent="Uploading "+f.name+" failed. Check your connection and the database rules.";return;}
+  }
+  nt.textContent=done+" document"+(done===1?"":"s")+" added.";
+});
+$("libList").addEventListener("click",async function(e){
+  var o=e.target.closest("[data-open]"),r=e.target.closest("[data-rm]");
+  if(o){var d=LIB.filter(function(x){return x.id===o.dataset.open;})[0];if(!d)return;
+    var w=window.open("","_blank");if(w)w.document.write("<p style='font-family:sans-serif;padding:20px'>Opening "+esc(d.title)+"…</p>");
+    o.disabled=true;o.textContent="Opening…";
+    try{var q=await db.collection("docs/"+d.id+"/chunks").get();var parts=q.docs.sort(function(a,b){return a.id<b.id?-1:1;}).map(function(x){return x.data().d;}).join("");
+      var bin=atob(parts),arr=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)arr[i]=bin.charCodeAt(i);
+      var url=URL.createObjectURL(new Blob([arr],{type:"application/pdf"}));
+      if(w)w.location.href=url;else{var a=document.createElement("a");a.href=url;a.download=d.name||"document.pdf";document.body.appendChild(a);a.click();a.remove();}
+    }catch(x){if(w)w.close();alert("Couldn’t open the document. Check your connection.");}
+    finally{o.disabled=false;o.textContent="Open";}}
+  if(r&&confirm("Remove this document from the library?")){var id=r.dataset.rm;try{var q2=await db.collection("docs/"+id+"/chunks").get();for(var j=0;j<q2.docs.length;j++)await db.doc("docs/"+id+"/chunks/"+q2.docs[j].id).delete();await db.doc("docs/"+id).delete();}catch(x){alert("Couldn’t remove it. Try again.");}}
+});
+$("libList").addEventListener("change",function(e){var s=e.target.closest("[data-cat]");if(s)db.doc("docs/"+s.dataset.cat).merge({cat:s.value});});
+
+/* ---------- Staff accounts ---------- */
+function renderStaff(){
+  $("staffList").innerHTML=STAFF.length?'<div class="tablewrap" style="max-width:960px"><table class="plain"><thead><tr><th>Name</th><th>Role</th><th>Email</th><th></th></tr></thead><tbody>'+
+    STAFF.slice().sort(function(a,b){return (a.name||"").localeCompare(b.name||"");}).map(function(s){return '<tr><td>'+esc(s.name)+'</td><td>'+esc(s.role)+'</td><td>'+esc(s.email)+'</td><td>'+(s.email===String(AUTHUSER&&AUTHUSER.email||"").toLowerCase()?'<span class="small">You</span>':'<button class="btn sm danger" data-unstaff="'+esc(s.email)+'">Remove access</button>')+'</td></tr>';}).join("")+'</tbody></table></div>'
+    :'<p class="small">No staff added here yet. Accounts named in the database rules also have staff rights.</p>';
+}
+$("stAdd").addEventListener("click",async function(){
+  var err=$("stErr"),nt=$("stNote");err.textContent="";nt.textContent="";
+  var name=$("stName").value.trim(),email=$("stEmail").value.trim().toLowerCase(),role=$("stRole").value;
+  if(!name||!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){err.textContent="Enter a name and a valid email address.";return;}
+  if(STAFF.some(function(s){return s.email===email;})){err.textContent="That person is already on the staff list.";return;}
+  var pw=genPw(12);$("stAdd").disabled=true;
+  try{var cr=await createUserWithEmailAndPassword(creator(),email,pw);var u=cr.user;await signOut(creator());
+    await db.doc("staff/"+email).set({name:name,email:email,role:role,uid:u.uid,at:Date.now()});
+    nt.innerHTML="Added. Give "+esc(name)+" this password now; it isn’t shown again: <b style='font-family:monospace;font-size:1.1rem'>"+esc(pw)+"</b>";
+    $("stName").value="";$("stEmail").value="";
+  }catch(e){err.textContent=e&&e.code==="auth/email-already-in-use"?"An account with this email already exists in this project. Remove it in the Firebase console (Authentication › Users), then try again.":"Couldn’t add the staff member. Check your connection.";}
+  finally{$("stAdd").disabled=false;}
+});
+$("staffList").addEventListener("click",function(e){var b=e.target.closest("[data-unstaff]");if(b&&confirm("Remove staff access for "+b.dataset.unstaff+"? Their login stays but has no rights."))db.doc("staff/"+b.dataset.unstaff).delete();});
+$("pwSet").addEventListener("click",function(){
+  var pw=$("pwNew").value;if(pw.length<8){$("pwNote").textContent="Use at least 8 characters.";return;}
+  updatePassword(AUTH.currentUser,pw).then(function(){$("pwNote").textContent="Password changed.";$("pwNew").value="";},function(e){$("pwNote").textContent=e&&e.code==="auth/requires-recent-login"?"For security, sign out and in again, then change your password.":"Couldn’t change the password.";});
+});
+
+/* ---------- Sign-in ---------- */
+function loginToEmail(v){v=v.trim().toLowerCase();return v.indexOf("@")>=0?v:v.replace(/\s+/g,"")+"@"+DOMAIN;}
+$("gateForm").addEventListener("submit",function(e){
+  e.preventDefault();var err=$("gErr"),btn=$("gGo");err.textContent="";
+  var lg=$("gLogin").value,pw=$("gPass").value;
+  if(!lg.trim()||!pw){err.textContent="Enter your login and password.";return;}
+  if(!AUTH){err.textContent="The platform isn’t set up yet. Tell your course staff.";return;}
+  btn.disabled=true;btn.textContent="Signing in…";
+  signInWithEmailAndPassword(AUTH,loginToEmail(lg),pw).catch(function(x){var c=x&&x.code||"";
+    err.textContent=(c==="auth/invalid-credential"||c==="auth/wrong-password"||c==="auth/user-not-found"||c==="auth/invalid-email")?"Login or password is incorrect.":c==="auth/too-many-requests"?"Too many attempts. Wait a few minutes.":"Sign-in failed. Check your connection.";
+    btn.disabled=false;btn.textContent="Sign in";});
+});
+$("signOutBtn").addEventListener("click",function(){
+  if(dirty&&!confirm("You have unsaved message changes. Sign out anyway?"))return;dirty=false;
+  Promise.all([teamSaver.push(),plenSaver.push()]).catch(function(){}).then(function(){return signOut(AUTH);}).then(function(){location.hash="";location.reload();});
+});
+
+/* ---------- Firebase ---------- */
+function makeDb(fs){
+  function wrap(s){return {id:s.id,exists:s.exists(),data:function(){return s.data();}};}
+  return {
+    doc:function(path){var r=fDoc(fs,path);return {get:function(){return getDoc(r).then(wrap);},set:function(d){return setDoc(r,d);},merge:function(d){return setDoc(r,d,{merge:true});},update:function(d){return updateDoc(r,d);},delete:function(){return deleteDoc(r);},onSnapshot:function(n,e){return onSnapshot(r,function(s){n(wrap(s));},e);}};},
+    collection:function(path){var c=fCollection(fs,path);return {get:function(){return getDocs(c).then(function(q){return {docs:q.docs.map(wrap)};});},onSnapshot:function(n,e){return onSnapshot(c,function(q){n({docs:q.docs.map(wrap)});},e);}};}
+  };
+}
+$("stationList").innerHTML=CNP_STATIONS.map(function(s){return '<option value="'+esc(s[0])+'">';}).join("");
+indexFields();
+show("login");
+var booted=false;
+(function(){
+  var C=window.FIREBASE_CONFIG;
+  if(!C){try{/* global firebaseConfig */C=(typeof firebaseConfig!=="undefined")?firebaseConfig:null;}catch(e){C=null;}}
+  if(!window.__cfgLoaded&&!C){setStatus("Setup needed: firebase-config.js was not found. Put it next to index.html (README, step 4).",true);return;}
+  if(!C||!C.apiKey||/PASTE/.test(C.apiKey)){setStatus("Setup needed: firebase-config.js still has placeholder values (README, step 4).",true);return;}
+  CONF=C;DOMAIN=String(C.authDomain||(C.projectId+".firebaseapp.com")).toLowerCase();
+  var app=initializeApp(C);AUTH=getAuth(app);fsRef=initializeFirestore(app,{ignoreUndefinedProperties:true});db=makeDb(fsRef);
+  setStatus("Sign in to continue.");
+  onAuthStateChanged(AUTH,async function(u){
+    if(!u){SIGNED=false;$("signOutBtn").hidden=true;show("login");setTimeout(function(){$("gLogin").focus();},50);return;}
+    if(booted)return;booted=true;AUTHUSER=u;uid=u.uid;$("signOutBtn").hidden=false;
+    setStatus("Loading…");
+    try{await getDoc(fDoc(fsRef,"fac/config"));isStaff=true;}catch(e){isStaff=false;}
+    if(isStaff){
+      var me=null;try{var sd=await db.doc("staff/"+String(u.email||"").toLowerCase()).get();if(sd.exists)me=sd.data();}catch(e){}
+      $("whoLine").textContent=(me?me.role+": "+me.name:"Staff")+" · "+u.email;
+    } else {
+      try{var mm=await db.doc("members/"+u.uid).get();if(mm.exists){TEAMID=mm.data().teamId;var r=await db.doc("roster/"+TEAMID).get();if(r.exists)TEAM=r.data();else TEAMID=null;}}catch(e){TEAMID=null;}
+      if(!TEAMID){$("gErr").textContent="This account isn’t a group or staff login for CARANA.";setStatus("Signed in as "+(u.email||"unknown")+", which has no access here. Sign out and use the details your course staff gave you.",true);$("signOutBtn").hidden=false;return;}
+      $("whoLine").textContent=TEAM.name+" · UNAC Police planning team";
+      try{var mine=await db.doc("teams/"+TEAMID).get();if(mine.exists){ME=mine.data();ME.ex=ME.ex||{};ME.sub=ME.sub||{};}}catch(e){}
+      db.doc("teams/"+TEAMID).onSnapshot(function(s){if(!s.exists)return;var wasSub=submitted();ME=teamSaver.absorb(s.data());ME.ex=ME.ex||{};ME.sub=ME.sub||{};if($("workBody").__scope)$("workBody").__scope.root=ME;
+        if(wasSub!==submitted())renderWork();else{refreshSheet($("workBody"));updateWorkChecks();}renderMessages();applyLock();});
+      db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){TEAM=s.data();renderBrief();$("whoLine").textContent=TEAM.name+" · UNAC Police planning team";updateWorkChecks();}});
+    }
+    SIGNED=true;
+    db.doc("live/state").onSnapshot(function(s){LIVE=s.exists?s.data():null;onLive();},function(){setStatus("Lost the live connection. Reload the page.",true);});
+    db.collection("docs").onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});renderLibrary();},function(){});
+    if(isStaff){
+      db.doc("fac/config").onSnapshot(function(s){CFG=s.exists?s.data():{messages:{}};CFG.messages=CFG.messages||{};if(!dirty){DRAFT=clone(CFG);delete DRAFT.updatedAt;if(!$("editor").contains(document.activeElement))renderEditor();}});
+      db.doc("fac/teamCreds").onSnapshot(function(s){if(!busyLogins){CREDS=s.exists?clone(s.data()):{teams:[]};CREDS.teams=CREDS.teams||[];}renderLogins();});
+      db.collection("roster").onSnapshot(function(q){ROSTER={};q.docs.forEach(function(d){ROSTER[d.id]=d.data();});renderLogins();if(current==="results")renderResults();});
+      db.collection("teams").onSnapshot(function(q){TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});if(current==="results")renderResults();if(current==="others")renderOthers();});
+      db.doc("fac/ratings").onSnapshot(function(s){if(!ratingsDirty){RATINGS=s.exists?clone(s.data()):{};if(current==="results")renderResults();}});
+      db.collection("staff").onSnapshot(function(q){STAFF=q.docs.map(function(d){return d.data();});renderStaff();},function(){});
+    }
+    onLive();
+    var h=location.hash.slice(1);show(h&&h!=="login"?h:(isStaff?"run":"brief"));
+  });
+})();
+})();
+</script>
+</body>
+</html>
