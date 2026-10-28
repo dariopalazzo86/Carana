@@ -2343,6 +2343,12 @@ function loadCourse(){
   if(!isStaff&&PERSON&&uid)progUnsub=db.doc("progress/"+uid).onSnapshot(function(s){var fresh=s.exists?s.data():{done:{},ans:{}};fresh.done=fresh.done||{};fresh.ans=fresh.ans||{};PROG=fresh;if(prepMode==="home")renderPrep();},function(){});
   if(isStaff)progAllUnsub=db.collection("progress").onSnapshot(function(q){PROG_ALL={};q.docs.forEach(function(d){PROG_ALL[d.id]=d.data();});if(current==="prep"&&!prepPreview)renderPrepDash();},function(){});
 }
+// Firestore can't store a list directly inside another list, so table rows are stored as objects.
+function storableBlocks(blocks){return (blocks||[]).map(function(b){
+  if(b.t==="kv")return Object.assign({},b,{rows:b.rows.map(function(r){return Array.isArray(r)?{k:r[0],v:r[1]}:r;})});
+  if(b.t==="table")return Object.assign({},b,{rows:b.rows.map(function(r){return Array.isArray(r)?{c:r}:r;})});
+  return b;});}
+function rowK(r){return Array.isArray(r)?r[0]:r.k;}function rowV(r){return Array.isArray(r)?r[1]:r.v;}function rowC(r){return Array.isArray(r)?r:(r.c||[]);}
 function getChapter(id){if(CH_CACHE[id])return Promise.resolve(CH_CACHE[id]);return db.doc("course_ch/"+id).get().then(function(s){if(!s.exists)throw new Error("missing");CH_CACHE[id]=s.data();return CH_CACHE[id];});}
 function fillImages(host){
   host.querySelectorAll("img[data-img]").forEach(function(el){
@@ -2395,8 +2401,8 @@ function blockHtml(b,idx){
   case "note":return '<div class="callout">'+fmtInline(b.x)+'</div>';
   case "ul":return '<ul>'+b.items.map(function(x){return '<li>'+fmtInline(x)+'</li>';}).join("")+'</ul>';
   case "ol":return '<ol>'+b.items.map(function(x){return '<li>'+fmtInline(x)+'</li>';}).join("")+'</ol>';
-  case "kv":return '<div class="kv">'+(b.title?'<div class="kvt">'+esc(b.title)+'</div>':'')+'<dl>'+b.rows.map(function(r){return '<dt>'+esc(r[0])+'</dt><dd>'+fmtInline(r[1])+'</dd>';}).join("")+'</dl></div>';
-  case "table":return '<div class="tablewrap"><table class="plain">'+b.rows.map(function(r,ri){return '<tr>'+r.map(function(c){return ri===0&&b.head?'<th>'+esc(c)+'</th>':'<td>'+fmtInline(c)+'</td>';}).join("")+'</tr>';}).join("")+'</table></div>';
+  case "kv":return '<div class="kv">'+(b.title?'<div class="kvt">'+esc(b.title)+'</div>':'')+'<dl>'+b.rows.map(function(r){return '<dt>'+esc(rowK(r))+'</dt><dd>'+fmtInline(rowV(r))+'</dd>';}).join("")+'</dl></div>';
+  case "table":return '<div class="tablewrap"><table class="plain">'+b.rows.map(function(r,ri){return '<tr>'+rowC(r).map(function(c){return ri===0&&b.head?'<th>'+esc(c)+'</th>':'<td>'+fmtInline(c)+'</td>';}).join("")+'</tr>';}).join("")+'</table></div>';
   case "img":return '<figure><img data-img="'+esc(b.src)+'" alt="'+esc(b.cap||"")+'"><figcaption>'+esc(b.cap||"")+'</figcaption></figure>';
   case "q":return questionHtml(b,idx);
   }
@@ -2506,17 +2512,19 @@ $("prepFile").addEventListener("change",async function(e){
   $("prepLoadLbl").classList.add("disabled");
   try{
     var imgs=data.images||{},keys=Object.keys(imgs),k=0;
-    for(k=0;k<keys.length;k++){note.textContent="Uploading images… ("+(k+1)+" of "+keys.length+")";await db.doc("course_img/"+keys[k]).set(imgs[keys[k]]);}
+    var step="images";
+    for(k=0;k<keys.length;k++){note.textContent="Uploading images… ("+(k+1)+" of "+keys.length+")";step="image "+keys[k];await db.doc("course_img/"+keys[k]).set(imgs[keys[k]]);}
     var ids={},done=0;
     for(var mi=0;mi<data.modules.length;mi++){var m=data.modules[mi];for(var ci=0;ci<(m.chapters||[]).length;ci++){var c=m.chapters[ci];ids[c.id]=1;
-      note.textContent="Uploading chapters… ("+(++done)+" of "+nch+")";await db.doc("course_ch/"+c.id).set({moduleId:m.id,title:c.title,blocks:c.blocks});}}
+      note.textContent="Uploading chapters… ("+(++done)+" of "+nch+")";step="chapter “"+c.title+"”";await db.doc("course_ch/"+c.id).set({moduleId:m.id,title:c.title,blocks:storableBlocks(c.blocks)});}}
     var meta={title:data.title||"Preparation course",intro:data.intro||"",version:data.version||1,loadedAt:Date.now(),
       modules:data.modules.map(function(m){return {id:m.id,title:m.title,summary:m.summary||"",source:m.source||"",chapters:(m.chapters||[]).map(function(c){return {id:c.id,title:c.title,nq:(c.blocks||[]).filter(function(b){return b.t==="q";}).length};})};})};
-    await db.doc("course/meta").set(meta);
+    step="course contents";await db.doc("course/meta").set(meta);step="cleanup";
     var old=await db.collection("course_ch").get();for(var i=0;i<old.docs.length;i++)if(!ids[old.docs[i].id])await db.doc("course_ch/"+old.docs[i].id).delete();
     var oldI=await db.collection("course_img").get();for(var j=0;j<oldI.docs.length;j++)if(!imgs[oldI.docs[j].id])await db.doc("course_img/"+oldI.docs[j].id).delete();
     CH_CACHE={};note.textContent="Course published: "+nch+" chapters.";
-  }catch(x){note.textContent="Publishing stopped: check your connection and the database rules, then load the file again.";}
+  }catch(x){var code=x&&x.code||"",msg=x&&x.message||String(x);
+    note.textContent="Publishing stopped at "+(typeof step!=="undefined"?step:"the start")+": "+(code==="permission-denied"?"the database rules don’t allow it yet. Paste the current firestore.rules into Firebase and publish them, then load the file again.":msg);}
   finally{$("prepLoadLbl").classList.remove("disabled");}
 });
 
