@@ -201,6 +201,39 @@ table.logins td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mono
 @media (max-width:640px){.rrow{grid-template-columns:1fr}}
 .score{font-weight:700;font-variant-numeric:tabular-nums}
 .lib{max-width:960px}
+/* Sidebar layout */
+.shell{display:flex;max-width:1440px;margin:0 auto;align-items:flex-start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 76px);flex:0 0 260px;max-height:calc(100vh - 90px);overflow:auto;padding:18px 10px 30px 16px}
+.shell main{flex:1;min-width:0;max-width:none;margin:0}
+#nav .grp{margin:0 0 14px}
+#nav .gt{font-size:.72rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);padding:6px 10px}
+#nav a{display:flex;gap:8px;align-items:center;padding:7px 10px;border-radius:7px;color:var(--ink);text-decoration:none;font-size:.93rem;font-weight:500}
+#nav a:hover{background:var(--un-soft)}
+#nav a.sel{background:var(--un);color:var(--on-accent);font-weight:600}
+#nav a .b{margin-left:auto;font-size:.72rem;font-weight:700;background:var(--flash);color:#fff;border-radius:99px;padding:1px 7px}
+#nav a .tag{margin-left:auto;font-size:.7rem;color:var(--muted);font-weight:600}
+#nav a.sel .tag{color:var(--on-accent)}
+#nav .sub{margin:2px 0 6px 12px;border-left:2px solid var(--line);padding-left:6px}
+#nav .sub a{font-size:.88rem;padding:5px 10px}
+#nav .scn{font-weight:600}
+#nav .scn.closed{color:var(--muted)}
+.menubtn{border:1px solid var(--line);background:var(--surface);border-radius:8px;font-size:1.2rem;width:42px;height:40px;line-height:1}
+@media (max-width:900px){
+  .side{position:fixed;z-index:40;top:0;left:0;bottom:0;max-height:none;width:290px;background:var(--surface);border-right:1px solid var(--line);box-shadow:8px 0 30px rgba(0,0,0,.18);padding-top:calc(env(safe-area-inset-top,0px) + 16px);transform:translateX(-105%);transition:transform .2s}
+  .side.open{transform:none}
+  .menubtn:not([hidden]){display:inline-block}
+}
+@media (min-width:901px){.menubtn{display:none !important}}
+.ovtab td{text-align:left;vertical-align:top;min-width:170px}
+.ovtab td.cell{cursor:pointer}
+.ovtab td.cell:hover{background:var(--un-soft)}
+.ovtab td.closed{background:var(--paper);color:var(--muted)}
+.ovtab .sum{font-size:.84rem;margin:2px 0}
+.ovtab .when{font-size:.74rem;color:var(--muted)}
+.ovtab .fin{outline:3px solid var(--terrain);outline-offset:-3px}
+.sctoggle{display:flex;gap:14px;align-items:center;flex-wrap:wrap;border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:12px 16px;margin:0 0 8px;max-width:960px}
+.sctoggle .t{flex:1;min-width:200px}
+.sctoggle.on{border-color:var(--ok);background:var(--ok-soft)}
 /* Preparation course */
 .prog-hero{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;max-width:760px;margin:0 0 24px}
 .prog-bar{height:12px;border-radius:99px;background:var(--paper);border:1px solid var(--line);overflow:hidden}
@@ -280,13 +313,15 @@ footer p{margin:0 0 8px}
 <body>
 <header class="top">
   <div class="top-inner">
+    <button class="menubtn" id="menuBtn" aria-label="Open the menu" aria-expanded="false" hidden>☰</button>
     <div class="brand"><span class="mark" id="hubMark">SDH</span><div class="brand-text"><b id="exTitle">Skill Development Hub</b><span id="whoLine">UNAC Police Component</span></div></div>
-    <div class="clock"><span class="stage" id="stagePill" hidden></span><span class="time idle" id="time">--:--</span><button class="btn primary" id="startBtn" hidden>Start</button></div>
+    <span class="stage" id="stagePill" hidden></span>
   </div>
   <div class="status" id="status">Connecting…</div>
-  <nav class="track" id="track" aria-label="Sections"></nav>
 </header>
 
+<div class="shell">
+<aside class="side" id="side" hidden><nav id="nav" aria-label="Main menu"></nav></aside>
 <main>
 <div class="lockbanner" id="lockBanner" hidden></div>
 
@@ -303,16 +338,24 @@ footer p{margin:0 0 8px}
   </div>
 </section>
 
+<section class="view" id="v-exbrief">
+  <div class="assign" id="exAssign" hidden></div>
+  <h1><span class="exName">CARANA</span> exercise</h1>
+  <p class="lede">The country and the mission behind every scenario of this exercise. Each scenario has its own brief and worksheet in the menu.</p>
+  <div class="doc" id="caranaBody"></div>
+  <h2>Scenarios</h2>
+  <div class="exlist" id="exScList"></div>
+</section>
+
 <section class="view" id="v-brief">
   <div class="assign" id="assignBox" hidden></div>
   <h1 id="briefTitle">Scenario brief</h1>
   <p class="lede" id="briefSub"></p>
   <div class="doc" id="briefBody"></div>
-  <details class="more"><summary><span class="exName">CARANA</span> at a glance</summary><div class="doc" id="caranaBody"></div></details>
 </section>
 
 <section class="view" id="v-work">
-  <h1>Group worksheet</h1>
+  <h1 id="workTitle">Group worksheet</h1>
   <p class="lede" id="workLede">Everyone in your group can edit this page at the same time; changes appear on every device.</p>
   <div id="workBody"></div>
   <div class="submitbox" id="submitBox">
@@ -331,24 +374,23 @@ footer p{margin:0 0 8px}
 </section>
 
 <section class="view" id="v-others">
-  <h1>Other groups</h1>
+  <h1 id="othersTitle">Other groups</h1>
   <p class="lede">Read-only view of every group’s worksheet, for presentations and review.</p>
-  <label class="small" id="othersMineWrap" hidden style="display:block;margin-bottom:10px"><input type="checkbox" id="othersMine" checked> Show only my topic</label>
   <div class="row" id="othersPick" style="margin-bottom:16px"></div>
   <div id="othersBody"></div>
 </section>
 
-<section class="view" id="v-plenary">
-  <h1>Joint plan</h1>
-  <p class="lede" id="plenIntro"></p>
-  <div class="row" style="margin-bottom:16px"><button class="btn" id="plenaryPdf">Download as PDF</button><label class="small" id="plenMineWrap" hidden><input type="checkbox" id="plenMine" checked> Show only my topic</label><span class="small" id="plenaryNote"></span></div>
-  <div id="plenaryBody"></div>
+<section class="view" id="v-final">
+  <h1>Final assessment</h1>
+  <p class="lede" id="finalIntro"></p>
+  <div class="row" style="margin-bottom:16px"><button class="btn" id="finalPdf">Download as PDF</button><span class="small" id="finalNote"></span></div>
+  <div id="finalBody"></div>
   <div class="submitbox" id="finalBox" hidden>
-    <h2>Joint result</h2>
-    <p class="small">When the plan is complete, any group can submit the joint result on behalf of everyone. It locks the joint plan; staff can reopen it.</p>
-    <button class="btn primary" id="finalBtn">Submit joint result</button>
+    <h2>Submit the final assessment</h2>
+    <p class="small">When your group has finalized the scenario and prepared the SMT briefing, submit it. It locks for everyone in the group; staff can reopen it.</p>
+    <button class="btn primary" id="finalBtn">Submit final assessment</button>
   </div>
-  <div class="checkbox" id="plenaryChecks"></div>
+  <div class="checkbox" id="finalChecks"></div>
 </section>
 
 <section class="view" id="v-prep">
@@ -383,40 +425,56 @@ footer p{margin:0 0 8px}
 </section>
 
 <!-- Staff views -->
-<section class="view" id="v-run">
-  <h1>Run a scenario</h1>
-  <p class="lede">Choose the scenario, control the clock and the stage, adjust the scenario and send messages. Every group follows these settings live.</p>
+<section class="view" id="v-course">
+  <h1>Course control</h1>
+  <p class="lede">Start the course, open scenarios as the lessons progress, share worksheets for reviews, and move to the finalization. Every group follows these settings live.</p>
   <div class="course" id="courseBox"></div>
-  <h2>Scenario</h2>
-  <div class="exlist" id="exPick"></div>
-  <div class="grid">
-    <div class="panel"><h3>Stage</h3><div class="seg" id="stageSeg"></div><p class="small" id="stageNote"></p></div>
-    <div class="panel"><h3>Clock</h3>
-      <div class="row"><div class="field" style="margin:0;max-width:110px"><label for="durIn" class="small">Minutes</label><input type="number" id="durIn" min="10" max="480"></div><button class="btn" id="durSet">Set</button><button class="btn" id="addTime">+5 min</button></div>
-      <div class="row" style="margin-top:10px"><button class="btn danger" id="resetBtn">Reset run</button></div>
-      <p class="small">Reset stops the clock, withdraws sent messages and returns to group work. Answers are kept.</p></div>
-    <div class="panel" id="paramPanel"></div>
-  </div>
+  <h2>Phase</h2>
+  <div class="seg" id="phaseSeg"></div>
+  <p class="small" id="phaseNote" style="max-width:75ch"></p>
+  <h2>Scenarios open to the groups</h2>
+  <p class="small" style="max-width:75ch">Open each scenario when the lessons reach it. Once opened, groups can keep working on it.</p>
+  <div id="scOpen"></div>
+  <h2>Sharing</h2>
+  <label class="panel" style="display:flex;gap:12px;align-items:flex-start;max-width:760px;cursor:pointer"><input type="checkbox" id="shareWork" style="margin-top:4px"><span><b>Groups can read each other’s worksheets</b><br><span class="small">Use this for presentations and peer reviews, such as the RBB quality-assurance review. Groups still edit only their own work.</span></span></label>
+</section>
+
+<section class="view" id="v-injects">
+  <h1 id="injTitle">Injects and messages</h1>
+  <p class="lede">Scenario settings and messages for this scenario. Messages go to every group as soon as you send them.</p>
+  <div class="panel" id="paramPanel" style="max-width:960px;margin-bottom:20px"></div>
   <h2>Messages</h2>
-  <p class="small" style="max-width:75ch">Messages for the selected scenario. Set the minute for automatic sending, or leave it empty and use Send now. Options are one per line; leave empty for a free response. Notes stay with staff.</p>
+  <p class="small" style="max-width:75ch">Send a message with <b>Send now</b>. Options are one per line; leave them empty for a free response. Notes stay with staff.</p>
   <div class="row" style="margin-bottom:12px"><button class="btn" id="exportMsgs">Export messages</button><label class="btn" for="importMsgs">Import messages</label><input type="file" id="importMsgs" accept=".json,application/json" hidden></div>
   <div id="editor"></div>
   <div class="row" style="margin:6px 0 16px"><button class="btn" id="addMsg">Add message</button></div>
   <div class="savebar" id="saveBar"><span id="saveState">All changes saved</span><button class="btn primary" id="saveCfg">Save messages</button></div>
 </section>
 
+<section class="view" id="v-overview">
+  <h1>Overview</h1>
+  <p class="lede" id="ovLede">What every group is doing in every scenario. Click a cell to open that group’s worksheet.</p>
+  <div id="ovGrid"></div>
+</section>
+
+<section class="view" id="v-finalstaff">
+  <h1>Final assessment</h1>
+  <p class="lede">At the end of the course each group finalizes one scenario, starting from its own worksheet, and presents it to the SMT. Together, the groups’ final products form the final joint assessment.</p>
+  <div class="row" style="margin-bottom:10px"><button class="btn" id="fsAssign">Assign open scenarios in order</button><button class="btn primary" id="fsPdf">Export the final joint assessment (PDF)</button><span class="small" id="fsNote"></span></div>
+  <div id="fsTable"></div>
+  <div id="fsRater"></div>
+</section>
+
 <section class="view" id="v-groups">
   <h1>Groups</h1>
-  <p class="lede">Create one login per group. During group work every group covers every topic; for the review and the joint result, give each group a topic. Logins stay the same across scenarios; place people in groups in the Participants tab.</p>
+  <p class="lede">Create one login per group (for example a shared group laptop). Participants with a personal login work in their group automatically. Place people in groups in Participants; assign final scenarios in Final assessment.</p>
   <div class="row" style="align-items:end;margin-bottom:10px">
     <div class="field" style="margin:0;max-width:130px"><label for="nTeams">Groups to add</label><input type="number" id="nTeams" min="1" max="30" value="4"></div>
     <div class="field" style="margin:0;max-width:200px"><label for="teamPrefix">Name them</label><input type="text" id="teamPrefix" value="Group" maxlength="24"></div>
     <button class="btn primary" id="makeTeams">Create group logins</button>
   </div>
-  <div class="row" style="align-items:center;margin:14px 0 10px"><span class="small" style="font-weight:600">Topics for</span><div class="seg" id="gExSeg"></div></div>
   <div id="logins"></div>
   <div class="row" style="margin-top:6px">
-    <button class="btn" id="fillAssign">Assign topics in order</button>
     <button class="btn" id="cardsPdf">Download login cards (PDF)</button>
     <button class="btn" id="copyLogins">Copy login list</button>
     <button class="btn" id="newPwAll">New passwords for all</button>
@@ -427,7 +485,7 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-people">
   <h1>Participants</h1>
-  <p class="lede">Register everyone on the course, give them a personal login, and place them in groups. Each scenario can have its own grouping. With a personal login a participant can read the Library before the course, and during the course works in whichever group they’re placed in for the running scenario.</p>
+  <p class="lede">Register everyone on the course, give them a personal login, and place them in groups. Each participant belongs to one group for the whole course. With a personal login a participant can use the preparation course and the Library before the course, and during the course works in their group automatically.</p>
   <div class="panel" style="max-width:1100px;margin-bottom:16px">
     <h3 style="margin-top:0">Register participants</h3>
     <div class="row" style="align-items:end">
@@ -443,23 +501,20 @@ footer p{margin:0 0 8px}
     </details>
     <p class="err-line" id="pErr"></p>
   </div>
-  <div class="row" style="align-items:center;margin-bottom:10px">
-    <span class="small" style="font-weight:600">Grouping for</span><div class="seg" id="pExSeg"></div>
   </div>
   <div class="row" style="margin-bottom:10px">
     <button class="btn primary" id="pLogins">Create personal logins</button>
     <button class="btn" id="pCards">Personal login cards (PDF)</button>
     <button class="btn" id="pDistribute">Place unassigned evenly</button>
     <button class="btn" id="pShuffle">Shuffle everyone</button>
-    <select id="pCopyFrom" style="width:auto"></select><button class="btn" id="pCopy">Copy grouping</button>
     <span class="small" id="pNote" role="status"></span>
   </div>
   <div id="pCounts" class="small" style="margin-bottom:8px"></div>
   <div id="pList"></div>
 </section>
 
-<section class="view" id="v-results">
-  <h1>Progress and results</h1>
+<section class="view" id="v-scwork">
+  <h1 id="resultsTitle">Group worksheets</h1>
   <p class="lede" id="resultsLede"></p>
   <div id="teams"></div>
   <div class="row" style="margin-top:12px">
@@ -468,7 +523,7 @@ footer p{margin:0 0 8px}
     <button class="btn danger" id="clearTeams">Clear answers for this scenario</button>
     <span class="small" id="copyNote"></span>
   </div>
-  <p class="small" style="max-width:75ch">Rate each section from 0 (not done) to 5 (excellent). Totals count rated sections only. The joint plan is rated once and shown for every group.</p>
+  <p class="small" style="max-width:75ch">Rate each section from 0 (not done) to 5 (excellent). Totals count rated sections only.</p>
   <div id="rater"></div>
 </section>
 
@@ -518,6 +573,7 @@ footer p{margin:0 0 8px}
   </div>
 </section>
 </main>
+</div>
 
 <footer><p>The <span class="exName">CARANA</span> exercise and its scenarios are fictional. Scenario documents © FüAkBw.</p><button class="linkbtn" id="signOutBtn" hidden>Sign out</button></footer>
 
@@ -593,8 +649,8 @@ var EX_COLOCATION={
     ]}
   ],
   plenaryExtra:[
-    {id:"p1",title:"Joint plan review",fields:[
-      {t:"text",id:"review",label:"Duplications, inconsistencies, gaps and competing requirements found",max:1500,rows:5},
+    {id:"p1",title:"Final adjustments and SMT briefing",fields:[
+      {t:"text",id:"review",label:"Duplications, gaps, inconsistencies and competing requirements resolved",max:1500,rows:5},
       {t:"text",id:"inj1",label:"Changes after the security update (Inject 1)",hint:"Which objectives remain valid, what modality changed, what happened to the ratios.",max:1500,rows:4},
       {t:"text",id:"inj2",label:"Changes after the reduced UNPOL availability (Inject 2)",hint:"What you kept, reduced, made periodic, mobile or specialist, and why. No equal cuts across the board.",max:1500,rows:4},
       {t:"text",id:"smt",label:"SMT briefing: key messages",hint:"Where, why, which sectors, how many officers, which ratios, how security shaped the plan, what CNP capacity each arrangement strengthens.",max:2000,rows:6}
@@ -864,18 +920,23 @@ var isStaff=false,TEAMID=null,TEAM=null,SIGNED=false,PERSON=null;
 var LIVE=null,CFG=null,DRAFT=null,dirty=false,CREDS={teams:[]},TEAMS=[],ROSTER={},RATINGS={},STAFF=[],LIB=[];
 var ME={teamName:"",ex:{},sub:{}};
 var PLEN={},PLEN_EX=null,plenUnsub=null,teamsUnsub=null,acks=[];
-function liveDefaults(){return {courseOpen:false,exId:"colocation",status:"idle",duration:90,extra:0,startedAt:0,elapsedBefore:0,sent:[],stage:"group",shareWork:false,params:{}};}
+function liveDefaults(){return {courseOpen:false,phase:"work",open:{},shareWork:false,sent:[],params:{}};}
 function L(){return Object.assign(liveDefaults(),LIVE||{});}
-function exId(){return L().exId;}
+var SC=null; // the scenario currently being viewed
+function isOpen(k){return !!(L().open||{})[k];}
+function openList(){return EX_ORDER.filter(isOpen);}
+function exId(){if(SC&&EXERCISES[SC])return SC;return openList()[0]||EX_ORDER[0];}
 function EX(){return EXERCISES[exId()]||EX_COLOCATION;}
 function knownEx(k){return !!EXERCISES[k];}
 function elapsed(){var l=L();return (l.elapsedBefore||0)+(l.status==="running"?Math.max(0,Date.now()-l.startedAt):0);}
 function myTopic(){return TEAM&&TEAM.assign?matchTopic(EX(),TEAM.assign[exId()]):null;}
 function myAssign(){var t=myTopic();return t?t.label:"";}
 function submitted(){return !!(ME.sub&&ME.sub[exId()]);}
-function ctxFor(assign,plenary){var p=L().params||{};return {assign:assign||"",sec:p.sec||{},ceiling:+p.ceiling||0,plenary:!!plenary};}
-function loadAcks(){try{acks=JSON.parse(localStorage.getItem("carana-acks:"+(TEAMID||"staff")+":"+exId())||"[]");}catch(e){acks=[];}}
-function saveAcks(){try{localStorage.setItem("carana-acks:"+(TEAMID||"staff")+":"+exId(),JSON.stringify(acks));}catch(e){}}
+function ctxFor(assign,plenary){var p=(L().params||{})[exId()]||{};return {assign:assign||"",sec:p.sec||{},ceiling:+p.ceiling||0,plenary:!!plenary};}
+function loadAcks(){try{acks=JSON.parse(localStorage.getItem("hub-acks:"+(TEAMID||"staff"))||"[]");}catch(e){acks=[];}}
+function saveAcks(){try{localStorage.setItem("hub-acks:"+(TEAMID||"staff"),JSON.stringify(acks));}catch(e){}}
+function myFinal(){var f=TEAM&&TEAM.finalEx;return f&&EXERCISES[f]?f:null;}
+function finalSubmitted(){return !!(ME.finalSub&&ME.finalSub.at);}
 
 /* ---------- Field-by-field saving, so people editing together don't overwrite each other ---------- */
 function makeSaver(docPath,root){
@@ -890,7 +951,8 @@ function makeSaver(docPath,root){
     var body={updatedAt:Date.now()},r=root();if(r===ME&&TEAM&&TEAM.name)body.teamName=TEAM.name;
     keys.forEach(function(k){var path=S.inflight[k],o=body;
       for(var i=0;i<path.length-1;i++){o[path[i]]=o[path[i]]||{};o=o[path[i]];}
-      var v=getPath(r,path);o[path[path.length-1]]=v===undefined?null:v;});
+      var v=getPath(r,path);o[path[path.length-1]]=v===undefined?null:v;
+      if(path[0]==="ex"&&path.length>2){body.ex[path[1]]._at=Date.now();setPath(r,["ex",path[1],"_at"],body.ex[path[1]]._at);}});
     return db.doc(p).merge(body).then(function(){
       S.saving=false;S.inflight={};
       if(S.again||Object.keys(S.pend).length){S.again=false;return S.push();}
@@ -923,7 +985,7 @@ function fieldScope(scope,secId,fid){if(!scope.canEdit)return scope;var e=!!(sco
 function renderSheet(host,sections,scope){
   host.__scope=scope;
   var stage=L().stage;
-  var secs=sections.filter(function(s){return !s.stage||(!scope.ctx.plenary&&(scope.showStage||stage!=="group"));}).filter(function(s){return !scope.sectionFilter||scope.sectionFilter(s);});
+  var secs=sections.filter(function(s){return !s.stage||(!scope.ctx.plenary&&(scope.showStage||L().shareWork));}).filter(function(s){return !scope.sectionFilter||scope.sectionFilter(s);});
   host.innerHTML=secs.length?secs.map(function(s){
     return '<section class="ws-sec"><h2>'+esc(s.title)+(scope.mine&&scope.mine(s)?' <span class="pill sent" style="vertical-align:4px">Your topic</span>':'')+'</h2>'+s.fields.map(function(f){return fieldHtml(f,fieldScope(scope,s.id,f.id),s.id);}).join("")+'</section>';
   }).join(""):'<div class="empty">Nothing to show here.</div>';
@@ -1066,324 +1128,318 @@ function checksHtml(list,title){
 }
 function keepOpen(box,html){var was=box.querySelector("details");var open=was&&was.open;box.innerHTML=html;var d=box.querySelector("details");if(d&&was)d.open=open;}
 
-/* ---------- Navigation ---------- */
-var TEAM_VIEWS=[["brief","Brief"],["work","Worksheet"],["messages","Messages"],["others","Other groups"],["plenary","Joint plan"],["library","Library"]];
-var STAFF_VIEWS=[["run","Run"],["exercises","Scenarios"],["groups","Groups"],["people","Participants"],["prep","Preparation"],["reading","Reading log"],["results","Results"],["plenary","Joint plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
+/* ---------- Navigation: sidebar grouped by topic ---------- */
 var current="login";
-function visibleViews(){
-  if(!SIGNED)return [];
-  if(isStaff)return STAFF_VIEWS;
-  var pre=PERSON?[["prep","Preparation"]]:[];
-  if(!L().courseOpen||!TEAMID)return pre.concat([["library","Library"]]);
-  var st=L().stage;
-  var tv=TEAM_VIEWS.filter(function(v){if(v[0]==="others")return st!=="group";if(v[0]==="plenary")return st!=="group";return true;});
-  return PERSON?tv.slice(0,-1).concat(pre,tv.slice(-1)):tv;
+var SC_VIEWS=["brief","work","others","scwork","injects"];
+function unseenCount(){return L().sent.filter(function(m){return isOpen(m.ex)&&acks.indexOf(m.id)<0;}).length;}
+function navModel(){
+  var g=[];
+  if(!SIGNED)return g;
+  if(isStaff){
+    g.push({t:"Course",items:[{v:"overview",l:"Overview"},{v:"course",l:"Course control"}]});
+    g.push({t:SITE.exerciseName+" exercise",items:[{v:"exbrief",l:"Exercise brief"}].concat(EX_ORDER.map(function(k){return {v:"brief",sc:k,l:EXERCISES[k].title,tag:isOpen(k)?"open":"closed",
+      sub:[{v:"brief",l:"Brief"},{v:"scwork",l:"Group worksheets"},{v:"injects",l:"Injects and messages"}]};})).concat([{v:"exercises",l:"Scenario builder"}])});
+    g.push({t:"Final assessment",items:[{v:"finalstaff",l:"Final assessment"+(L().phase==="final"?"":"")}]});
+    g.push({t:"People",items:[{v:"people",l:"Participants"},{v:"groups",l:"Groups and logins"}]});
+    g.push({t:"Preparation",items:[{v:"prep",l:"Preparation course"},{v:"reading",l:"Reading log"},{v:"library",l:"Library"}]});
+    g.push({t:"Administration",items:[{v:"staff",l:"Staff and settings"}]});
+    return g;
+  }
+  var pre=[];if(PERSON)pre.push({v:"prep",l:"Preparation course"});pre.push({v:"library",l:"Library"});
+  g.push({t:"Preparation",items:pre});
+  if(L().courseOpen&&TEAMID){
+    var items=[{v:"exbrief",l:"Exercise brief"}];
+    openList().forEach(function(k){items.push({v:"brief",sc:k,l:EXERCISES[k].title,tag:L().phase==="final"&&myFinal()===k?"final":"",
+      sub:[{v:"brief",l:"Brief"},{v:"work",l:"Worksheet"}].concat(L().shareWork?[{v:"others",l:"Other groups"}]:[])});});
+    g.push({t:SITE.exerciseName+" exercise",items:items});
+    var ex=[{v:"messages",l:"Messages",badge:unseenCount()}];
+    if(L().phase==="final"&&myFinal())ex.push({v:"final",l:"Final assessment"});
+    g.push({t:"During the course",items:ex});
+  }
+  return g;
 }
-function show(id){
-  var vis=visibleViews().map(function(v){return v[0];});
-  if(!SIGNED)id="login";else if(vis.indexOf(id)<0)id=vis[0];
+function allowed(v,sc){
+  var ok=false;
+  navModel().forEach(function(gr){gr.items.forEach(function(it){
+    if(it.v===v&&(!it.sc||!sc||it.sc===sc))ok=true;
+    (it.sub||[]).forEach(function(s){if(s.v===v&&(!sc||it.sc===sc))ok=true;});});});
+  return ok;
+}
+function firstView(){var m=navModel();return m.length&&m[0].items.length?m[0].items[0]:{v:"login"};}
+function show(id,sc){
+  if(id&&id.indexOf(".")>0){var p=id.split(".");id=p[0];sc=p[1];}
+  if(SC_VIEWS.indexOf(id)>=0){sc=sc||SC||exId();if(!EXERCISES[sc])sc=null;}
+  if(!SIGNED)id="login";
+  else if(!allowed(id,sc)){var f=firstView();id=f.v;sc=f.sc;}
+  if(id==="final"&&myFinal())sc=myFinal();
+  if(sc&&EXERCISES[sc])SC=sc;
   current=id;
   document.querySelectorAll("main>.view").forEach(function(s){s.classList.toggle("on",s.id==="v-"+id);});
-  renderTrack();
+  $("lockBanner").hidden=true;
+  closeMenu();
+  if(id==="brief")renderBrief();
+  if(id==="exbrief")renderExBrief();
+  if(id==="work")renderWork();
   if(id==="others")renderOthers();
-  if(id==="results")renderResults();
+  if(id==="final")renderFinal();
+  if(id==="scwork")renderResults();
+  if(id==="injects")renderInjects();
+  if(id==="overview")renderOverview();
+  if(id==="course")renderCourse();
+  if(id==="finalstaff")renderFinalStaff();
   if(id==="people")renderPeople();
+  if(id==="groups")renderLogins();
   if(id==="exercises")renderXList();
   if(id==="library")renderLibrary();
   if(id==="reading")renderReadLog();
   if(id==="prep")renderPrep();
-  if(id==="messages"){acks=acks.concat(L().sent.map(function(m){return m.id;}).filter(function(x){return acks.indexOf(x)<0;}));saveAcks();renderTrack();}
-  try{if(location.hash.slice(1)!==id)history.replaceState(null,"","#"+id);}catch(e){}
+  if(id==="messages"){renderMessages();acks=acks.concat(L().sent.filter(function(m){return isOpen(m.ex);}).map(function(m){return m.id;}).filter(function(x){return acks.indexOf(x)<0;}));saveAcks();}
+  renderNav();
+  var tok=id+(SC_VIEWS.indexOf(id)>=0&&SC?"."+SC:"");
+  try{if(location.hash.slice(1)!==tok)history.replaceState(null,"","#"+tok);}catch(e){}
   window.scrollTo(0,0);
 }
-window.addEventListener("hashchange",function(){var h=location.hash.slice(1);if(h&&h!==current)show(h);});
-function renderTrack(){
-  if(!SIGNED){$("track").innerHTML="";return;}
-  var unseen=L().sent.filter(function(m){return acks.indexOf(m.id)<0;}).length;
-  $("track").innerHTML=visibleViews().map(function(v){
-    return '<button class="'+(v[0]===current?"sel":"")+'" data-go="'+v[0]+'">'+esc(v[1])+(v[0]==="messages"&&unseen&&!isStaff?'<span class="dot" aria-label="'+unseen+' new"></span>':"")+'</button>';
+window.addEventListener("hashchange",function(){var h=location.hash.slice(1);if(h)show(h);});
+function renderNav(){
+  var side=$("side");
+  if(!SIGNED){side.hidden=true;$("menuBtn").hidden=true;$("nav").innerHTML="";return;}
+  side.hidden=false;$("menuBtn").hidden=false;
+  $("nav").innerHTML=navModel().map(function(gr){
+    return '<div class="grp"><div class="gt">'+esc(gr.t)+'</div>'+gr.items.map(function(it){
+      var isSc=!!it.sc,expanded=isSc&&SC===it.sc&&SC_VIEWS.indexOf(current)>=0;
+      var sel=!isSc&&current===it.v;
+      var h='<a href="#'+it.v+(isSc?"."+it.sc:"")+'" data-v="'+it.v+'"'+(isSc?' data-sc="'+esc(it.sc)+'"':'')+' class="'+(sel?"sel ":"")+(isSc?"scn "+(it.tag==="closed"?"closed":""):"")+'">'+esc(it.l)+
+        (it.badge?'<span class="b">'+it.badge+'</span>':'')+(it.tag?'<span class="tag">'+esc(it.tag)+'</span>':'')+'</a>';
+      if(expanded&&it.sub)h+='<div class="sub">'+it.sub.map(function(s){return '<a href="#'+s.v+'.'+it.sc+'" data-v="'+s.v+'" data-sc="'+esc(it.sc)+'" class="'+(current===s.v?"sel":"")+'">'+esc(s.l)+'</a>';}).join("")+'</div>';
+      return h;}).join("")+'</div>';
   }).join("");
 }
-$("track").addEventListener("click",function(e){var b=e.target.closest("[data-go]");if(b)show(b.dataset.go);});
-
-/* ---------- Brief ---------- */
+function renderTrack(){renderNav();}
+$("nav").addEventListener("click",function(e){var a=e.target.closest("a[data-v]");if(!a)return;e.preventDefault();show(a.dataset.v,a.dataset.sc);});
+function closeMenu(){$("side").classList.remove("open");$("menuBtn").setAttribute("aria-expanded","false");}
+$("menuBtn").addEventListener("click",function(){var o=!$("side").classList.contains("open");$("side").classList.toggle("open",o);$("menuBtn").setAttribute("aria-expanded",String(o));});
+document.addEventListener("click",function(e){if($("side").classList.contains("open")&&!e.target.closest("#side")&&!e.target.closest("#menuBtn"))closeMenu();});
+document.addEventListener("click",function(e){var b=e.target.closest("[data-go]");if(b&&!b.closest("#nav")){e.preventDefault();show(b.dataset.go,b.dataset.sc);}});
+/* ---------- Briefs ---------- */
+function groupLine(){
+  if(!TEAM)return "";
+  var mem=membersOf(TEAM);
+  return '<b>'+esc(TEAM.name)+'</b>'+(mem.length?'<span class="small">'+esc(mem.join(", "))+'</span>':'');
+}
 function renderBrief(){
-  var ex=EX();
+  var ex=EX(),p=(L().params||{})[exId()]||{},box=$("assignBox");
   $("briefTitle").textContent=ex.title;
   $("briefSub").textContent=ex.subtitle+". Output: "+ex.output+".";
-  $("briefBody").innerHTML=scenarioDocBtn()+ex.brief();
-  $("caranaBody").innerHTML=CARANA_BRIEF;
-  var p=L().params||{},box=$("assignBox");
-  if(TEAM){
-    var mem=membersOf(TEAM,exId());
-    box.hidden=false;
-    box.innerHTML='<b>'+esc(TEAM.name)+'</b>'+(mem.length?'<span class="small">'+esc(mem.join(", "))+'</span>':'')+
-      '<div style="margin-top:6px">'+(L().stage==="group"?'Group work: your group works on every part of the scenario. ':'')+(myTopic()?'Your topic for the review and joint result: <b style="display:inline">'+esc(myTopic().label)+'</b>':'Your topic for the review will be assigned by staff.')+'</div>'+
-      (exId()==="fpu"&&p.dday!=null&&p.dday!==""?'<div style="margin-top:6px;font-weight:700">French withdrawal: D-'+esc(p.dday)+'</div>':'')+
-      (exId()==="colocation"&&p.ceiling?'<div style="margin-top:6px;font-weight:700">UNPOL available for colocation: '+esc(p.ceiling)+'</div>':'');
-  } else box.hidden=true;
+  $("briefBody").innerHTML=scenarioDocBtn()+ex.brief()+(TEAMID&&!isStaff?'<p><button class="btn primary" data-go="work" data-sc="'+esc(exId())+'">Open your worksheet</button></p>':'');
+  var notes=(exId()==="fpu"&&p.dday!=null&&p.dday!==""?'<div style="margin-top:6px;font-weight:700">French withdrawal: D-'+esc(p.dday)+'</div>':'')+
+    (exId()==="colocation"&&p.ceiling?'<div style="margin-top:6px;font-weight:700">UNPOL available for colocation: '+esc(p.ceiling)+'</div>':'')+
+    (exId()==="colocation"&&p.sec&&Object.keys(p.sec).length?'<div style="margin-top:6px">Updated security: '+esc(Object.keys(p.sec).map(function(k){return k+" "+p.sec[k];}).join(", "))+'</div>':'');
+  if(TEAM||notes){box.hidden=false;box.innerHTML=groupLine()+(L().phase==="final"&&myFinal()===exId()?'<div style="margin-top:6px;font-weight:700">Your group finalizes this scenario for the SMT.</div>':'')+notes;}
+  else box.hidden=true;
 }
-
+function renderExBrief(){
+  $("caranaBody").innerHTML=CARANA_BRIEF;
+  var box=$("exAssign");
+  if(TEAM){box.hidden=false;box.innerHTML=groupLine()+(L().phase==="final"?'<div style="margin-top:6px">'+(myFinal()?'Final assessment: your group finalizes <b style="display:inline">'+esc(EXERCISES[myFinal()].title)+'</b>.':'Your final scenario will be assigned by staff.')+'</div>':'');}
+  else box.hidden=true;
+  var list=isStaff?EX_ORDER:openList();
+  $("exScList").innerHTML=list.length?list.map(function(k){var e=EXERCISES[k],d=getPath(ME,["ex",k])||{},sub=ME.sub&&ME.sub[k];
+    return '<button class="excard'+(L().phase==="final"&&myFinal()===k?" on":"")+'" data-go="brief" data-sc="'+esc(k)+'"><b>'+esc(e.title)+'</b><span class="small">'+esc(e.subtitle)+'</span>'+
+      (isStaff?'<span class="small" style="display:block;margin-top:6px">'+(isOpen(k)?"Open to groups":"Not open yet")+'</span>':'<span class="small" style="display:block;margin-top:6px">'+(sub?"Submitted":esc(e.summary(d)))+'</span>')+'</button>';}).join("")
+    :'<div class="empty">No scenario is open yet. Your course staff open them as the lessons progress.</div>';
+}
 /* ---------- Group worksheet ---------- */
 var workRenderedFor=null,checkTimer=null;
 function stageSection(sid){return EX().sections.some(function(s){return s.id===sid&&s.stage;});}
-function workScope(){
-  var st=L().stage;
-  return {root:ME,base:["ex",exId()],editable:!!TEAMID&&st!=="plenary"&&(st==="review"||!submitted()),saver:teamSaver,ctx:ctxFor(myAssign(),false),groups:otherGroups(),
-    canEdit:function(sid){return L().stage==="group"||stageSection(sid);}};
+function workEditable(){
+  if(!TEAMID||!isOpen(exId()))return false;
+  if(L().phase==="final")return false;
+  return true;
 }
+function workScope(){
+  return {root:ME,base:["ex",exId()],editable:workEditable(),saver:teamSaver,ctx:ctxFor("",false),groups:otherGroups(),
+    canEdit:function(sid){return stageSection(sid)?!!L().shareWork:!submitted();}};
+}
+function workKey(){return exId()+":"+L().phase+":"+L().shareWork+":"+submitted()+":"+isOpen(exId())+":"+otherGroups().map(function(g){return g.id;}).join(",");}
 function renderWork(){
   if(!TEAMID)return;
-  var st=L().stage;
-  $("workLede").textContent=st==="group"?"Your group works on every part of the exercise. Everyone in the group can edit at the same time; changes appear on every device.":
-    st==="review"?"Group work is closed. Your worksheet is kept for reference"+(EX().sections.some(function(s){return s.stage;})?"; complete the review section below":"")+". Work on your topic in the joint plan.":"Group work is closed. Everyone now works on the joint plan.";
-  renderSheet($("workBody"),EX().sections,workScope());
-  workRenderedFor=exId()+":"+L().stage+":"+submitted()+":"+otherGroups().map(function(g){return g.id;}).join(",");
+  var ex=EX(),ph=L().phase;
+  $("workTitle").textContent="Worksheet: "+ex.title;
+  $("workLede").innerHTML=ph==="final"?(myFinal()===exId()?'The course is in the finalization. Your group continues this scenario in <a href="#final" data-go="final">Final assessment</a>.':'The course is in the finalization; this worksheet is kept for reference.'):
+    submitted()?"Your group has submitted this worksheet."+(L().shareWork&&ex.sections.some(function(s){return s.stage;})?" You can still complete the review section.":""):
+    "Everyone in your group can edit this worksheet at the same time; changes appear on every device.";
+  renderSheet($("workBody"),ex.sections,workScope());
+  workRenderedFor=workKey();
   updateWorkChecks();applyLock();
 }
-function updateWorkChecks(){if(!TEAMID)return;keepOpen($("workChecks"),checksHtml(EX().checks(getPath(ME,["ex",exId()])||{},ctxFor(myAssign(),false)),"Plan check"));}
+function updateWorkChecks(){if(!TEAMID)return;keepOpen($("workChecks"),checksHtml(EX().checks(getPath(ME,["ex",exId()])||{},ctxFor("",false)),"Plan check"));}
 wireSheet($("workBody"),function(){clearTimeout(checkTimer);checkTimer=setTimeout(updateWorkChecks,300);});
 function applyLock(){
-  var lock=!!TEAMID&&submitted();
+  var lock=!!TEAMID&&submitted()&&current==="work";
   $("lockBanner").hidden=!lock;
   if(lock)$("lockBanner").textContent="Your group submitted this worksheet at "+timeOf(ME.sub[exId()].at)+". It is locked; ask staff if you need to change something.";
-  $("submitBox").hidden=!TEAMID||lock||L().stage!=="group";
+  $("submitBox").hidden=!TEAMID||submitted()||L().phase!=="work"||!isOpen(exId());
 }
 $("submitBtn").addEventListener("click",function(){
   var err=$("submitErr");err.textContent="";
-  if(!TEAMID){err.textContent="Sign in with your group login first.";return;}
-  var probs=EX().checks(getPath(ME,["ex",exId()])||{},ctxFor(myAssign(),false)).filter(function(c){return c[0]==="err";}).length;
-  if(!confirm((probs?probs+" problem"+(probs>1?"s are":" is")+" still flagged in the plan check. ":"")+"Submit your group’s worksheet now? It locks for everyone in the group."))return;
-  ME.sub=ME.sub||{};ME.sub[exId()]={at:Date.now()};teamSaver.change(["sub",exId()]);teamSaver.push();renderWork();onLive();
+  if(!TEAMID){err.textContent="Sign in first.";return;}
+  var probs=EX().checks(getPath(ME,["ex",exId()])||{},ctxFor("",false)).filter(function(c){return c[0]==="err";}).length;
+  if(!confirm((probs?probs+" problem"+(probs>1?"s are":" is")+" still flagged in the plan check. ":"")+"Submit your group’s worksheet for "+EX().title+"? It locks for everyone in the group."))return;
+  ME.sub=ME.sub||{};ME.sub[exId()]={at:Date.now()};teamSaver.change(["sub",exId()]);teamSaver.push();renderWork();
 });
-
-/* ---------- Other groups (review) ---------- */
+/* ---------- Other groups (when staff share worksheets) ---------- */
 var VIEW_TEAMS=[],othersPick=null;
 function otherGroups(){return (isStaff?TEAMS:VIEW_TEAMS).filter(function(t){return t.id!==TEAMID;}).map(function(t){return {id:t.id,name:gName(t)};}).sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});}
 function renderOthers(){
-  var list=(isStaff?TEAMS:VIEW_TEAMS).slice().sort(function(a,b){return (a.data.teamName||"").localeCompare(b.data.teamName||"",undefined,{numeric:true});});
-  if(!list.length){$("othersPick").innerHTML="";$("othersBody").innerHTML='<div class="empty">Other groups’ worksheets appear here once staff open the review stage.</div>';return;}
+  $("othersTitle").textContent="Other groups: "+EX().title;
+  var list=(isStaff?TEAMS:VIEW_TEAMS).slice().sort(function(a,b){return gName(a).localeCompare(gName(b),undefined,{numeric:true});});
+  if(!list.length){$("othersPick").innerHTML="";$("othersBody").innerHTML='<div class="empty">Other groups’ worksheets appear here while staff share them.</div>';return;}
   if(!othersPick||!list.some(function(t){return t.id===othersPick;}))othersPick=list[0].id;
   $("othersPick").innerHTML=list.map(function(t){return '<button class="btn sm'+(t.id===othersPick?" primary":"")+'" data-pick="'+esc(t.id)+'">'+esc(gName(t))+(t.id===TEAMID?" (yours)":"")+'</button>';}).join("");
   var t=list.filter(function(x){return x.id===othersPick;})[0];
-  var host=$("othersBody");
-  var tp=isStaff?null:myTopic(),only=!!tp&&$("othersMine").checked;
-  $("othersMineWrap").hidden=!tp;
-  renderSheet(host,EX().sections.filter(function(s){return !s.stage;}),Object.assign({root:t.data,base:["ex",exId()],editable:false,ctx:ctxFor(rosterAssign(t.id),false)},only?topicFilters(tp):{}));
+  renderSheet($("othersBody"),EX().sections.filter(function(s){return !s.stage;}),{root:t.data,base:["ex",exId()],editable:false,ctx:ctxFor("",false)});
 }
-$("othersMine").addEventListener("change",renderOthers);
 $("othersPick").addEventListener("click",function(e){var b=e.target.closest("[data-pick]");if(b){othersPick=b.dataset.pick;renderOthers();}});
-function gName(t){return (ROSTER[t.id]&&ROSTER[t.id].name)||t.data.teamName||t.id;}
-function rosterTopic(id,ex){var r=ROSTER[id];var e=EXERCISES[ex||exId()];return r&&r.assign&&e?matchTopic(e,r.assign[ex||exId()]):null;}
-function rosterAssign(id){var t=rosterTopic(id);return t?t.label:"";}
-var COLO_TOPIC_SECTIONS=["s1","s2","p1"],COLO_TOPIC_FIELDS=["arr","priorities","review"];
-function inTopicRow(tp,r){return !r.prov||tp.prov.indexOf(PROV_SHORT(r.prov))>=0;}
-function topicFilters(tp){
-  if(tp.prov)return {sectionFilter:function(s){return COLO_TOPIC_SECTIONS.indexOf(s.id)>=0;},rowFilter:function(fid,r){return fid!=="arr"||inTopicRow(tp,r);}};
-  return {sectionFilter:function(s){return tp.sections.indexOf(s.id)>=0;}};
+function gName(t){return (ROSTER[t.id]&&ROSTER[t.id].name)||(t.data&&t.data.teamName)||t.id;}
+function rosterAssign(){return "";}
+/* ---------- Final assessment (participants) ---------- */
+function finalSections(ex){return ex.sections.filter(function(s){return !s.stage;}).concat(ex.plenaryExtra||[]);}
+function finalScope(){return {root:ME,base:["ex",exId()],editable:!!TEAMID&&L().phase==="final"&&!finalSubmitted(),saver:teamSaver,ctx:ctxFor("",false)};}
+function renderFinal(){
+  var f=myFinal();
+  if(!f||L().phase!=="final"){$("finalIntro").textContent="";$("finalBody").innerHTML='<div class="empty">Your group’s final scenario appears here during the finalization.</div>';$("finalBox").hidden=true;$("finalChecks").innerHTML="";return;}
+  SC=f;var ex=EXERCISES[f];
+  $("finalIntro").innerHTML=finalSubmitted()?'<b>Submitted at '+esc(timeOf(ME.finalSub.at))+'.</b> Your final assessment is locked; ask staff if something must change.':
+    'Your group finalizes <b>'+esc(ex.title)+'</b>, starting from your own worksheet. Complete it, prepare your SMT briefing in the last section, then submit. Your final product becomes part of the final joint assessment evaluated by the SMT.';
+  renderSheet($("finalBody"),finalSections(ex),finalScope());
+  $("finalBox").hidden=finalSubmitted();
+  updateFinalChecks();
 }
-
-/* ---------- Consolidated plan ---------- */
-var plenRenderedFor=null;
-function finalDone(){return !!(PLEN&&PLEN.final&&PLEN.final.at);}
-function plenScope(){
-  var st=L().stage,s={root:PLEN,base:[],saver:plenSaver,ctx:ctxFor("",true)};
-  if(isStaff){s.editable=true;return s;}
-  s.editable=!!TEAMID&&st!=="group"&&!finalDone();
-  if(st==="review"){
-    var tp=myTopic();
-    s.canEdit=function(sid,fid){if(!tp)return false;return tp.prov?COLO_TOPIC_FIELDS.indexOf(fid)>=0:tp.sections.indexOf(sid)>=0;};
-    if(tp&&tp.prov)s.rowEditable=function(fid,r){return fid!=="arr"||inTopicRow(tp,r);};
-    if(tp)s.mine=function(sec){return tp.prov?sec.id==="s2":tp.sections.indexOf(sec.id)>=0;};
-    if(tp&&$("plenMine").checked)Object.assign(s,topicFilters(tp));
-  }
-  return s;
-}
-function plenKey(){var t=myTopic();return exId()+":"+L().stage+":"+finalDone()+":"+(t?t.id:"")+":"+$("plenMine").checked+":"+isStaff;}
-function plenaryEmpty(){return !Object.keys(PLEN||{}).filter(function(k){return k!=="updatedAt";}).length;}
-function renderPlenary(){
-  var host=$("plenaryBody");
-  if(plenaryEmpty()){
-    host.__scope=null;
-    host.innerHTML='<div class="empty">'+(isStaff?'No joint plan yet for this scenario. <div style="margin-top:12px"><button class="btn primary" id="buildPlen">Build it from the group worksheets</button></div>':'The joint plan appears here when staff start the review.')+'</div>';
-    $("plenIntro").textContent="";$("finalBox").hidden=true;
-    $("plenaryChecks").innerHTML="";plenRenderedFor=null;return;
-  }
-  var st=L().stage,tp=myTopic();
-  $("plenMineWrap").hidden=isStaff||st!=="review"||!tp;
-  $("plenIntro").innerHTML=finalDone()?'<b>Joint result submitted at '+esc(timeOf(PLEN.final.at))+'.</b> '+(isStaff?'You can still edit it, or reopen it for the groups.':'It is locked; ask staff if something must change.'):
-    isStaff?"Staff can edit every part. In the review, each group edits its own topic; in the joint result stage, everyone edits everything.":
-    st==="review"?(tp?"Every group’s work has been merged here. Your group edits <b>"+esc(tp.label)+"</b>: compare the versions, remove duplicates and keep the best. Other parts are read-only until the joint result stage.":"Staff haven’t assigned your group a topic yet. You can read the joint plan meanwhile."):
-    "All groups now work on this one plan. Finish it together, then submit the joint result.";
-  renderSheet(host,plenarySections(EX()),plenScope());
-  if(isStaff)host.insertAdjacentHTML("afterbegin",'<div class="row" style="margin-bottom:12px"><button class="btn sm" id="buildPlen">Rebuild from group worksheets</button><span class="small">Replaces the joint plan with a fresh merge of all groups’ current work.</span></div>');
-  $("finalBox").hidden=!(st==="plenary"||isStaff);
-  $("finalBtn").textContent=finalDone()?(isStaff?"Reopen the joint result":"Submitted"):"Submit joint result";
-  $("finalBtn").disabled=finalDone()&&!isStaff;
-  plenRenderedFor=plenKey();
-  updatePlenChecks();
-}
-function updatePlenChecks(){if(plenaryEmpty())return;keepOpen($("plenaryChecks"),checksHtml(EX().checks(PLEN,ctxFor("",true)),"Plan check"));}
-wireSheet($("plenaryBody"),function(){clearTimeout(checkTimer);checkTimer=setTimeout(updatePlenChecks,300);});
-$("plenaryBody").addEventListener("click",function(e){if(e.target.id==="buildPlen")buildPlenary(true);});
-$("plenMine").addEventListener("change",renderPlenary);
+function updateFinalChecks(){var f=myFinal();if(!f)return;keepOpen($("finalChecks"),checksHtml(EXERCISES[f].checks(getPath(ME,["ex",f])||{},ctxFor("",false)),"Plan check"));}
+wireSheet($("finalBody"),function(){clearTimeout(checkTimer);checkTimer=setTimeout(updateFinalChecks,300);});
 $("finalBtn").addEventListener("click",function(){
-  if(finalDone()){if(!isStaff)return;if(!confirm("Reopen the joint result so groups can edit it again?"))return;PLEN.final=null;plenSaver.change(["final"]);plenSaver.push();renderPlenary();return;}
-  var probs=EX().checks(PLEN,ctxFor("",true)).filter(function(c){return c[0]==="err";}).length;
-  if(!confirm((probs?probs+" problem"+(probs>1?"s are":" is")+" still flagged in the plan check. ":"")+"Submit the joint result for all groups? It locks the joint plan for everyone."))return;
-  PLEN.final={at:Date.now(),by:TEAM?TEAM.name:"Staff"};plenSaver.change(["final"]);plenSaver.push();renderPlenary();
+  var f=myFinal();if(!f)return;
+  var probs=EXERCISES[f].checks(getPath(ME,["ex",f])||{},ctxFor("",false)).filter(function(c){return c[0]==="err";}).length;
+  if(!confirm((probs?probs+" problem"+(probs>1?"s are":" is")+" still flagged in the plan check. ":"")+"Submit your group’s final assessment of "+EXERCISES[f].title+"? It locks for everyone in the group."))return;
+  ME.finalSub={at:Date.now(),ex:f};teamSaver.change(["finalSub"]);teamSaver.push();renderFinal();renderNav();
 });
-function groupsForMerge(){
-  return TEAMS.map(function(t){return {id:t.id,name:gName(t),assign:rosterAssign(t.id),ex:getPath(t.data,["ex",exId()])||{}};})
-    .sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});
-}
-function buildPlenary(ask){
-  if(!isStaff)return Promise.resolve();
-  if(ask&&!plenaryEmpty()&&!confirm("Replace the current joint plan with a fresh merge of the group worksheets? Edits made in the joint plan will be lost."))return Promise.resolve();
-  var merged=EX().merge(groupsForMerge());merged.updatedAt=Date.now();
-  PLEN=merged;plenSaver.pend={};
-  return db.doc("plenary/"+exId()).set(merged).then(function(){renderPlenary();},function(){alert("Couldn’t build the joint plan. Check your connection.");});
-}
-function subscribePlenary(){
-  if(PLEN_EX===exId())return;
-  if(plenUnsub){plenUnsub();plenUnsub=null;}
-  PLEN_EX=exId();PLEN={};plenSaver.pend={};plenSaver.inflight={};
-  plenUnsub=db.doc("plenary/"+PLEN_EX).onSnapshot(function(s){
-    PLEN=plenSaver.absorb(s.exists?s.data():{});if($("plenaryBody").__scope)$("plenaryBody").__scope.root=PLEN;
-    if(plenRenderedFor!==plenKey()||!$("plenaryBody").__scope)renderPlenary();else{refreshSheet($("plenaryBody"));updatePlenChecks();}
-  },function(){});
-}
-$("plenaryPdf").addEventListener("click",function(){
-  if(plenaryEmpty()){toast($("plenaryNote"),"Nothing to export yet.");return;}
+$("finalPdf").addEventListener("click",function(){
+  var f=myFinal();if(!f)return;
   ensurePdf().then(function(){
-    var c=[{text:SITE.exerciseName+" · "+EX().title,style:"kicker"},{text:"Joint plan",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"}),style:"meta"}].concat(sheetPdf(plenarySections(EX()),PLEN,true));
-    window.pdfMake.createPdf(pdfDoc(c)).download("carana-"+exId()+"-joint-plan.pdf");
-  }).catch(function(){toast($("plenaryNote"),"Couldn’t create the PDF. Check your connection.");});
+    var c=[{text:SITE.exerciseName+" · "+EXERCISES[f].title,style:"kicker"},{text:"Final assessment: "+(TEAM?TEAM.name:""),style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"}),style:"meta"}].concat(sheetPdf(finalSections(EXERCISES[f]),getPath(ME,["ex",f])||{},true));
+    window.pdfMake.createPdf(pdfDoc(c)).download("final-assessment-"+f+".pdf");
+  }).catch(function(){toast($("finalNote"),"Couldn’t create the PDF. Check your connection.");});
 });
-
-/* ---------- Messages ---------- */
+/* ---------- Messages (each message belongs to a scenario) ---------- */
 function precClass(p){return p==="FLASH"?"":p==="IMMEDIATE"?"amber":"blue";}
 var PRECS=["FLASH","IMMEDIATE","PRIORITY","ROUTINE"];
-function headHtml(m,n){return '<dl class="msg-head"><dt>Precedence</dt><dd><span class="prec '+precClass(m.prec)+'">'+esc(m.prec)+'</span></dd><dt>From</dt><dd>'+esc(m.from||"UNAC Police")+'</dd><dt>To</dt><dd>'+esc(isStaff?"All groups":(TEAM?TEAM.name:"All groups"))+'</dd><dt>Serial</dt><dd>Message '+n+'</dd></dl>';}
+function headHtml(m,n){return '<dl class="msg-head"><dt>Scenario</dt><dd>'+esc(EXERCISES[m.ex]?EXERCISES[m.ex].title:"")+'</dd><dt>Precedence</dt><dd><span class="prec '+precClass(m.prec)+'">'+esc(m.prec)+'</span></dd><dt>From</dt><dd>'+esc(m.from||"UNAC Police")+'</dd><dt>To</dt><dd>'+esc(isStaff?"All groups":(TEAM?TEAM.name:"All groups"))+'</dd><dt>Sent</dt><dd>'+esc(m.at?new Date(m.at).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"")+'</dd></dl>';}
 function bodyHtml(m){return '<div class="msg-body">'+paras(m.body).map(function(p){return "<p>"+esc(p)+"</p>";}).join("")+'</div>';}
+function visibleSent(){return L().sent.filter(function(m){return isStaff||isOpen(m.ex);});}
 function renderMessages(){
-  var sent=L().sent;
+  var sent=visibleSent();
   if(!sent.length){$("msgList").innerHTML='<div class="empty">No messages yet.</div>';return;}
   if($("msgList").contains(document.activeElement))return;
-  var base=["ex",exId(),"msg"],lock=!TEAMID||submitted(),h="";
+  var h="";
   for(var i=sent.length-1;i>=0;i--){
-    var m=sent[i],opts=(m.options||[]).filter(Boolean),r=getPath(ME,base.concat([m.id]))||{};
+    var m=sent[i],opts=(m.options||[]).filter(Boolean),r=getPath(ME,["ex",m.ex,"msg",m.id])||{};
+    var lock=!TEAMID||L().phase==="final"||!!(ME.sub&&ME.sub[m.ex]);
     h+='<article class="msg"><h2 style="margin:16px 18px 0">'+esc(m.title)+'</h2>'+headHtml(m,i+1)+bodyHtml(m);
     if(!isStaff)h+='<div class="msg-task">'+(m.question?'<h3>'+esc(m.question)+'</h3>':'')+
-      opts.map(function(o,j){return '<label class="coa"><input type="radio" name="coa_'+esc(m.id)+'" data-m="'+esc(m.id)+'" value="'+j+'"'+(r.pick===j?" checked":"")+(lock?" disabled":"")+'><b>Option '+String.fromCharCode(65+j)+'.</b> '+esc(o)+'</label>';}).join("")+
-      '<div class="field" style="margin-top:12px"><label for="why_'+esc(m.id)+'">'+(opts.length?"Justification and changes to your plan":"Your response")+'</label><textarea id="why_'+esc(m.id)+'" data-msg="'+esc(m.id)+'" rows="4"'+(lock?" disabled":"")+'>'+esc(r.text||"")+'</textarea></div><button class="btn" data-go-work>Update the worksheet</button></div>';
+      opts.map(function(o,j){return '<label class="coa"><input type="radio" name="coa_'+esc(m.id)+'" data-m="'+esc(m.id)+'" data-ex="'+esc(m.ex)+'" value="'+j+'"'+(r.pick===j?" checked":"")+(lock?" disabled":"")+'><b>Option '+String.fromCharCode(65+j)+'.</b> '+esc(o)+'</label>';}).join("")+
+      '<div class="field" style="margin-top:12px"><label for="why_'+esc(m.id)+'">'+(opts.length?"Justification and changes to your plan":"Your response")+'</label><textarea id="why_'+esc(m.id)+'" data-msg="'+esc(m.id)+'" data-ex="'+esc(m.ex)+'" rows="4"'+(lock?" disabled":"")+'>'+esc(r.text||"")+'</textarea></div><button class="btn" data-go="work" data-sc="'+esc(m.ex)+'">Open the '+esc(EXERCISES[m.ex]?EXERCISES[m.ex].title:"")+' worksheet</button></div>';
     h+='</article>';
   }
   $("msgList").innerHTML=h;
 }
-$("msgList").addEventListener("change",function(e){var t=e.target;if(t.type==="radio"&&TEAMID){setPath(ME,["ex",exId(),"msg",t.dataset.m,"pick"],+t.value);teamSaver.change(["ex",exId(),"msg",t.dataset.m,"pick"]);}});
-$("msgList").addEventListener("input",function(e){var t=e.target;if(t.dataset.msg&&TEAMID){setPath(ME,["ex",exId(),"msg",t.dataset.msg,"text"],t.value);teamSaver.change(["ex",exId(),"msg",t.dataset.msg,"text"]);}});
-$("msgList").addEventListener("click",function(e){if(e.target.closest("[data-go-work]"))show(L().stage==="plenary"?"plenary":"work");});
+$("msgList").addEventListener("change",function(e){var t=e.target;if(t.type==="radio"&&TEAMID){var p=["ex",t.dataset.ex,"msg",t.dataset.m,"pick"];setPath(ME,p,+t.value);teamSaver.change(p);}});
+$("msgList").addEventListener("input",function(e){var t=e.target;if(t.dataset.msg&&TEAMID){var p=["ex",t.dataset.ex,"msg",t.dataset.msg,"text"];setPath(ME,p,t.value);teamSaver.change(p);}});
 var queue=[],showing=null;
 function checkNew(){
-  if(isStaff||!L().courseOpen)return;
-  L().sent.forEach(function(m){if(acks.indexOf(m.id)<0&&queue.indexOf(m.id)<0&&showing!==m.id)queue.push(m.id);});
-  queue=queue.filter(function(id){return L().sent.some(function(m){return m.id===id;});});
+  if(isStaff||!L().courseOpen||!TEAMID)return;
+  visibleSent().forEach(function(m){if(acks.indexOf(m.id)<0&&queue.indexOf(m.id)<0&&showing!==m.id)queue.push(m.id);});
+  queue=queue.filter(function(id){return visibleSent().some(function(m){return m.id===id;});});
   if(!showing)nextFlash();
 }
 function nextFlash(){
   var id=queue.shift();if(!id){showing=null;$("overlay").classList.remove("on");return;}
-  var idx=-1;L().sent.forEach(function(m,i){if(m.id===id)idx=i;});if(idx<0){nextFlash();return;}
-  var m=L().sent[idx];showing=id;
+  var m=visibleSent().filter(function(x){return x.id===id;})[0];if(!m){nextFlash();return;}
+  showing=id;
   var box=$("flashBox");box.className="flash "+precClass(m.prec);
-  box.innerHTML='<div class="flash-strip">'+esc(m.prec)+' message received</div><h2 id="flashTitle">'+esc(m.title)+'</h2>'+headHtml(m,idx+1)+bodyHtml(m)+'<div class="flash-actions"><button class="btn primary" id="ackGo">Acknowledge and respond</button><button class="btn" id="ackLater">Acknowledge</button></div>';
+  box.innerHTML='<div class="flash-strip">'+esc(m.prec)+' message received</div><h2 id="flashTitle">'+esc(m.title)+'</h2>'+headHtml(m)+bodyHtml(m)+'<div class="flash-actions"><button class="btn primary" id="ackGo">Acknowledge and respond</button><button class="btn" id="ackLater">Acknowledge</button></div>';
   $("overlay").classList.add("on");setTimeout(function(){var b=$("ackGo");if(b)b.focus();},50);
 }
 $("overlay").addEventListener("click",function(e){
   if(e.target.id!=="ackGo"&&e.target.id!=="ackLater")return;
   if(showing&&acks.indexOf(showing)<0){acks.push(showing);saveAcks();}
   var go=e.target.id==="ackGo";showing=null;
-  if(queue.length)nextFlash();else{$("overlay").classList.remove("on");if(go)show("messages");else renderTrack();}
+  if(queue.length)nextFlash();else{$("overlay").classList.remove("on");if(go)show("messages");else renderNav();}
 });
-
-/* ---------- Clock and live state ---------- */
-function tick(){
-  var l=L(),t=$("time");
-  if(!LIVE||l.status==="idle"){t.textContent=fmt((l.duration+l.extra)*60000);t.className="time idle";}
-  else{var rem=(l.duration+l.extra)*60000-elapsed();t.textContent=fmt(rem);t.className="time"+(rem<0?" over":rem<10*60000?" warn":"");}
-  var b=$("startBtn");
-  if(isStaff){b.hidden=false;b.textContent=l.status==="idle"?"Start":l.status==="running"?"Pause":"Resume";b.classList.toggle("primary",l.status!=="running");autoSend();}
-  var gated=!isStaff&&(!l.courseOpen||!TEAMID);t.hidden=gated;
-  var sp=$("stagePill");if(SIGNED&&!gated){sp.hidden=false;sp.textContent={group:"Group work",review:"Topic review",plenary:"Joint result"}[l.stage]||"";}
-}
-setInterval(tick,1000);
+/* ---------- Live course state ---------- */
 var liveChain=Promise.resolve();
 function writeLive(patch){
   liveChain=liveChain.then(function(){var ref=db.doc("live/state");return ref.get().then(function(s){return s.exists?ref.update(patch):ref.set(Object.assign(liveDefaults(),patch));});})
-    .catch(function(){setStatus("Couldn’t update the run. Check your connection and try again.",true);});
+    .catch(function(){setStatus("Couldn’t update the course. Check your connection and try again.",true);});
   return liveChain;
 }
-$("startBtn").addEventListener("click",function(){var l=L();if(l.status==="running"){writeLive({status:"paused",elapsedBefore:elapsed(),startedAt:0});return;}
-  if(!l.courseOpen){if(!confirm("The course hasn’t been started for participants: they only see the Library. Start the course and the clock now?"))return;writeLive({courseOpen:true,courseOpenedAt:Date.now(),status:"running",startedAt:Date.now()});return;}
-  writeLive({status:"running",startedAt:Date.now()});});
-var lastEx=null,lastStage=null,lastOpen=null;
+var lastOpen=null,lastPhase=null,lastShare=null,firstLive=true;
 function onLive(){
   if(!SIGNED)return;
-  var l=L(),exChanged=lastEx!==l.exId,stageChanged=lastStage!==l.stage;
-  if(exChanged){loadAcks();queue=[];}
-  var openChanged=lastOpen!==null&&lastOpen!==!!l.courseOpen;lastOpen=!!l.courseOpen;
-  lastEx=l.exId;lastStage=l.stage;
-  subscribePlenary();
-  if(!isStaff){if(l.stage!=="group")subscribeTeamsView();else if(teamsUnsub){teamsUnsub();teamsUnsub=null;VIEW_TEAMS=[];}}
-  renderBrief();tick();renderTrack();renderMessages();checkNew();
-  var wkey=exId()+":"+l.stage+":"+submitted()+":"+otherGroups().map(function(g){return g.id;}).join(",");
-  if(TEAMID&&(exChanged||stageChanged||workRenderedFor!==wkey))renderWork();else if(TEAMID)updateWorkChecks();
-  if(exChanged||plenRenderedFor!==plenKey())renderPlenary();
-  if(isStaff){renderRun();if(current==="results")renderResults();if(current==="groups")renderLogins();if(exChanged&&PEOPLE.list&&PEOPLE.list.length)syncMembers();}
-  if(!isStaff&&stageChanged&&l.stage!=="group"&&current==="work")show("plenary");
+  var l=L();
+  var openChanged=lastOpen!==null&&lastOpen!==!!l.courseOpen,phaseChanged=lastPhase!==null&&lastPhase!==l.phase;
+  lastOpen=!!l.courseOpen;lastPhase=l.phase;
+  if(firstLive){firstLive=false;loadAcks();}
+  if(!isStaff){if(l.shareWork)subscribeTeamsView();else if(teamsUnsub){teamsUnsub();teamsUnsub=null;VIEW_TEAMS=[];}}
+  var sp=$("stagePill");sp.hidden=!SIGNED||(!isStaff&&!l.courseOpen);sp.textContent=!l.courseOpen?"Course not started":l.phase==="final"?"Finalization":"Scenario work";
+  renderNav();checkNew();
+  if(current==="messages")renderMessages();
+  if(current==="brief")renderBrief();
+  if(current==="exbrief")renderExBrief();
+  if(current==="work"&&workRenderedFor!==workKey())renderWork();
+  if(current==="final"&&!$("finalBody").contains(document.activeElement))renderFinal();
   if(current==="others")renderOthers();
-  if(!isStaff&&openChanged&&l.courseOpen)show("brief");
-  if(visibleViews().map(function(v){return v[0];}).indexOf(current)<0)show(visibleViews()[0][0]);
-  if(!isStaff&&!l.courseOpen){setStatus("The course hasn’t started yet. You can already read the scenario documents in the Library.");return;}
-  if(!isStaff&&!TEAMID){setStatus("You aren’t in a group for "+EX().title+" yet. Your course staff will place you; meanwhile you can read the Library.");return;}
-  var st={group:"Group work: every group works on all topics",review:"Review: each group works on its topic in the joint plan",plenary:"Joint result: everyone finishes the joint plan together"}[l.stage];
-  if(isStaff&&!l.courseOpen)setStatus("Course not started: participants who sign in see only the Library. Start the course in Run when you’re ready.");
-  else if(isStaff)setStatus(l.status==="idle"?EX().title+" is ready. Set up groups and messages, then start.":l.status==="paused"?"Paused. "+st+".":"Running. "+st+". Keep this page open so scheduled messages go out.");
-  else if(submitted()&&l.stage==="group")setStatus("Worksheet submitted. Wait for the next stage.");
-  else setStatus(l.status==="idle"?"Waiting for staff to start. Read the brief in the meantime.":l.status==="paused"?"Staff have paused the exercise.":st+". Your work saves automatically.");
+  if(isStaff){if(current==="course")renderCourse();if(current==="overview")renderOverview();if(current==="injects"&&!$("v-injects").contains(document.activeElement))renderInjects();if(current==="finalstaff")renderFinalStaff();if(current==="scwork")renderResults();}
+  if(!isStaff&&openChanged&&l.courseOpen&&TEAMID)show("exbrief");
+  else if(!isStaff&&phaseChanged&&l.phase==="final"&&myFinal())show("final");
+  else if(!allowed(current,SC))show(firstView().v,firstView().sc);
+  if(isStaff){setStatus(!l.courseOpen?"Course not started: participants who sign in see only the preparation material. Start the course in Course control.":
+    (l.phase==="final"?"Finalization: each group finalizes its assigned scenario for the SMT.":"Scenario work: "+openList().length+" of "+EX_ORDER.length+" scenarios open to the groups.")+(l.shareWork?" Worksheets are shared between groups.":""));return;}
+  if(!l.courseOpen){setStatus(PERSON?"The course hasn’t started yet. Work through the preparation course and read the Library.":"The course hasn’t started yet. You can already read the documents in the Library.");return;}
+  if(!TEAMID){setStatus("You aren’t in a group yet. Your course staff will place you; meanwhile you can use the preparation material.");return;}
+  setStatus(l.phase==="final"?(myFinal()?(finalSubmitted()?"Final assessment submitted.":"Finalization: your group finalizes "+EXERCISES[myFinal()].title+"."):"Finalization: staff will assign your group’s scenario."):
+    (openList().length?openList().length+" scenario"+(openList().length>1?"s":"")+" open. Your work saves automatically.":"No scenario is open yet. Staff open them as the lessons progress."));
 }
+var teamsUnsub=null;
 function subscribeTeamsView(){
   if(teamsUnsub)return;
   teamsUnsub=db.collection("teams").onSnapshot(function(q){VIEW_TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});
-    var wkey=exId()+":"+L().stage+":"+submitted()+":"+otherGroups().map(function(g){return g.id;}).join(",");if(workRenderedFor!==wkey&&!$("workBody").contains(document.activeElement))renderWork();
+    if(current==="work"&&workRenderedFor!==workKey()&&!$("workBody").contains(document.activeElement))renderWork();
     if(current==="others")renderOthers();},function(){teamsUnsub=null;});
 }
-
-/* ---------- Staff: run panel ---------- */
-var STAGES=[["group","Group work: all topics"],["review","Review: topics"],["plenary","Joint result"]];
-function renderRun(){
+/* ---------- Staff: course control ---------- */
+function groupsSortedC(){return (CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});}
+function renderCourse(){
   var l=L();
   var cb=$("courseBox");cb.classList.toggle("open",!!l.courseOpen);
-  cb.innerHTML=l.courseOpen?'<div class="txt"><b>Course started'+(l.courseOpenedAt?' at '+esc(timeOf(l.courseOpenedAt)):'')+'</b><span class="small">Participants have the brief, worksheets, messages and joint plan.</span></div><button class="btn" id="courseClose">Back to library only</button>'
-    :'<div class="txt"><b>Course not started</b><span class="small">Participants can sign in now, but they only see the Library. Start the course to open the exercise for everyone.</span></div><button class="btn primary" id="courseOpen">Start the course</button>';
-  $("exPick").innerHTML=EX_ORDER.map(function(k){var e=EXERCISES[k];return '<button class="excard'+(k===l.exId?" on":"")+'" data-ex="'+k+'"><b>'+esc(e.title)+'</b><span class="small">'+esc(e.subtitle)+'</span></button>';}).join("");
-  $("stageSeg").innerHTML=STAGES.map(function(s){return '<button data-stage="'+s[0]+'" class="'+(l.stage===s[0]?"on":"")+'">'+s[1]+'</button>';}).join("");
-  $("stageNote").textContent={group:"Every group works on every part of the scenario in its own worksheet.",review:"All worksheets are merged into the joint plan. Each group reviews every group’s work on its topic and edits that part of the joint plan. Assign topics in Groups.",plenary:"All groups edit the whole joint plan together and submit one joint result."}[l.stage];
-  if(document.activeElement!==$("durIn"))$("durIn").value=l.duration;
-  if(!$("paramPanel").contains(document.activeElement))renderParams();
-  if(!$("editor").contains(document.activeElement))renderEditor();
+  cb.innerHTML=l.courseOpen?'<div class="txt"><b>Course started'+(l.courseOpenedAt?' at '+esc(timeOf(l.courseOpenedAt)):'')+'</b><span class="small">Groups see the exercise brief, the open scenarios and messages.</span></div><button class="btn" id="courseClose">Back to preparation only</button>'
+    :'<div class="txt"><b>Course not started</b><span class="small">Participants can sign in now and use the preparation course and the Library. Start the course to open the exercise.</span></div><button class="btn primary" id="courseOpen">Start the course</button>';
+  $("phaseSeg").innerHTML=[["work","Scenario work"],["final","Finalization"]].map(function(p){return '<button data-phase="'+p[0]+'" class="'+(l.phase===p[0]?"on":"")+'">'+p[1]+'</button>';}).join("");
+  $("phaseNote").textContent=l.phase==="final"?"Each group finalizes its assigned scenario, starting from its own worksheet, and submits it for the SMT. Other worksheets are read-only.":"All groups work on every open scenario in their own worksheets.";
+  $("scOpen").innerHTML=EX_ORDER.map(function(k){var e=EXERCISES[k],o=(l.open||{})[k];
+    return '<div class="sctoggle'+(o?" on":"")+'"><div class="t"><b>'+esc(e.title)+'</b><div class="small">'+(o?"Open since "+esc(new Date(o).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})):"Not open yet")+'</div></div>'+
+      (o?'<button class="btn sm" data-close="'+esc(k)+'">Close</button>':'<button class="btn sm primary" data-openex="'+esc(k)+'">Open to the groups</button>')+'</div>';}).join("");
+  if(document.activeElement!==$("shareWork"))$("shareWork").checked=!!l.shareWork;
 }
 $("courseBox").addEventListener("click",function(e){
-  if(e.target.id==="courseOpen"){if(confirm("Start the course? Every group immediately gets "+EX().title+": the brief, worksheet, messages and joint plan."))writeLive({courseOpen:true,courseOpenedAt:Date.now()});}
-  if(e.target.id==="courseClose"){if(confirm("Return participants to library-only access? Their work is kept; they just can’t see the exercise until you start the course again."))writeLive({courseOpen:false,status:L().status==="running"?"paused":L().status,elapsedBefore:L().status==="running"?elapsed():L().elapsedBefore,startedAt:0});}
+  if(e.target.id==="courseOpen"){if(confirm("Start the course? Groups get the exercise brief"+(openList().length?" and the open scenarios":"")+". You can open scenarios one by one below."))writeLive({courseOpen:true,courseOpenedAt:Date.now()});}
+  if(e.target.id==="courseClose"){if(confirm("Return participants to the preparation material only? Their work is kept."))writeLive({courseOpen:false});}
 });
-$("exPick").addEventListener("click",function(e){
-  var b=e.target.closest("[data-ex]");if(!b)return;var k=b.dataset.ex,l=L();if(k===l.exId)return;
-  if((l.status!=="idle"||l.sent.length)&&!confirm("Switch to "+EXERCISES[k].title+"? This resets the clock, stage and sent messages of the current run. All answers are kept."))return;
-  if(dirty&&!confirm("You have unsaved message changes. Switch anyway?"))return;
-  dirty=false;
-  writeLive({exId:k,status:"idle",startedAt:0,elapsedBefore:0,extra:0,sent:[],stage:"group",shareWork:false,params:{},duration:EXERCISES[k].duration});
+$("scOpen").addEventListener("click",function(e){
+  var o=e.target.closest("[data-openex]"),c=e.target.closest("[data-close]");
+  if(o){var k=o.dataset.openex;if(!confirm("Open "+EXERCISES[k].title+" to every group?"))return;var op=clone(L().open||{})||{};op[k]=Date.now();writeLive({open:op});}
+  if(c){var k2=c.dataset.close;if(!confirm("Close "+EXERCISES[k2].title+"? Groups can no longer see it until you open it again. Their work is kept."))return;var op2=clone(L().open||{})||{};delete op2[k2];writeLive({open:op2});}
 });
+$("shareWork").addEventListener("change",function(){writeLive({shareWork:$("shareWork").checked});});
 // A small dialog for decisions that need more than a yes/no question.
 function dialog(title,html,ok,cancel){
   return new Promise(function(res){
@@ -1395,55 +1451,42 @@ function dialog(title,html,ok,cancel){
     box.addEventListener("click",h);
   });
 }
-function stageReadiness(target){
-  var ex=EX(),gs=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});}),items=[];
-  if(!gs.length){items.push(["err","No groups.","Create group logins in the Groups tab first."]);return items;}
+function finalReadiness(){
+  var gs=groupsSortedC(),items=[];
+  if(!gs.length){items.push(["err","No groups.","Create group logins first."]);return items;}
   var byId={};TEAMS.forEach(function(t){byId[t.id]=t;});
-  var empty=[],notSub=[],probs=[];
-  gs.forEach(function(g){var t=byId[g.id],d=t?getPath(t.data,["ex",exId()]):null;
-    var has=d&&Object.keys(d).some(function(k){return k!=="msg";});
-    if(!has)empty.push(g.name);
-    if(!(t&&getPath(t.data,["sub",exId()])))notSub.push(g.name);
-    if(has){var n=ex.checks(d,ctxFor("",false)).filter(function(c){return c[0]==="err";}).length;if(n)probs.push(g.name+" ("+n+")");}});
-  var noTopic=gs.filter(function(g){return !rosterTopic(g.id);}).map(function(g){return g.name;});
-  if(empty.length===gs.length)items.push(["err","No group has started.","There is nothing to merge into the joint plan yet."]);
-  else if(empty.length)items.push(["warn","Not started:",empty.join(", ")+". Their part of the joint plan will be empty."]);
-  items.push([notSub.length?"warn":"ok","Submitted:",(gs.length-notSub.length)+" of "+gs.length+" groups"+(notSub.length?". Still working: "+notSub.join(", ")+".":".")]);
-  if(probs.length)items.push(["warn","Problems in the plan check:",probs.join(", ")+"."]);
-  if(target==="review"){
-    if(noTopic.length===gs.length)items.push(["err","No topics assigned.","Groups won’t be able to edit anything in the review. Assign topics in the Groups tab."]);
-    else if(noTopic.length)items.push(["warn","No topic:",noTopic.join(", ")+". They can read the joint plan but not edit it."]);
-    else items.push(["ok","Topics:","every group has a topic."]);
-  }
-  var un=(PEOPLE.list||[]).filter(function(p){var g=(p.groups||{})[exId()];return !g||!gs.some(function(x){return x.id===g;});}).length;
-  if((PEOPLE.list||[]).length&&un)items.push(["info","Participants:",un+" not placed in a group for this scenario."]);
+  var none=gs.filter(function(g){var f=(ROSTER[g.id]||{}).finalEx;return !f||!EXERCISES[f];});
+  if(none.length===gs.length)items.push(["err","No final scenarios assigned.","Assign a scenario to each group in Final assessment first."]);
+  else if(none.length)items.push(["warn","No final scenario:",none.map(function(g){return g.name;}).join(", ")+". They will have nothing to finalize."]);
+  else items.push(["ok","Final scenarios:","every group has one."]);
+  var closed=[],empty=[];
+  gs.forEach(function(g){var f=(ROSTER[g.id]||{}).finalEx;if(!f||!EXERCISES[f])return;
+    if(!isOpen(f)&&closed.indexOf(EXERCISES[f].title)<0)closed.push(EXERCISES[f].title);
+    var d=byId[g.id]?getPath(byId[g.id].data,["ex",f]):null;if(!d||!Object.keys(d).some(function(k){return k!=="msg"&&k!=="_at";}))empty.push(g.name+" ("+EXERCISES[f].title+")");});
+  if(closed.length)items.push(["warn","Not open yet:",closed.join(", ")+". Groups can still finalize them, but they haven’t worked on them in the lessons."]);
+  if(empty.length)items.push(["warn","Starting from an empty worksheet:",empty.join(", ")+"."]);
+  var un=(PEOPLE.list||[]).filter(function(p){return !p.group||!gs.some(function(x){return x.id===p.group;});}).length;
+  if((PEOPLE.list||[]).length&&un)items.push(["info","Participants:",un+" not placed in a group."]);
   return items;
 }
-$("stageSeg").addEventListener("click",async function(e){
-  var b=e.target.closest("[data-stage]");if(!b)return;var s=b.dataset.stage,from=L().stage;if(s===from)return;
-  var go=function(){return writeLive({stage:s,shareWork:s!=="group"});};
-  if(from==="group"){
-    var items=stageReadiness(s),hasPlan=!plenaryEmpty();
-    var html='<ul class="checks">'+items.map(function(c){return '<li class="'+c[0]+'"><b>'+esc(c[1])+'</b>'+esc(c[2])+'</li>';}).join("")+'</ul>'+
-      '<p class="small">'+(s==="review"?"Next: group worksheets close (except any review table), all worksheets are merged into the joint plan, and each group edits its own topic.":"Next: group worksheets close and all groups edit the whole joint plan together.")+'</p>'+
-      '<label class="small" style="display:block;margin:8px 0"><input type="checkbox" id="dlgBuild"'+(hasPlan?"":" checked")+'> '+(hasPlan?"Rebuild the joint plan from the latest group worksheets (replaces the current joint plan)":"Build the joint plan from the group worksheets")+'</label>';
-    var ok=await dialog(s==="review"?"Move to the review?":"Move to the joint result?",html,s==="review"?"Move to review":"Move to joint result","Not yet");
+$("phaseSeg").addEventListener("click",async function(e){
+  var b=e.target.closest("[data-phase]");if(!b)return;var p=b.dataset.phase;if(p===L().phase)return;
+  if(p==="final"){
+    var items=finalReadiness();
+    var ok=await dialog("Move to the finalization?",'<ul class="checks">'+items.map(function(c){return '<li class="'+c[0]+'"><b>'+esc(c[1])+'</b>'+esc(c[2])+'</li>';}).join("")+'</ul><p class="small">Next: each group finalizes its assigned scenario, starting from its own worksheet, and prepares the SMT briefing. All other worksheets become read-only.</p>',"Move to finalization","Not yet");
     if(!ok)return;
-    var build=$("dlgBuild").checked;
-    if(build){PLEN={};await buildPlenary(false);}
-    go();return;
-  }
-  if(s==="group"){if(!confirm("Return to group work? Groups can edit their own worksheets again. The joint plan is kept."))return;go();return;}
-  if(s==="plenary"&&from==="review"){if(!confirm("Move to the joint result? All groups can then edit the whole joint plan."))return;}
-  if(s==="review"&&from==="plenary"){if(!confirm("Go back to the topic review? Groups can then edit only their own topic again."))return;}
-  if(plenaryEmpty())await buildPlenary(false);
-  go();
+  } else if(!confirm("Return to scenario work? Groups can edit their worksheets again; final assessments are kept."))return;
+  writeLive({phase:p});
 });
-$("durSet").addEventListener("click",function(){var n=Math.max(10,Math.min(480,parseInt($("durIn").value,10)||90));writeLive({duration:n});});
-$("addTime").addEventListener("click",function(){writeLive({extra:(L().extra||0)+5});});
-$("resetBtn").addEventListener("click",function(){if(confirm("Reset this run? The clock stops, sent messages are withdrawn and the stage returns to group work. Answers are kept."))writeLive({status:"idle",startedAt:0,elapsedBefore:0,extra:0,sent:[],stage:"group",shareWork:false});});
+
+/* ---------- Staff: injects and messages per scenario ---------- */
+function renderInjects(){
+  $("injTitle").textContent="Injects and messages: "+EX().title;
+  if(!$("paramPanel").contains(document.activeElement))renderParams();
+  if(!$("editor").contains(document.activeElement))renderEditor();
+}
 function renderParams(){
-  var p=L().params||{},box=$("paramPanel"),k=exId();
+  var p=(L().params||{})[exId()]||{},box=$("paramPanel"),k=exId();
   if(k==="colocation"){
     var sec=p.sec||{};
     box.innerHTML='<h3>Scenario settings</h3><p class="small">Inject 1: change the security level of selected provinces. Inject 2: set how many UNPOL are available.</p><div class="secgrid">'+
@@ -1455,7 +1498,7 @@ function renderParams(){
 }
 $("paramPanel").addEventListener("click",function(e){
   if(e.target.id!=="applyParams")return;
-  var k=exId(),old=L().params||{},np=clone(old)||{},lines=[];
+  var k=exId(),old=(L().params||{})[k]||{},np=clone(old)||{},lines=[];var allP=function(){var a=clone(L().params||{})||{};a[k]=np;return a;};
   if(k==="colocation"){
     var sec={};$("paramPanel").querySelectorAll("[data-sec]").forEach(function(s){if(s.value)sec[s.dataset.sec]=s.value;});
     var ceil=parseInt($("ceilIn").value,10)||0;
@@ -1463,14 +1506,14 @@ $("paramPanel").addEventListener("click",function(e){
     np.sec=sec;np.ceiling=ceil||null;
     var body="";
     if(lines.length)body+="The D/HOPC CBD, on behalf of the HOPC, issues an updated security assessment.\n\n"+lines.join("\n")+"\n\nIn RED areas permanent colocation is no longer feasible; periodic, mobile or specialist engagement may remain possible. Review the affected arrangements: do the capacity-building objectives remain valid, should the modality change, are fewer officers needed, and what happens to the ratios?";
-    if(ceil&&ceil!==+old.ceiling)body+=(body?"\n\n":"")+"The number of UNPOL officers available for colocation is now "+ceil+". Reduce the joint plan to this figure. Do not cut every location by the same percentage: keep what is essential to the highest-priority CNP needs, and consider periodic, mobile or specialist arrangements instead of permanent presence.";
+    if(ceil&&ceil!==+old.ceiling)body+=(body?"\n\n":"")+"The number of UNPOL officers available for colocation is now "+ceil+". Reduce your plan to this figure. Do not cut every location by the same percentage: keep what is essential to the highest-priority CNP needs, and consider periodic, mobile or specialist arrangements instead of permanent presence.";
     if(!body){alert("Nothing has changed.");return;}
     if(!confirm("Apply these settings and send a message to all groups?"))return;
-    writeLive({params:np}).then(function(){sendMessage({id:newId("p"),title:lines.length?"Updated security assessment":"Reduced UNPOL availability",prec:"FLASH",from:"D/HOPC CBD for the HOPC",body:body,question:"",options:""});});
+    writeLive({params:allP()}).then(function(){sendMessage({id:newId("p"),title:lines.length?"Updated security assessment":"Reduced UNPOL availability",prec:"FLASH",from:"D/HOPC CBD for the HOPC",body:body,question:"",options:""});});
   } else if(k==="fpu"){
     var d=parseInt($("ddayIn").value,10);if(isNaN(d))return;np.dday=d;
     if(!confirm("Set the French withdrawal to D-"+d+" and notify all groups?"))return;
-    writeLive({params:np}).then(function(){sendMessage({id:newId("p"),title:"Time update: D-"+d,prec:"PRIORITY",from:"Deputy HOPC Operations",body:"The French Light Infantry Unit now withdraws in "+d+" day"+(d===1?"":"s")+". Check that your plan, phases and decision points still match the timeline.",question:"",options:""});});
+    writeLive({params:allP()}).then(function(){sendMessage({id:newId("p"),title:"Time update: D-"+d,prec:"PRIORITY",from:"Deputy HOPC Operations",body:"The French Light Infantry Unit now withdraws in "+d+" day"+(d===1?"":"s")+". Check that your plan, phases and decision points still match the timeline.",question:"",options:""});});
   }
 });
 
@@ -1483,13 +1526,9 @@ function sendMessage(src){
   if(pendingSend[src.id]||sentIds().indexOf(src.id)>=0)return;
   pendingSend[src.id]=1;
   var entry={id:newId(),sourceId:src.id,title:src.title||"Message",prec:src.prec||"FLASH",from:src.from||"",body:src.body||"",question:src.question||"",
-    options:String(src.options||"").split("\n").map(function(x){return x.trim();}).filter(Boolean),sentAtMin:Math.round(elapsed()/60000)};
+    options:String(src.options||"").split("\n").map(function(x){return x.trim();}).filter(Boolean),ex:exId(),at:Date.now()};
   var sent=L().sent.slice();sent.push(entry);
   writeLive({sent:sent}).then(function(){delete pendingSend[src.id];});
-}
-function autoSend(){
-  if(!CFG||L().status!=="running")return;var mins=elapsed()/60000;
-  cfgList().forEach(function(m){if(m.sendAt!==""&&m.sendAt!=null&&!isNaN(+m.sendAt)&&mins>=+m.sendAt)sendMessage(m);});
 }
 function letterOpts(v,none){return '<option value="">'+none+'</option>'+"ABCDEF".split("").map(function(l){return '<option'+(v===l?" selected":"")+'>'+l+'</option>';}).join("");}
 function renderEditor(){
@@ -1497,16 +1536,16 @@ function renderEditor(){
   if(!ms){$("editor").innerHTML='<div class="empty">Loading messages…</div>';return;}
   if(!ms.length){$("editor").innerHTML='<div class="empty">No messages for '+esc(EX().title)+' yet. Add one, or import the message file.</div>';renderSaveBar();return;}
   var sids=sentIds();
-  var order=ms.map(function(m,i){return i;}).sort(function(a,b){var x=ms[a].sendAt,y=ms[b].sendAt;x=(x===""||x==null)?1e9:+x;y=(y===""||y==null)?1e9:+y;return x-y;});
+  var order=ms.map(function(m,i){return i;});
   $("editor").innerHTML=order.map(function(i){
-    var m=ms[i],isSent=sids.indexOf(m.id)>=0,hasT=m.sendAt!==""&&m.sendAt!=null;
-    var pill=isSent?'<span class="pill sent">Sent</span>':hasT?'<span class="pill">At minute '+esc(m.sendAt)+'</span>':'<span class="pill">Manual</span>';
+    var m=ms[i],isSent=sids.indexOf(m.id)>=0;
+    var pill=isSent?'<span class="pill sent">Sent</span>':'<span class="pill">Not sent</span>';
     return '<div class="ed'+(isSent?" sent":"")+'" data-i="'+i+'"><div class="ed-top"><b>'+esc(m.title||"Untitled message")+'</b>'+pill+
       '<button class="btn sm primary" data-send="'+i+'"'+(isSent?" disabled":"")+'>'+(isSent?"Sent":"Send now")+'</button><button class="btn sm danger" data-del="'+i+'">Delete</button></div>'+
-      '<div class="ed-grid"><div class="field"><label>Title</label><input type="text" data-k="title" value="'+esc(m.title)+'"></div>'+
+      '<div class="ed-grid" style="grid-template-columns:2fr 1fr 1fr"><div class="field"><label>Title</label><input type="text" data-k="title" value="'+esc(m.title)+'"></div>'+
       '<div class="field"><label>From</label><input type="text" data-k="from" value="'+esc(m.from)+'"></div>'+
       '<div class="field"><label>Precedence</label><select data-k="prec">'+PRECS.map(function(p){return '<option'+(m.prec===p?" selected":"")+'>'+p+'</option>';}).join("")+'</select></div>'+
-      '<div class="field"><label>Send at minute</label><input type="number" min="0" max="480" data-k="sendAt" value="'+esc(m.sendAt)+'"></div></div>'+
+      '</div>'+
       '<div class="field"><label>Message text</label><textarea data-k="body" rows="5">'+esc(m.body)+'</textarea></div>'+
       '<div class="field"><label>Question for groups</label><input type="text" data-k="question" value="'+esc(m.question)+'"></div>'+
       '<div class="field"><label>Options, one per line</label><textarea data-k="options" rows="3">'+esc(m.options)+'</textarea></div>'+
@@ -1553,18 +1592,15 @@ function loginSlug(n){return String(n).toLowerCase().normalize("NFKD").replace(/
 function credById(id){return (CREDS.teams||[]).filter(function(t){return t.id===id;})[0];}
 function saveCreds(){return db.doc("fac/teamCreds").set(clone(CREDS));}
 function siteUrl(){return location.origin+location.pathname.replace(/index\.html$/,"");}
-var gEx=null;
-function gExId(){return gEx&&EXERCISES[gEx]?gEx:exId();}
 function renderLogins(){
-  var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});}),ex=EXERCISES[gExId()],tops=topicsOf(ex);
-  $("gExSeg").innerHTML=EX_ORDER.map(function(k){return '<button data-gex="'+k+'" class="'+(k===gExId()?"on":"")+'">'+esc(EXERCISES[k].title)+(k===exId()?" (running)":"")+'</button>';}).join("");
+  var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});
   if(!ts.length){$("logins").innerHTML='<div class="empty" style="margin:10px 0">No groups yet. Choose how many to add, then create their logins.</div>';return;}
   if($("logins").contains(document.activeElement))return;
-  $("logins").innerHTML='<div class="tablewrap"><table class="plain logins"><thead><tr><th>Group</th><th>Members in '+esc(ex.title)+'</th><th>Topic for the review and joint result</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
-    ts.map(function(t){var r=ROSTER[t.id]||{};var cur=matchTopic(ex,(r.assign||{})[gExId()]);var mem=membersOf(r,gExId());
+  $("logins").innerHTML='<div class="tablewrap"><table class="plain logins"><thead><tr><th>Group</th><th>Members</th><th>Final scenario</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
+    ts.map(function(t){var r=ROSTER[t.id]||{};var mem=membersOf(r);var f=r.finalEx&&EXERCISES[r.finalEx];
       return '<tr><td><input type="text" maxlength="40" data-rename="'+esc(t.id)+'" value="'+esc(t.name)+'" aria-label="Group name"></td>'+
         '<td class="small">'+(mem.length?esc(mem.join(", ")):'<button class="linkbtn" data-go="people">Place participants</button>')+'</td>'+
-        '<td><select data-assign="'+esc(t.id)+'" aria-label="Topic" style="min-width:220px"><option value="">Not assigned</option>'+tops.map(function(tp){return '<option value="'+esc(tp.id)+'"'+(cur&&cur.id===tp.id?" selected":"")+'>'+esc(tp.label)+'</option>';}).join("")+'</select></td>'+
+        '<td class="small">'+(f?esc(f.title):'<button class="linkbtn" data-go="finalstaff">Assign</button>')+'</td>'+
         '<td class="mono">'+esc(t.login)+'</td><td class="mono">'+esc(t.password)+'</td>'+
         '<td><div class="row"><button class="btn sm" data-newpw="'+esc(t.id)+'">New password</button><button class="btn sm danger" data-delg="'+esc(t.id)+'">Delete</button></div></td></tr>';}).join("")+
     '</tbody></table></div>';
@@ -1578,7 +1614,7 @@ async function createLogin(name,taken){
   }
   if(!u)throw new Error("no free login");
   await db.doc("members/"+u.uid).set({teamId:login});
-  await db.doc("roster/"+login).set({uid:u.uid,name:name,membersBy:{},assign:{}});
+  await db.doc("roster/"+login).set({uid:u.uid,name:name,members:[],people:[]});
   taken[login]=1;
   return {id:login,name:name,login:login,password:pw,uid:u.uid,createdAt:Date.now()};
 }
@@ -1599,14 +1635,8 @@ $("logins").addEventListener("change",function(e){
   if((id=t.dataset.rename)){var c=credById(id),nm=t.value.replace(/\s+/g," ").trim();if(!c||!nm){t.value=c?c.name:"";return;}
     if((CREDS.teams||[]).some(function(x){return x!==c&&x.name.toLowerCase()===nm.toLowerCase();})){alert("Another group already has that name.");t.value=c.name;return;}
     c.name=nm;saveCreds();db.doc("roster/"+id).merge({name:nm});db.doc("teams/"+id).merge({teamName:nm}).catch(function(){});}
-  else if((id=t.dataset.assign)){var a={};a[gExId()]=t.value;db.doc("roster/"+id).merge({assign:a});}
 });
-$("gExSeg").addEventListener("click",function(e){var b=e.target.closest("[data-gex]");if(b){gEx=b.dataset.gex;renderLogins();}});
-$("fillAssign").addEventListener("click",function(){
-  var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});}),ex=EXERCISES[gExId()],tops=topicsOf(ex);
-  if(!ts.length||!tops.length)return;if(!confirm("Give each group a topic for "+ex.title+", in order (Group 1 gets the first topic, and so on)? Existing topics for this scenario are replaced."))return;
-  ts.forEach(function(t,i){var a={};a[gExId()]=tops[i%tops.length].id;db.doc("roster/"+t.id).merge({assign:a});});
-});
+
 async function newPassword(t){var c=creator(),np=genPw(8);await signInWithEmailAndPassword(c,t.login+"@"+DOMAIN,t.password);await updatePassword(c.currentUser,np);await signOut(c);t.password=np;await saveCreds();}
 async function removeLogin(t){
   var c=creator();
@@ -1614,7 +1644,7 @@ async function removeLogin(t){
   if(t.uid)await db.doc("members/"+t.uid).delete().catch(function(){});
   await db.doc("roster/"+t.id).delete().catch(function(){});await db.doc("teams/"+t.id).delete().catch(function(){});
   CREDS.teams=(CREDS.teams||[]).filter(function(x){return x!==t;});await saveCreds();
-  var changed=false;(PEOPLE.list||[]).forEach(function(p){Object.keys(p.groups||{}).forEach(function(k){if(p.groups[k]===t.id){delete p.groups[k];changed=true;}});});if(changed){await savePeople();await syncMembers();}
+  var changed=false;(PEOPLE.list||[]).forEach(function(p){if(p.group===t.id){p.group=null;changed=true;}});if(changed){await savePeople();await syncMembers();}
 }
 $("logins").addEventListener("click",async function(e){
   var b=e.target.closest("[data-newpw],[data-delg]");if(!b||busyLogins)return;var t=credById(b.dataset.newpw||b.dataset.delg);if(!t)return;
@@ -1634,15 +1664,15 @@ $("delAll").addEventListener("click",async function(){
 });
 $("copyLogins").addEventListener("click",function(){
   var ts=CREDS.teams||[];if(!ts.length)return;
-  var txt=SITE.hubName+" – "+siteUrl()+"\n\n"+ts.map(function(t){var r=ROSTER[t.id]||{};return t.name+(membersOf(r,exId()).length?" ("+membersOf(r,exId()).join(", ")+")":"")+"\n  Login: "+t.login+"\n  Password: "+t.password;}).join("\n\n");
+  var txt=SITE.hubName+" – "+siteUrl()+"\n\n"+ts.map(function(t){var r=ROSTER[t.id]||{};return t.name+(membersOf(r).length?" ("+membersOf(r).join(", ")+")":"")+"\n  Login: "+t.login+"\n  Password: "+t.password;}).join("\n\n");
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){note("Login list copied.");},function(){note("Copy isn’t available; use the login cards PDF.");});
 });
 $("cardsPdf").addEventListener("click",function(){
   var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});if(!ts.length){note("Create group logins first.");return;}
   ensurePdf().then(function(){
-    var url=siteUrl(),cards=ts.map(function(t){var r=ROSTER[t.id]||{},a=rosterAssign(t.id);return {stack:[
+    var url=siteUrl(),cards=ts.map(function(t){var r=ROSTER[t.id]||{},a="";return {stack:[
       {text:SITE.hubName+" · "+SITE.exerciseName,color:"#8A5A1E",bold:true,fontSize:9},{text:t.name,fontSize:20,bold:true,margin:[0,2,0,4]},
-      a?{text:EX().title+", review topic: "+a,fontSize:9,margin:[0,0,0,4]}:"",membersOf(r,exId()).length?{text:membersOf(r,exId()).join(", "),fontSize:8.5,color:"#566778",margin:[0,0,0,6]}:"",
+      a?{text:EX().title+", review topic: "+a,fontSize:9,margin:[0,0,0,4]}:"",membersOf(r).length?{text:membersOf(r).join(", "),fontSize:8.5,color:"#566778",margin:[0,0,0,6]}:"",
       {text:"Website",fontSize:8,color:"#566778"},{text:url,fontSize:9.5,margin:[0,0,0,6]},
       {columns:[{stack:[{text:"Login",fontSize:8,color:"#566778"},{text:t.login,fontSize:15,bold:true}]},{stack:[{text:"Password",fontSize:8,color:"#566778"},{text:t.password,fontSize:15,bold:true}]}]},
       {text:"Everyone in the group can sign in with these details on their own device.",fontSize:8,color:"#566778",margin:[0,8,0,0]}],margin:[12,12,12,12]};});
@@ -1658,7 +1688,7 @@ var PEOPLE={list:[]},peopleEx=null,MEMBERS={},busyP=false;
 function syncMembers(){
   var ex=exId(),gs={};groupsSorted().forEach(function(g){gs[g.id]=1;});
   return Promise.all((PEOPLE.list||[]).filter(function(p){return p.uid;}).map(function(p){
-    var g=(p.groups||{})[ex];g=g&&gs[g]?g:null;var m=MEMBERS[p.uid]||{};
+    var g=p.group;g=g&&gs[g]?g:null;var m=MEMBERS[p.uid]||{};
     if(m.personId===p.id&&(m.teamId||null)===g&&m.name===personLabel(p))return null;
     return db.doc("members/"+p.uid).set({personId:p.id,name:personLabel(p),teamId:g});
   })).catch(function(){toast($("pNote"),"Couldn’t update personal logins. Check your connection.");});
@@ -1673,7 +1703,7 @@ async function createPersonLogin(p,taken){
   }
   if(!u)throw new Error("no free login");
   taken[login]=1;p.login=login;p.password=pw;p.uid=u.uid;
-  var g=(p.groups||{})[exId()];var gs={};groupsSorted().forEach(function(x){gs[x.id]=1;});
+  var g=p.group;var gs={};groupsSorted().forEach(function(x){gs[x.id]=1;});
   await db.doc("members/"+u.uid).set({personId:p.id,name:personLabel(p),teamId:g&&gs[g]?g:null});
   await savePeople();
 }
@@ -1710,32 +1740,31 @@ $("pCards").addEventListener("click",function(){
   }).catch(function(){toast($("pNote"),"Couldn’t create the PDF. Check your connection.");});
 });
 
-function membersOf(r,ex){if(!r)return [];var m=r.membersBy&&r.membersBy[ex];return (m||r.members||[]).filter(Boolean);}
+function membersOf(r){if(!r)return [];var m=r.members;if(!m&&r.membersBy){var k=Object.keys(r.membersBy)[0];m=k?r.membersBy[k]:[];}return (m||[]).filter(Boolean);}
 function personLabel(p){return (p.rank?p.rank+" ":"")+p.name;}
 function groupsSorted(){return (CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});}
 function pEx(){return peopleEx||exId();}
 function savePeople(){return db.doc("fac/participants").set(clone(PEOPLE));}
 // Keep each group's member list (shown to the group and on login cards) in step with the register.
-function syncRoster(ex){
+// Each group's member list (shown to the group, on login cards and in the reading log) follows the register.
+function syncRoster(){
   var by={},ppl={};groupsSorted().forEach(function(g){by[g.id]=[];ppl[g.id]=[];});
-  (PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){var g=(p.groups||{})[ex];if(g&&by[g]){by[g].push(personLabel(p));ppl[g].push({id:p.id,label:personLabel(p)});}});
-  return Promise.all(Object.keys(by).map(function(gid){var m={},q={};m[ex]=by[gid];q[ex]=ppl[gid];var r=ROSTER[gid]||{};
-    if(JSON.stringify(membersOf(r,ex))===JSON.stringify(by[gid])&&JSON.stringify((r.peopleBy||{})[ex]||[])===JSON.stringify(ppl[gid])&&r.membersBy)return null;
-    return db.doc("roster/"+gid).merge({membersBy:m,peopleBy:q});}));
+  (PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);}).forEach(function(p){var g=p.group;if(g&&by[g]){by[g].push(personLabel(p));ppl[g].push({id:p.id,label:personLabel(p)});}});
+  return Promise.all(Object.keys(by).map(function(gid){var r=ROSTER[gid]||{};
+    if(JSON.stringify(r.members||null)===JSON.stringify(by[gid])&&JSON.stringify(r.people||null)===JSON.stringify(ppl[gid]))return null;
+    return db.doc("roster/"+gid).merge({members:by[gid],people:ppl[gid]});}));
 }
-function commitPeople(ex,msg){return savePeople().then(function(){return syncRoster(ex||pEx());}).then(syncMembers).then(function(){if(msg)toast($("pNote"),msg);},function(){toast($("pNote"),"Couldn’t save. Check your connection.");});}
+function commitPeople(ex,msg){return savePeople().then(function(){return syncRoster();}).then(syncMembers).then(function(){if(msg)toast($("pNote"),msg);},function(){toast($("pNote"),"Couldn’t save. Check your connection.");});}
 function renderPeople(){
   if(!isStaff)return;
   var ex=pEx(),gs=groupsSorted(),list=(PEOPLE.list||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name);});
-  $("pExSeg").innerHTML=EX_ORDER.map(function(k){return '<button data-pex="'+k+'" class="'+(k===ex?"on":"")+'">'+esc(EXERCISES[k].title)+'</button>';}).join("");
-  $("pCopyFrom").innerHTML='<option value="">Copy grouping from…</option>'+EX_ORDER.filter(function(k){return k!==ex;}).map(function(k){return '<option value="'+k+'">'+esc(EXERCISES[k].title)+'</option>';}).join("");
-  var counts={},un=0;gs.forEach(function(g){counts[g.id]=0;});list.forEach(function(p){var g=(p.groups||{})[ex];if(g&&counts[g]!=null)counts[g]++;else un++;});
+  var counts={},un=0;gs.forEach(function(g){counts[g.id]=0;});list.forEach(function(p){var g=p.group;if(g&&counts[g]!=null)counts[g]++;else un++;});
   $("pCounts").textContent=list.length?list.length+" participants. "+gs.map(function(g){return g.name+": "+counts[g.id];}).join(", ")+(un?". Unassigned: "+un:"")+".":"";
   if(!gs.length&&list.length)$("pCounts").textContent+=" Create group logins in the Groups tab to place people.";
   if($("pList").contains(document.activeElement))return;
   if(!list.length){$("pList").innerHTML='<div class="empty">No participants registered yet.</div>';return;}
-  $("pList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain logins"><thead><tr><th>Name</th><th>Rank or title</th><th>Country or organization</th><th>Email</th><th>Group in '+esc(EXERCISES[ex].title)+'</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
-    list.map(function(p){var g=(p.groups||{})[ex]||"";return '<tr><td><input type="text" data-pf="name" data-pid="'+esc(p.id)+'" value="'+esc(p.name)+'" aria-label="Name"></td>'+
+  $("pList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain logins"><thead><tr><th>Name</th><th>Rank or title</th><th>Country or organization</th><th>Email</th><th>Group</th><th>Login</th><th>Password</th><th></th></tr></thead><tbody>'+
+    list.map(function(p){var g=p.group||"";return '<tr><td><input type="text" data-pf="name" data-pid="'+esc(p.id)+'" value="'+esc(p.name)+'" aria-label="Name"></td>'+
       '<td><input type="text" data-pf="rank" data-pid="'+esc(p.id)+'" value="'+esc(p.rank)+'" aria-label="Rank"></td>'+
       '<td><input type="text" data-pf="country" data-pid="'+esc(p.id)+'" value="'+esc(p.country)+'" aria-label="Country"></td>'+
       '<td><input type="email" data-pf="email" data-pid="'+esc(p.id)+'" value="'+esc(p.email)+'" aria-label="Email"></td>'+
@@ -1767,9 +1796,9 @@ $("pBulkAdd").addEventListener("click",function(){
 });
 $("pList").addEventListener("change",function(e){
   var t=e.target,p;
-  if(t.dataset.pg&&(p=personById(t.dataset.pg))){p.groups=p.groups||{};if(t.value)p.groups[pEx()]=t.value;else delete p.groups[pEx()];commitPeople();renderPeople();}
+  if(t.dataset.pg&&(p=personById(t.dataset.pg))){p.group=t.value||null;commitPeople();renderPeople();}
   else if(t.dataset.pf&&(p=personById(t.dataset.pid))){var v=t.value.replace(/\s+/g," ").trim();if(t.dataset.pf==="name"&&!v){t.value=p.name;return;}p[t.dataset.pf]=t.dataset.pf==="email"?v.toLowerCase():v;
-    savePeople().then(function(){return Promise.all(EX_ORDER.map(syncRoster));});}
+    savePeople().then(function(){return syncRoster().then(syncMembers);});}
 });
 $("pList").addEventListener("click",async function(e){
   var b=e.target.closest("[data-prm],[data-plog],[data-ppw]");if(!b||busyP)return;
@@ -1780,107 +1809,166 @@ $("pList").addEventListener("click",async function(e){
     busyP=true;b.disabled=true;try{await newPersonPassword(p);toast($("pNote"),"New password set for "+p.name+".");}catch(x){toast($("pNote"),"That didn’t work. Try again.");}finally{busyP=false;renderPeople();}return;}
   if(!confirm("Remove "+p.name+" from the course"+(p.uid?" and delete their personal login":"")+"?"))return;
   busyP=true;try{await removePersonLogin(p);}catch(x){toast($("pNote"),"Couldn’t delete the login. Try again.");busyP=false;return;}busyP=false;
-  PEOPLE.list=PEOPLE.list.filter(function(x){return x!==p;});savePeople().then(function(){return Promise.all(EX_ORDER.map(syncRoster));});renderPeople();
+  PEOPLE.list=PEOPLE.list.filter(function(x){return x!==p;});savePeople().then(function(){return syncRoster().then(syncMembers);});renderPeople();
 });
-$("pExSeg").addEventListener("click",function(e){var b=e.target.closest("[data-pex]");if(b){peopleEx=b.dataset.pex;renderPeople();}});
 function placeEvenly(people){
   var gs=groupsSorted();if(!gs.length){toast($("pNote"),"Create group logins first.");return false;}
   var ex=pEx(),counts={};gs.forEach(function(g){counts[g.id]=0;});
-  (PEOPLE.list||[]).forEach(function(p){var g=(p.groups||{})[ex];if(g&&counts[g]!=null&&people.indexOf(p)<0)counts[g]++;});
-  people.forEach(function(p){var best=gs.slice().sort(function(a,b){return (counts[a.id]-counts[b.id])||a.name.localeCompare(b.name,undefined,{numeric:true});})[0];p.groups=p.groups||{};p.groups[ex]=best.id;counts[best.id]++;});
+  (PEOPLE.list||[]).forEach(function(p){var g=p.group;if(g&&counts[g]!=null&&people.indexOf(p)<0)counts[g]++;});
+  people.forEach(function(p){var best=gs.slice().sort(function(a,b){return (counts[a.id]-counts[b.id])||a.name.localeCompare(b.name,undefined,{numeric:true});})[0];p.group=best.id;counts[best.id]++;});
   return true;
 }
 $("pDistribute").addEventListener("click",function(){var ex=pEx(),gs=groupsSorted();
-  var un=(PEOPLE.list||[]).filter(function(p){var g=(p.groups||{})[ex];return !g||!gs.some(function(x){return x.id===g;});});
+  var un=(PEOPLE.list||[]).filter(function(p){var g=p.group;return !g||!gs.some(function(x){return x.id===g;});});
   if(!un.length){toast($("pNote"),"Everyone is already in a group.");return;}
   if(placeEvenly(un)){commitPeople(null,un.length+" placed.");renderPeople();}});
 $("pShuffle").addEventListener("click",function(){var all=(PEOPLE.list||[]).slice();if(!all.length)return;
-  if(!confirm("Shuffle all participants into new groups for "+EXERCISES[pEx()].title+"?"))return;
+  if(!confirm("Shuffle all participants into new groups?"))return;
   for(var i=all.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=all[i];all[i]=all[j];all[j]=t;}
-  all.forEach(function(p){if(p.groups)delete p.groups[pEx()];});
+  all.forEach(function(p){p.group=null;});
   if(placeEvenly(all)){commitPeople(null,"Groups shuffled.");renderPeople();}});
-$("pCopy").addEventListener("click",function(){var from=$("pCopyFrom").value;if(!from)return;var ex=pEx();
-  if(!confirm("Use the "+EXERCISES[from].title+" grouping for "+EXERCISES[ex].title+"?"))return;
-  (PEOPLE.list||[]).forEach(function(p){p.groups=p.groups||{};if(p.groups[from])p.groups[ex]=p.groups[from];else delete p.groups[ex];});
-  commitPeople(null,"Grouping copied.");renderPeople();});
 
-/* ---------- Staff: results and ratings ---------- */
-var RATE_T=null,ratingsTimer=null,ratingsDirty=false;
+
+/* ---------- Staff: ratings (one set per scenario and group) ---------- */
+var RATE=null,ratingsTimer=null,ratingsDirty=false; // RATE={host,gid,ex}
 var SCALE=[["","Not rated"],["0","0 · Not done"],["1","1 · Poor"],["2","2 · Weak"],["3","3 · Adequate"],["4","4 · Good"],["5","5 · Excellent"]];
-function exRatings(){RATINGS[exId()]=RATINGS[exId()]||{};return RATINGS[exId()];}
-function scoreTeam(id){
-  var R=exRatings(),r=R[id]||{},pl=R.__plenary||{},tot=0,max=0,un=0;
-  EX().rating.forEach(function(it){var v=(it.k==="brief"?pl.scores:r.scores||{})||{};var s=v[it.k];if(s===""||s==null)un++;else{tot+=+s;max+=5;}});
+function ratingsFor(ex){RATINGS[ex]=RATINGS[ex]||{};return RATINGS[ex];}
+function scoreFor(ex,gid){
+  var r=ratingsFor(ex)[gid]||{},tot=0,max=0,un=0;
+  EXERCISES[ex].rating.forEach(function(it){var s=(r.scores||{})[it.k];if(s===""||s==null)un++;else{tot+=+s;max+=5;}});
   return {total:tot,max:max,pct:max?Math.round(tot/max*100):0,unrated:un};
 }
 function teamList(){return TEAMS.slice().sort(function(a,b){return gName(a).localeCompare(gName(b),undefined,{numeric:true});});}
+function allGroups(){
+  // every group with a login, plus any group that has data but no login any more
+  var out=groupsSortedC().map(function(g){var t=TEAMS.filter(function(x){return x.id===g.id;})[0];return {id:g.id,name:g.name,data:t?t.data:{}};});
+  TEAMS.forEach(function(t){if(!out.some(function(o){return o.id===t.id;}))out.push({id:t.id,name:gName(t),data:t.data});});
+  return out;
+}
+function exData(g,ex){return getPath(g.data,["ex",ex])||{};}
+function hasWork(d){return Object.keys(d||{}).some(function(k){return k!=="msg"&&k!=="_at";});}
+function dtShort(t){return t?new Date(t).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";}
+function totalText(sc){return "Total: "+sc.total+" / "+sc.max+(sc.max?" ("+sc.pct+"%)":"")+(sc.unrated?" · "+sc.unrated+" not rated":"");}
+function rateRow(it,R){var sc=(R.scores||{})[it.k],cm=(R.comments||{})[it.k]||"";
+  return '<div class="rrow"><label>'+esc(it.l)+'<span class="g">'+esc(it.g)+'</span><select class="rate" data-key="'+esc(it.k)+'" style="margin-top:6px">'+SCALE.map(function(o){return '<option value="'+o[0]+'"'+(String(sc==null?"":sc)===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select></label><textarea class="ratec" data-key="'+esc(it.k)+'" placeholder="Comment for the report (optional)">'+esc(cm)+'</textarea></div>';}
+function msgAnswersHtml(g,ex){
+  var sent=L().sent.filter(function(m){return m.ex===ex;});if(!sent.length)return "";
+  var cfg=(CFG&&CFG.messages&&CFG.messages[ex])||[];
+  return '<h3>Message responses</h3>'+sent.map(function(m,i){var c=getPath(g.data,["ex",ex,"msg",m.id])||{};var cf=cfg.filter(function(x){return x.id===m.sourceId;})[0];
+    return '<div class="panel" style="margin-bottom:8px;max-width:960px"><b>'+esc(m.title)+'</b>'+((m.options||[]).length?'<div>Option chosen: '+(c.pick!=null?String.fromCharCode(65+c.pick)+". "+esc(m.options[c.pick]||""):"none")+'</div>':'')+
+      '<div class="small" style="white-space:pre-wrap;margin-top:4px">'+esc(c.text||"(no response)")+'</div>'+(cf&&cf.notes?'<div class="small" style="margin-top:6px"><b>Your notes:</b> '+esc(cf.notes)+'</div>':'')+'</div>';}).join("");
+}
+function openRater(host,gid,ex){RATE={host:host,gid:gid,ex:ex};$(host).dataset.key="";renderRater();setTimeout(function(){$(host).scrollIntoView({behavior:"smooth",block:"start"});},30);}
+function renderRater(){
+  ["rater","fsRater"].forEach(function(h){if(!RATE||RATE.host!==h){$(h).innerHTML="";$(h).className="";}});
+  if(!RATE)return;
+  var host=$(RATE.host),key=RATE.gid+":"+RATE.ex;
+  if(host.contains(document.activeElement)&&host.dataset.key===key)return;
+  var ex=EXERCISES[RATE.ex],g=allGroups().filter(function(x){return x.id===RATE.gid;})[0];if(!ex||!g){host.innerHTML="";return;}
+  var R=ratingsFor(RATE.ex)[RATE.gid]||{},d=exData(g,RATE.ex),isFinal=RATE.host==="fsRater";
+  var prev=SC;SC=RATE.ex;var ch=ex.checks(d,ctxFor("",false));
+  host.className="rater";host.dataset.key=key;
+  host.innerHTML='<div class="row" style="justify-content:space-between"><h2>'+(isFinal?"SMT evaluation":"Rating")+': '+esc(g.name)+' · '+esc(ex.title)+'</h2><button class="btn sm" data-closerater>Close</button></div>'+
+    '<p class="score" data-total>'+totalText(scoreFor(RATE.ex,RATE.gid))+'</p>'+
+    ex.rating.map(function(it){return rateRow(it,R);}).join("")+
+    '<div class="rrow"><label>Overall comment</label><textarea class="ratec" data-key="overall" placeholder="Strengths, areas to improve, learning points">'+esc((R.comments||{}).overall||"")+'</textarea></div>'+
+    '<h3>Plan check</h3><ul class="checks">'+(ch.length?ch:[["ok","All clear.",""]]).map(function(c){return '<li class="'+c[0]+'"><b>'+esc(c[1])+'</b>'+esc(c[2])+'</li>';}).join("")+'</ul>'+
+    msgAnswersHtml(g,RATE.ex)+'<h3>'+(isFinal?"Final product":"Worksheet")+'</h3><div data-sheet></div>';
+  renderSheet(host.querySelector("[data-sheet]"),isFinal?finalSections(ex):ex.sections,{root:g.data,base:["ex",RATE.ex],editable:false,showStage:true,ctx:ctxFor("",false),groups:otherGroups()});
+  SC=prev;
+}
+function rateEdit(t){
+  if(!RATE)return;var R=ratingsFor(RATE.ex);var r=R[RATE.gid]=R[RATE.gid]||{scores:{},comments:{}};r.scores=r.scores||{};r.comments=r.comments||{};
+  if(t.classList.contains("rate"))r.scores[t.dataset.key]=t.value;else r.comments[t.dataset.key]=t.value;
+  ratingsDirty=true;clearTimeout(ratingsTimer);ratingsTimer=setTimeout(function(){db.doc("fac/ratings").set(clone(RATINGS)).then(function(){ratingsDirty=false;},function(){setStatus("Couldn’t save ratings. Check your connection.",true);});},900);
+  var tt=$(RATE.host).querySelector("[data-total]");if(tt)tt.textContent=totalText(scoreFor(RATE.ex,RATE.gid));
+}
+["rater","fsRater"].forEach(function(h){
+  $(h).addEventListener("change",function(e){if(e.target.classList.contains("rate"))rateEdit(e.target);});
+  $(h).addEventListener("input",function(e){if(e.target.classList.contains("ratec"))rateEdit(e.target);});
+  $(h).addEventListener("click",function(e){if(e.target.closest("[data-closerater]")){RATE=null;renderRater();if(current==="scwork")renderResults();if(current==="finalstaff")renderFinalStaff();}});
+});
+
+/* ---------- Staff: one scenario, all groups ---------- */
 function renderResults(){
   if(!isStaff)return;
-  var ex=EX(),ts=teamList();
-  var subs=ts.filter(function(t){return getPath(t.data,["sub",exId()]);}).length;
-  $("resultsLede").textContent=ex.title+": "+subs+" of "+ts.length+" groups have submitted.";
-  if(!ts.length){$("teams").innerHTML='<div class="empty">No group has started this scenario yet.</div>';renderRater();return;}
-  $("teams").innerHTML='<div class="tablewrap"><table class="plain"><thead><tr><th>Group</th><th>Review topic</th><th>Status</th><th>Progress</th><th>Plan check</th><th>Score</th><th></th></tr></thead><tbody>'+
-    ts.map(function(t){var d=getPath(t.data,["ex",exId()])||{},sub=getPath(t.data,["sub",exId()]),sc=scoreTeam(t.id);
-      var ch=ex.checks(d,ctxFor(rosterAssign(t.id),false)),errs=ch.filter(function(c){return c[0]==="err";}).length,warns=ch.filter(function(c){return c[0]==="warn";}).length;
-      return '<tr><td><b>'+esc(gName(t))+'</b></td><td class="small">'+esc(rosterAssign(t.id))+'</td><td>'+(sub?'<span class="pill sent">Submitted '+timeOf(sub.at)+'</span>':'<span class="pill prog">In progress</span>')+'</td>'+
-        '<td class="small">'+esc(ex.summary(d))+'</td><td class="small">'+(errs?errs+" problems, ":"")+warns+" to review</td>"+
-        '<td class="score">'+(sc.max?sc.pct+"%":"–")+(sc.unrated?'<div class="small">'+sc.unrated+' to rate</div>':'')+'</td>'+
-        '<td><div class="row"><button class="btn sm primary" data-rate="'+esc(t.id)+'">Rate</button>'+(sub?'<button class="btn sm" data-reopen="'+esc(t.id)+'">Reopen</button>':'')+'</div></td></tr>';}).join("")+
-    '<tr><td><b>Joint plan</b></td><td class="small">All groups</td><td>'+(finalDone()?'<span class="pill sent">Submitted '+timeOf(PLEN.final.at)+'</span>':'')+'</td><td class="small">'+(plenaryEmpty()?"Not built yet":esc(ex.summary(PLEN)))+'</td><td></td><td></td><td><button class="btn sm primary" data-rate="__plenary">Rate</button></td></tr>'+
+  var ex=EX(),k=exId(),gs=allGroups();
+  $("resultsTitle").textContent="Group worksheets: "+ex.title;
+  var subs=gs.filter(function(g){return getPath(g.data,["sub",k]);}).length;
+  $("resultsLede").textContent=(isOpen(k)?"Open to the groups. ":"Not open to the groups yet. ")+subs+" of "+gs.length+" groups have submitted.";
+  if(!gs.length){$("teams").innerHTML='<div class="empty">No groups yet.</div>';renderRater();return;}
+  $("teams").innerHTML='<div class="tablewrap"><table class="plain"><thead><tr><th>Group</th><th>Status</th><th>Progress</th><th>Plan check</th><th>Last edit</th><th>Score</th><th></th></tr></thead><tbody>'+
+    gs.map(function(g){var d=exData(g,k),sub=getPath(g.data,["sub",k]),sc=scoreFor(k,g.id);
+      var ch=hasWork(d)?ex.checks(d,ctxFor("",false)):[],errs=ch.filter(function(c){return c[0]==="err";}).length,warns=ch.filter(function(c){return c[0]==="warn";}).length;
+      return '<tr><td><b>'+esc(g.name)+'</b></td><td>'+(sub?'<span class="pill sent">Submitted '+timeOf(sub.at)+'</span>':hasWork(d)?'<span class="pill prog">In progress</span>':'<span class="pill">Not started</span>')+'</td>'+
+        '<td class="small">'+(hasWork(d)?esc(ex.summary(d)):"–")+'</td><td class="small">'+(hasWork(d)?(errs?errs+" problems, ":"")+warns+" to review":"–")+'</td><td class="small">'+esc(dtShort(d._at))+'</td>'+
+        '<td class="score">'+(sc.max?sc.pct+"%":"–")+'</td>'+
+        '<td><div class="row"><button class="btn sm primary" data-rate="'+esc(g.id)+'">Open and rate</button>'+(sub?'<button class="btn sm" data-reopen="'+esc(g.id)+'">Reopen</button>':'')+'</div></td></tr>';}).join("")+
     '</tbody></table></div>';
   renderRater();
 }
 $("teams").addEventListener("click",function(e){
   var r=e.target.closest("[data-rate]"),o=e.target.closest("[data-reopen]");
-  if(r){RATE_T=r.dataset.rate;$("rater").dataset.team="";renderRater();$("rater").scrollIntoView({behavior:"smooth",block:"start"});}
+  if(r)openRater("rater",r.dataset.rate,exId());
   if(o&&confirm("Reopen this group’s worksheet so they can edit again?")){var s={};s[exId()]=null;db.doc("teams/"+o.dataset.reopen).merge({sub:s}).catch(function(){alert("Couldn’t reopen. Try again.");});}
 });
-function rateRow(it,R){var sc=(R.scores||{})[it.k],cm=(R.comments||{})[it.k]||"";
-  return '<div class="rrow"><label>'+esc(it.l)+'<span class="g">'+esc(it.g)+'</span><select class="rate" data-key="'+esc(it.k)+'" style="margin-top:6px">'+SCALE.map(function(o){return '<option value="'+o[0]+'"'+(String(sc==null?"":sc)===o[0]?" selected":"")+'>'+o[1]+'</option>';}).join("")+'</select></label><textarea class="ratec" data-key="'+esc(it.k)+'" placeholder="Comment for the report (optional)">'+esc(cm)+'</textarea></div>';}
-function renderRater(){
-  var host=$("rater");if(!RATE_T){host.innerHTML="";host.className="";return;}
-  if(host.contains(document.activeElement)&&host.dataset.team===RATE_T+":"+exId())return;
-  var ex=EX(),isPl=RATE_T==="__plenary",R=exRatings()[RATE_T]||{};
-  var items=ex.rating.filter(function(it){return isPl?it.k==="brief":it.k!=="brief";});
-  var t=TEAMS.filter(function(x){return x.id===RATE_T;})[0];
-  if(!isPl&&!t){host.innerHTML="";return;}
-  host.className="rater";host.dataset.team=RATE_T+":"+exId();
-  var name=isPl?"Joint plan and SMT briefing":gName(t);
-  var data=isPl?PLEN:(getPath(t.data,["ex",exId()])||{});
-  var ch=ex.checks(data,isPl?ctxFor("",true):ctxFor(rosterAssign(RATE_T),false));
-  host.innerHTML='<div class="row" style="justify-content:space-between"><h2>Rating: '+esc(name)+'</h2><button class="btn sm" id="closeRater">Close</button></div>'+
-    (isPl?'':'<p class="score">'+totalText(scoreTeam(RATE_T))+'</p>')+
-    items.map(function(it){return rateRow(it,R);}).join("")+
-    '<div class="rrow"><label>Overall comment</label><textarea class="ratec" data-key="overall" placeholder="Strengths, areas to improve, learning points">'+esc((R.comments||{}).overall||"")+'</textarea></div>'+
-    '<h3>Plan check</h3><ul class="checks">'+(ch.length?ch:[["ok","All clear.",""]]).map(function(c){return '<li class="'+c[0]+'"><b>'+esc(c[1])+'</b>'+esc(c[2])+'</li>';}).join("")+'</ul>'+
-    (isPl?'':msgAnswersHtml(t))+
-    '<h3>Worksheet</h3><div id="raterSheet"></div>';
-  renderSheet($("raterSheet"),isPl?plenarySections(ex):ex.sections,{root:isPl?PLEN:t.data,base:isPl?[]:["ex",exId()],editable:false,showStage:true,ctx:isPl?ctxFor("",true):ctxFor(rosterAssign(RATE_T),false),groups:otherGroups()});
-}
-function msgAnswersHtml(t){
-  var sent=L().sent;if(!sent.length)return "";
-  return '<h3>Message responses</h3>'+sent.map(function(m,i){var c=getPath(t.data,["ex",exId(),"msg",m.id])||{};var cfg=cfgList().filter(function(x){return x.id===m.sourceId;})[0];
-    return '<div class="panel" style="margin-bottom:8px;max-width:960px"><b>Message '+(i+1)+': '+esc(m.title)+'</b>'+((m.options||[]).length?'<div>Option chosen: '+(c.pick!=null?String.fromCharCode(65+c.pick)+". "+esc(m.options[c.pick]||""):"none")+'</div>':'')+
-      '<div class="small" style="white-space:pre-wrap;margin-top:4px">'+esc(c.text||"(no response)")+'</div>'+(cfg&&cfg.notes?'<div class="small" style="margin-top:6px"><b>Your notes:</b> '+esc(cfg.notes)+'</div>':'')+'</div>';}).join("");
-}
-function totalText(sc){return "Total: "+sc.total+" / "+sc.max+(sc.max?" ("+sc.pct+"%)":"")+(sc.unrated?" · "+sc.unrated+" not rated":"");}
-function rateEdit(t){
-  if(!RATE_T)return;var R=exRatings();var r=R[RATE_T]=R[RATE_T]||{scores:{},comments:{}};r.scores=r.scores||{};r.comments=r.comments||{};
-  if(t.classList.contains("rate"))r.scores[t.dataset.key]=t.value;else r.comments[t.dataset.key]=t.value;
-  ratingsDirty=true;clearTimeout(ratingsTimer);ratingsTimer=setTimeout(function(){db.doc("fac/ratings").set(clone(RATINGS)).then(function(){ratingsDirty=false;},function(){setStatus("Couldn’t save ratings. Check your connection.",true);});},900);
-  if(t.classList.contains("rate")){var sc=$("rater").querySelector(".score");if(sc&&RATE_T!=="__plenary")sc.textContent=totalText(scoreTeam(RATE_T));}
-}
-$("rater").addEventListener("change",function(e){if(e.target.classList.contains("rate"))rateEdit(e.target);});
-$("rater").addEventListener("input",function(e){if(e.target.classList.contains("ratec"))rateEdit(e.target);});
-$("rater").addEventListener("click",function(e){if(e.target.id==="closeRater"){RATE_T=null;renderRater();renderResults();}});
 $("clearTeams").addEventListener("click",function(){
-  if(!confirm("Delete every group’s answers, the joint plan and your ratings for "+EX().title+"? Logins are kept. This can’t be undone."))return;
+  if(!confirm("Delete every group’s answers and your ratings for "+EX().title+"? Logins are kept. This can’t be undone."))return;
   var k=exId(),ps=TEAMS.map(function(t){var e={},s={};e[k]=null;s[k]=null;return db.doc("teams/"+t.id).merge({ex:e,sub:s});});
-  ps.push(db.doc("plenary/"+k).delete());delete RATINGS[k];ps.push(db.doc("fac/ratings").set(clone(RATINGS)));
+  delete RATINGS[k];ps.push(db.doc("fac/ratings").set(clone(RATINGS)));
   Promise.all(ps).then(function(){toast($("copyNote"),"Cleared.");},function(){setStatus("Some answers couldn’t be cleared.",true);});
 });
 
+/* ---------- Staff: overview of every group in every scenario ---------- */
+function renderOverview(){
+  if(!isStaff)return;
+  var gs=allGroups(),xs=EX_ORDER,fin=L().phase==="final";
+  $("ovLede").textContent=(fin?"Finalization: the outlined cell is each group’s final scenario. ":"")+"What every group is doing in every scenario. Click a cell to open that group’s worksheet.";
+  if(!gs.length){$("ovGrid").innerHTML='<div class="empty">No groups yet. Create them in Groups and logins.</div>';return;}
+  $("ovGrid").innerHTML='<div class="wide"><table class="ws ovtab"><thead><tr><th>Group</th>'+xs.map(function(k){return '<th>'+esc(EXERCISES[k].title)+'<small>'+(isOpen(k)?"Open":"Not open")+'</small></th>';}).join("")+'<th>Final assessment</th></tr></thead><tbody>'+
+    gs.map(function(g){var r=ROSTER[g.id]||{},mem=membersOf(r),f=r.finalEx&&EXERCISES[r.finalEx]?r.finalEx:null,fs=g.data&&g.data.finalSub;
+      return '<tr><td class="rh">'+esc(g.name)+(mem.length?'<div class="small" style="font-weight:400">'+esc(mem.join(", "))+'</div>':'')+'</td>'+
+        xs.map(function(k){var ex=EXERCISES[k],d=exData(g,k),sub=getPath(g.data,["sub",k]),w=hasWork(d);
+          var errs=w?ex.checks(d,ctxFor("",false)).filter(function(c){return c[0]==="err";}).length:0,sc=scoreFor(k,g.id);
+          return '<td class="cell'+(isOpen(k)||w?"":" closed")+(fin&&f===k?" fin":"")+'" data-ovg="'+esc(g.id)+'" data-ovx="'+esc(k)+'" title="Open '+esc(g.name)+' · '+esc(ex.title)+'">'+
+            (sub?'<span class="pill sent">Submitted</span>':w?'<span class="pill prog">In progress</span>':'<span class="pill">Not started</span>')+
+            (w?'<div class="sum">'+esc(ex.summary(d))+'</div>':'')+(errs?'<div class="sum" style="color:var(--flash)">'+errs+' problem'+(errs>1?"s":"")+'</div>':'')+
+            (sc.max?'<div class="sum score">'+sc.pct+'%</div>':'')+(d._at?'<div class="when">Edited '+esc(dtShort(d._at))+'</div>':'')+'</td>';}).join("")+
+        '<td>'+(f?'<b>'+esc(EXERCISES[f].title)+'</b><div class="small">'+(fs&&fs.at?"Submitted "+esc(dtShort(fs.at)):fin?"In progress":"Assigned")+'</div>':'<span class="small">Not assigned</span>')+'</td></tr>';}).join("")+
+    '</tbody></table></div>';
+}
+$("ovGrid").addEventListener("click",function(e){var c=e.target.closest("[data-ovg]");if(!c)return;show("scwork",c.dataset.ovx);openRater("rater",c.dataset.ovg,c.dataset.ovx);});
+
+/* ---------- Staff: final assessment ---------- */
+function renderFinalStaff(){
+  if(!isStaff)return;
+  var gs=allGroups(),fin=L().phase==="final";
+  if(!gs.length){$("fsTable").innerHTML='<div class="empty">No groups yet.</div>';renderRater();return;}
+  if($("fsTable").contains(document.activeElement)){renderRater();return;}
+  $("fsTable").innerHTML='<p class="small">'+(fin?"The course is in the finalization.":"The course is still in scenario work: assign the final scenarios now, then move to the finalization in Course control.")+'</p>'+
+    '<div class="tablewrap"><table class="plain"><thead><tr><th>Group</th><th>Final scenario</th><th>Worksheet</th><th>Plan check</th><th>Final assessment</th><th>SMT score</th><th></th></tr></thead><tbody>'+
+    gs.map(function(g){var r=ROSTER[g.id]||{},f=r.finalEx&&EXERCISES[r.finalEx]?r.finalEx:"",fs=g.data&&g.data.finalSub;
+      var d=f?exData(g,f):{},w=hasWork(d),errs=f&&w?EXERCISES[f].checks(d,ctxFor("",false)).filter(function(c){return c[0]==="err";}).length:0,sc=f?scoreFor(f,g.id):{max:0};
+      return '<tr><td><b>'+esc(g.name)+'</b><div class="small">'+esc(membersOf(r).join(", "))+'</div></td>'+
+        '<td><select data-final="'+esc(g.id)+'" aria-label="Final scenario" style="min-width:200px"><option value="">Not assigned</option>'+EX_ORDER.map(function(k){return '<option value="'+esc(k)+'"'+(k===f?" selected":"")+'>'+esc(EXERCISES[k].title)+'</option>';}).join("")+'</select></td>'+
+        '<td class="small">'+(f?(w?esc(EXERCISES[f].summary(d))+(d._at?"<br>Edited "+esc(dtShort(d._at)):""):"Empty"):"–")+'</td><td class="small">'+(f&&w?(errs?errs+" problems":"No problems"):"–")+'</td>'+
+        '<td>'+(fs&&fs.at?'<span class="pill sent">Submitted '+esc(dtShort(fs.at))+'</span>':fin&&f?'<span class="pill prog">In progress</span>':'<span class="small">–</span>')+'</td>'+
+        '<td class="score">'+(sc.max?sc.pct+"%":"–")+'</td>'+
+        '<td><div class="row">'+(f?'<button class="btn sm primary" data-fsrate="'+esc(g.id)+'">Evaluate</button>':'')+(fs&&fs.at?'<button class="btn sm" data-fsreopen="'+esc(g.id)+'">Reopen</button>':'')+'</div></td></tr>';}).join("")+
+    '</tbody></table></div>';
+  renderRater();
+}
+$("fsTable").addEventListener("change",function(e){var s=e.target.closest("[data-final]");if(s)db.doc("roster/"+s.dataset.final).merge({finalEx:s.value||null});});
+$("fsTable").addEventListener("click",function(e){
+  var r=e.target.closest("[data-fsrate]"),o=e.target.closest("[data-fsreopen]");
+  if(r){var f=(ROSTER[r.dataset.fsrate]||{}).finalEx;if(f)openRater("fsRater",r.dataset.fsrate,f);}
+  if(o&&confirm("Reopen this group’s final assessment so they can edit it again?"))db.doc("teams/"+o.dataset.fsreopen).merge({finalSub:null}).catch(function(){alert("Couldn’t reopen. Try again.");});
+});
+$("fsAssign").addEventListener("click",function(){
+  var gs=groupsSortedC(),xs=openList().length?openList():EX_ORDER;if(!gs.length)return;
+  if(!confirm("Give each group a final scenario in order ("+xs.map(function(k){return EXERCISES[k].title;}).join(", ")+")? Existing assignments are replaced."))return;
+  gs.forEach(function(g,i){db.doc("roster/"+g.id).merge({finalEx:xs[i%xs.length]});});
+});
 /* ---------- PDF ---------- */
 function loadScript(src){return new Promise(function(res,rej){var x=document.createElement("script");x.src=src;x.onload=res;x.onerror=rej;document.head.appendChild(x);});}
 function ensurePdf(){if(window.pdfMake&&window.pdfMake.vfs)return Promise.resolve();return loadScript("https://cdn.jsdelivr.net/npm/pdfmake@0.2.15/build/pdfmake.min.js").then(function(){return loadScript("https://cdn.jsdelivr.net/npm/pdfmake@0.2.15/build/vfs_fonts.js");});}
@@ -1923,40 +2011,48 @@ function pdfDoc(content){
       h1:{fontSize:17,bold:true,color:"#2C6DB5",margin:[0,0,0,4]},h2:{fontSize:12.5,bold:true,margin:[0,14,0,5]},h3:{fontSize:10.5,bold:true,color:"#2C6DB5",margin:[0,10,0,4]},
       th:{bold:true,fontSize:8.5},label:{fontSize:8.5,bold:true,color:"#566778",margin:[0,6,0,1]},ans:{fontSize:9.5,margin:[0,0,0,2]},p:{fontSize:9.5,margin:[0,0,0,6]},small:{fontSize:8.5,color:"#566778"}}};
 }
+// Shared block: one group's rated work on one scenario
+function groupPdf(g,ex,k,opts){
+  var c=[],R=ratingsFor(k)[g.id]||{},cm=R.comments||{},sc=scoreFor(k,g.id),d=exData(g,k);
+  c.push({text:opts.title,style:"h1",pageBreak:"before"});
+  var mem=membersOf(ROSTER[g.id]);if(mem.length)c.push({text:"Members: "+mem.join(", "),style:"small"});
+  c.push({text:"Score "+(sc.max?sc.pct+"%":"—")+" ("+sc.total+" of "+sc.max+")",style:"meta"});
+  var body=[["Section","Score","Comment"].map(function(h){return {text:h,style:"th"};})];
+  ex.rating.forEach(function(it){var s=(R.scores||{})[it.k];body.push([it.l,(s===""||s==null)?"Not rated":s+" / 5",txt(cm[it.k])]);});
+  c.push({table:{headerRows:1,widths:[160,50,"*"],body:body},layout:TL});
+  if(cm.overall){c.push({text:"Overall comment",style:"h3"});c.push({text:cm.overall,style:"p"});}
+  if(!opts.withWork)return c;
+  var prev=SC;SC=k;
+  var ch=ex.checks(d,ctxFor("",false)).filter(function(x){return x[0]!=="info";});SC=prev;
+  if(ch.length){c.push({text:"Plan check at export",style:"h3"});ch.forEach(function(x){c.push({text:x[1]+" "+x[2],style:"small"});});}
+  L().sent.filter(function(m){return m.ex===k;}).forEach(function(m){var a=getPath(d,["msg",m.id])||{};c.push({text:"Message: "+m.title,style:"h3"});if((m.options||[]).length)c.push({text:"Option chosen: "+(a.pick!=null?String.fromCharCode(65+a.pick):"none"),style:"ans"});c.push({text:txt(a.text),style:"ans"});});
+  return c.concat(sheetPdf(opts.final?finalSections(ex):ex.sections,d,!!opts.final,otherGroups()));
+}
 $("exportPdf").addEventListener("click",function(){
-  var btn=$("exportPdf"),ts=teamList();if(!ts.length){alert("No results to export yet.");return;}
+  var btn=$("exportPdf"),gs=allGroups().filter(function(g){return hasWork(exData(g,exId()));});if(!gs.length){alert("No group has worked on this scenario yet.");return;}
   btn.disabled=true;btn.textContent="Preparing PDF…";
   ensurePdf().then(function(){
-    var ex=EX(),withAns=$("pdfAnswers").checked,R=exRatings();
-    var ranked=ts.map(function(t){return {t:t,sc:scoreTeam(t.id)};}).sort(function(a,b){return b.sc.pct-a.sc.pct;});
-    var c=[{text:SITE.exerciseName+" · "+ex.title,style:"kicker"},{text:"Results report",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"})+", "+ts.length+" groups, "+L().duration+"-minute run",style:"meta"},
-      {text:"Sections are rated from 0 (not done) to 5 (excellent). Percentages use rated sections only. The SMT briefing is rated once for the joint plan and counts for every group.",style:"p"},
-      {text:"Ranking",style:"h2"},
-      {table:{headerRows:1,widths:[16,"*",110,60,45,45],body:[["#","Group","Topic","Points","Score","Unrated"].map(function(h){return {text:h,style:"th"};})].concat(ranked.map(function(r,i){return [String(i+1),{text:gName(r.t),bold:true},rosterAssign(r.t.id)||"—",r.sc.total+" / "+r.sc.max,{text:r.sc.max?r.sc.pct+"%":"—",bold:true},String(r.sc.unrated)];}))},layout:TL}];
-    if(L().sent.length){c.push({text:"Messages sent",style:"h2"});L().sent.forEach(function(m,i){c.push({text:(i+1)+". "+m.title+" (minute "+(m.sentAtMin||0)+")",style:"ans"});});}
-    if(!plenaryEmpty()){var pl=R.__plenary||{};c.push({text:"Joint plan",style:"h1",pageBreak:"before"});
-      c.push({table:{widths:[160,50,"*"],body:[["Section","Score","Comment"].map(function(h){return {text:h,style:"th"};}),["SMT briefing",(pl.scores||{}).brief?pl.scores.brief+" / 5":"Not rated",txt((pl.comments||{}).brief)]]},layout:TL});
-      if((pl.comments||{}).overall)c.push({text:pl.comments.overall,style:"p",margin:[0,6,0,0]});
-      c=c.concat(sheetPdf(plenarySections(ex),PLEN,true));}
-    ranked.forEach(function(r,i){var t=r.t,rr=R[t.id]||{},cm=rr.comments||{};
-      c.push({text:(i+1)+". "+gName(t),style:"h1",pageBreak:"before"});
-      if(membersOf(ROSTER[t.id],exId()).length)c.push({text:"Members: "+membersOf(ROSTER[t.id],exId()).join(", "),style:"small"});
-      c.push({text:(rosterAssign(t.id)?rosterAssign(t.id)+". ":"")+"Score "+(r.sc.max?r.sc.pct+"%":"—")+" ("+r.sc.total+" of "+r.sc.max+")",style:"meta"});
-      var body=[["Section","Score","Comment"].map(function(h){return {text:h,style:"th"};})];
-      ex.rating.forEach(function(it){var src=it.k==="brief"?(R.__plenary||{}):rr;var s=(src.scores||{})[it.k];body.push([it.l,(s===""||s==null)?"Not rated":s+" / 5",txt((src.comments||{})[it.k])]);});
-      c.push({table:{headerRows:1,widths:[160,50,"*"],body:body},layout:TL});
-      if(cm.overall){c.push({text:"Overall comment",style:"h3"});c.push({text:cm.overall,style:"p"});}
-      if(!withAns)return;
-      var d=getPath(t.data,["ex",exId()])||{};
-      var ch=ex.checks(d,ctxFor(rosterAssign(t.id),false)).filter(function(x){return x[0]!=="info";});
-      if(ch.length){c.push({text:"Plan check at export",style:"h3"});ch.forEach(function(x){c.push({text:x[1]+" "+x[2],style:"small"});});}
-      L().sent.forEach(function(m,k){var a=getPath(d,["msg",m.id])||{};c.push({text:"Message "+(k+1)+": "+m.title,style:"h3"});if((m.options||[]).length)c.push({text:"Option chosen: "+(a.pick!=null?String.fromCharCode(65+a.pick):"none"),style:"ans"});c.push({text:txt(a.text),style:"ans"});});
-      c=c.concat(sheetPdf(ex.sections,d,false,otherGroups()));
-    });
-    window.pdfMake.createPdf(pdfDoc(c)).download("carana-"+exId()+"-results.pdf");
+    var ex=EX(),k=exId(),withAns=$("pdfAnswers").checked;
+    var ranked=gs.map(function(g){return {g:g,sc:scoreFor(k,g.id)};}).sort(function(a,b){return b.sc.pct-a.sc.pct;});
+    var c=[{text:SITE.exerciseName+" · "+ex.title,style:"kicker"},{text:"Group worksheets",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"})+", "+gs.length+" groups",style:"meta"},
+      {text:"Sections are rated from 0 (not done) to 5 (excellent). Percentages use rated sections only.",style:"p"},
+      {table:{headerRows:1,widths:[16,"*",60,45,45],body:[["#","Group","Points","Score","Unrated"].map(function(h){return {text:h,style:"th"};})].concat(ranked.map(function(r,i){return [String(i+1),{text:r.g.name,bold:true},r.sc.total+" / "+r.sc.max,{text:r.sc.max?r.sc.pct+"%":"—",bold:true},String(r.sc.unrated)];}))},layout:TL}];
+    ranked.forEach(function(r,i){c=c.concat(groupPdf(r.g,ex,k,{title:(i+1)+". "+r.g.name,withWork:withAns}));});
+    window.pdfMake.createPdf(pdfDoc(c)).download(k+"-group-worksheets.pdf");
   }).catch(function(){alert("Couldn’t create the PDF. Check your connection.");}).then(function(){btn.disabled=false;btn.textContent="Export results as PDF";});
 });
-
+$("fsPdf").addEventListener("click",function(){
+  var gs=allGroups().filter(function(g){var f=(ROSTER[g.id]||{}).finalEx;return f&&EXERCISES[f];});
+  if(!gs.length){toast($("fsNote"),"Assign final scenarios first.");return;}
+  var btn=$("fsPdf");btn.disabled=true;
+  ensurePdf().then(function(){
+    var c=[{text:SITE.hubName,style:"kicker"},{text:"Final joint assessment",style:"title"},{text:SITE.exerciseName+" exercise · "+new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"}),style:"meta"},
+      {text:"Each group finalized one scenario, starting from its own worksheet, and presented it to the SMT. Together these products form the final joint assessment.",style:"p"},
+      {table:{headerRows:1,widths:["*","*",70,60],body:[["Group","Scenario","Submitted","SMT score"].map(function(h){return {text:h,style:"th"};})].concat(gs.map(function(g){var f=ROSTER[g.id].finalEx,fs=g.data&&g.data.finalSub,sc=scoreFor(f,g.id);return [{text:g.name,bold:true},EXERCISES[f].title,fs&&fs.at?dtShort(fs.at):"Not yet",sc.max?sc.pct+"%":"—"];}))},layout:TL}];
+    gs.forEach(function(g){var f=ROSTER[g.id].finalEx;c=c.concat(groupPdf(g,EXERCISES[f],f,{title:EXERCISES[f].title+" · "+g.name,withWork:true,final:true}));});
+    window.pdfMake.createPdf(pdfDoc(c)).download("final-joint-assessment.pdf");
+  }).catch(function(){toast($("fsNote"),"Couldn’t create the PDF. Check your connection.");}).then(function(){btn.disabled=false;});
+});
 /* ---------- Library ---------- */
 var LIB_CATS=["Introduction","Mission and police concepts","Directives","Maps","Exercise instructions","Other"];
 var CHUNK=900000;
@@ -1994,7 +2090,7 @@ function readLogRows(){
   var groupsById={};groupsSorted().forEach(function(g){groupsById[g.id]=g.name;});
   var rows={},order=[];
   function row(key,name,group,registered){if(!rows[key]){rows[key]={name:name,group:group,registered:registered,docs:{}};order.push(key);}return rows[key];}
-  (PEOPLE.list||[]).forEach(function(p){var gid=(p.groups||{})[exId()];var r=row("p:"+p.id,personLabel(p),gid?groupsById[gid]||"":"",true);r.login=p.login||"";r.pid=p.id;});
+  (PEOPLE.list||[]).forEach(function(p){var gid=p.group;var r=row("p:"+p.id,personLabel(p),gid?groupsById[gid]||"":"",true);r.login=p.login||"";r.pid=p.id;});
   VIEWS_LOG.forEach(function(v){if(v.type==="signin"&&rows["p:"+v.personId]){var r=rows["p:"+v.personId];if(!r.seen||v.at>r.seen)r.seen=v.at;}});
   logs.forEach(function(v){
     var key=v.personId&&rows["p:"+v.personId]?"p:"+v.personId:v.person?"n:"+v.teamId+":"+v.person.toLowerCase():"g:"+v.teamId;
@@ -2168,7 +2264,7 @@ function buildCustom(id,d){
   return {id:id,custom:true,title:d.title||"Untitled scenario",subtitle:d.subtitle||"",output:d.output||"Group products and briefing",duration:+d.duration||90,
     brief:function(){return briefHtmlParas(d.brief);},
     sections:sections,
-    plenaryExtra:[{id:"pb",title:"Briefing",fields:[{t:"text",id:"smt",label:"Briefing: key messages",max:2500,rows:6}]}],
+    plenaryExtra:[{id:"pb",title:"SMT briefing",fields:[{t:"text",id:"smt",label:"Key messages for the SMT",max:2500,rows:6}]}],
     rating:rating,checks:genericChecks(sections),merge:genericMerge(sections),
     summary:function(dd){var n=0,t=0;sections.forEach(function(s){s.fields.forEach(function(f){t++;var v=dd[f.id];if(f.t==="rows"?rowList(v).length:f.t==="text"||f.t==="select"?String(v||"").trim():v&&Object.keys(v).length)n++;});});return n+" of "+t+" parts started";}};
 }
@@ -2240,7 +2336,7 @@ function renderXEdit(){
     '<div class="field" style="margin:0"><label>Expected output</label><input type="text" data-x="output" value="'+esc(x.output)+'" placeholder="e.g. Outline plan and SMT briefing"></div>'+
     '<div class="field" style="margin:0"><label>Duration (minutes)</label><input type="number" min="10" max="480" data-x="duration" value="'+esc(x.duration)+'"></div></div>';
   h+='<div class="field" style="max-width:none"><label>Brief for participants</label><span class="hint">Leave a blank line between paragraphs. Start a line with “## ” for a heading or “- ” for a bullet; wrap words in **double asterisks** for bold. Link the full scenario PDF in the exercise list.</span><textarea rows="10" data-x="brief">'+esc(x.brief)+'</textarea></div>';
-  h+='<h2>Worksheet</h2><p class="small">Every group fills in the whole worksheet first. Each section is also a topic: in the review you assign sections to groups, CARANA merges all answers into the joint plan, and each group edits its own section. A briefing section is added to the joint plan.</p>';
+  h+='<h2>Worksheet</h2><p class="small">Every group fills in this worksheet while the scenario is open. In the finalization, the group assigned to this scenario continues from its own worksheet and adds an SMT briefing section.</p>';
   (x.sections||[]).forEach(function(s,si){
     h+='<div class="panel" style="max-width:1100px;margin-bottom:14px"><div class="row" style="align-items:end"><div class="field" style="flex:1;margin:0"><label>Section title</label><input type="text" data-xs="title" data-si="'+si+'" value="'+esc(s.title)+'"></div>'+
       '<button class="btn sm" data-xmove="s|'+si+'|-1">Up</button><button class="btn sm" data-xmove="s|'+si+'|1">Down</button><button class="btn sm danger" data-xrm="s|'+si+'">Remove section</button></div>';
@@ -2494,7 +2590,7 @@ function renderPrepDash(){
   $("prepTable").innerHTML='<div class="wide"><table class="ws logtab"><thead><tr><th style="min-width:180px">Participant</th><th>Group</th><th style="min-width:150px">Progress</th><th>Chapters</th>'+(COURSE.modules||[]).map(function(m,mi){return '<th title="'+esc(m.title)+'">Module '+(mi+1)+'</th>';}).join("")+'<th>Now reading</th><th>First-try correct</th><th>Last activity</th></tr></thead><tbody>'+
     rows.map(function(r){var g=r.g||{done:{},ans:{}},pct=prepPct(g),dn=fl.filter(function(c){return g.done&&g.done[c.id];}).length;
       var ans=Object.keys(g.ans||{}).map(function(k){return g.ans[k];}).filter(function(a){return a.ok;}),first=ans.filter(function(a){return a.tries===1;}).length;
-      var curC=fl.filter(function(c){return c.id===g.cur&&!(g.done&&g.done[c.id]);})[0]||(Object.keys(g.ans||{}).length?fl.filter(function(c){return !(g.done&&g.done[c.id]);})[0]:null),gid=r.p.groups?(r.p.groups[exId()]):null;
+      var curC=fl.filter(function(c){return c.id===g.cur&&!(g.done&&g.done[c.id]);})[0]||(Object.keys(g.ans||{}).length?fl.filter(function(c){return !(g.done&&g.done[c.id]);})[0]:null),gid=r.p.group||null;
       return '<tr data-prow="'+esc(r.p.uid)+'"'+(PREP_SEL===r.p.uid?' class="sel"':'')+'><td class="rh">'+esc(r.p.orphan?r.p.name:personLabel(r.p))+(r.p.orphan?' <span class="small">(not registered)</span>':'')+'</td><td class="small">'+esc(gid&&groupsById[gid]||"–")+'</td>'+
         '<td><div class="prog-bar sm"><span style="width:'+pct+'%"></span></div><span class="small">'+pct+'%</span></td><td class="score">'+dn+' / '+fl.length+'</td>'+
         (COURSE.modules||[]).map(function(m,mi){var mc=fl.filter(function(c){return c.mi===mi;}),md=mc.filter(function(c){return g.done&&g.done[c.id];}).length;return '<td class="'+(md===mc.length?"hit":md?"":"miss")+'">'+md+' / '+mc.length+'</td>';}).join("")+
@@ -2616,40 +2712,49 @@ var booted=false;
       else if(!TEAMID){$("gErr").textContent="This account has no access to this hub.";setStatus("Signed in as "+(u.email||"unknown")+", which has no access here. Sign out and use the details your course staff gave you.",true);$("signOutBtn").hidden=false;return;}
       
       if(TEAMID){
-      $("whoLine").textContent=(PERSON?PERSON.name+" · ":"")+TEAM.name+" · UNAC Police planning team";
+      $("whoLine").textContent=(PERSON?PERSON.name+" · ":"")+TEAM.name+" · "+SITE.exerciseName+" exercise";
       try{var mine=await db.doc("teams/"+TEAMID).get();if(mine.exists){ME=mine.data();ME.ex=ME.ex||{};ME.sub=ME.sub||{};}}catch(e){}
-      db.doc("teams/"+TEAMID).onSnapshot(function(s){if(!s.exists)return;var wasSub=submitted();ME=teamSaver.absorb(s.data());ME.ex=ME.ex||{};ME.sub=ME.sub||{};if($("workBody").__scope)$("workBody").__scope.root=ME;
-        if(wasSub!==submitted())renderWork();else{refreshSheet($("workBody"));updateWorkChecks();}renderMessages();applyLock();});
-      db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){TEAM=s.data();renderBrief();renderLibrary();$("whoLine").textContent=(PERSON?PERSON.name+" · ":"")+TEAM.name+" · UNAC Police planning team";updateWorkChecks();}});
+      db.doc("teams/"+TEAMID).onSnapshot(function(s){if(!s.exists)return;var wasSub=submitted(),wasFin=finalSubmitted();ME=teamSaver.absorb(s.data());ME.ex=ME.ex||{};ME.sub=ME.sub||{};
+        ["workBody","finalBody"].forEach(function(h){if($(h).__scope)$(h).__scope.root=ME;});
+        if(current==="work"){if(wasSub!==submitted())renderWork();else{refreshSheet($("workBody"));updateWorkChecks();}}
+        if(current==="final"){if(wasFin!==finalSubmitted())renderFinal();else{refreshSheet($("finalBody"));updateFinalChecks();}}
+        if(current==="messages")renderMessages();if(current==="exbrief")renderExBrief();});
+      db.doc("roster/"+TEAMID).onSnapshot(function(s){if(s.exists){var oldF=TEAM&&TEAM.finalEx;TEAM=s.data();if(current==="brief")renderBrief();if(current==="exbrief")renderExBrief();renderLibrary();if(oldF!==TEAM.finalEx)onLive();$("whoLine").textContent=(PERSON?PERSON.name+" · ":"")+TEAM.name+" · "+SITE.exerciseName+" exercise";updateWorkChecks();}});
       }
     }
     await new Promise(function(res){var first=true;
       db.collection("exercises").onSnapshot(function(q){XDEFS={};q.docs.forEach(function(d){XDEFS[d.id]=d.data();});rebuildExercises();
         if(first){first=false;res();return;}
-        workRenderedFor=null;plenRenderedFor=null;lastEx=null;onLive();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){if(first){first=false;res();}});});
+        workRenderedFor=null;onLive();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){if(first){first=false;res();}});});
     SIGNED=true;
     db.doc("live/state").onSnapshot(function(s){LIVE=s.exists?s.data():null;if(SIGNIN_PENDING){SIGNIN_PENDING=false;logEvent({type:"signin"});}onLive();},function(){setStatus("Lost the live connection. Reload the page.",true);});
     loadCourse();
     (isStaff?db.collection("docs"):db.where("docs","staffOnly",false)).onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});
       // Older documents have no visibility flag yet: exercise instructions become staff-only, the rest stay open to everyone.
       if(isStaff)LIB.forEach(function(d){if(typeof d.staffOnly!=="boolean")db.doc("docs/"+d.id).merge({staffOnly:d.cat==="Exercise instructions"});});
-      renderLibrary();renderBrief();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){});
+      renderLibrary();if(current==="brief")renderBrief();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){});
     if(isStaff){
       db.doc("fac/config").onSnapshot(function(s){CFG=s.exists?s.data():{messages:{}};CFG.messages=CFG.messages||{};if(!dirty){DRAFT=clone(CFG);delete DRAFT.updatedAt;if(!$("editor").contains(document.activeElement))renderEditor();}});
       db.doc("fac/teamCreds").onSnapshot(function(s){if(!busyLogins){CREDS=s.exists?clone(s.data()):{teams:[]};CREDS.teams=CREDS.teams||[];}renderLogins();renderPeople();});
-      db.collection("roster").onSnapshot(function(q){ROSTER={};q.docs.forEach(function(d){ROSTER[d.id]=d.data();});renderLogins();if(current==="results")renderResults();});
-      db.collection("teams").onSnapshot(function(q){TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});if(current==="results")renderResults();if(current==="others")renderOthers();});
-      db.doc("fac/ratings").onSnapshot(function(s){if(!ratingsDirty){RATINGS=s.exists?clone(s.data()):{};if(current==="results")renderResults();}});
-      db.doc("fac/participants").onSnapshot(function(s){PEOPLE=s.exists?clone(s.data()):{list:[]};PEOPLE.list=PEOPLE.list||[];renderPeople();renderReadLog();});
+      var staffRefresh=function(){if(current==="scwork")renderResults();if(current==="overview")renderOverview();if(current==="finalstaff")renderFinalStaff();if(current==="others")renderOthers();if(current==="groups")renderLogins();};
+      db.collection("roster").onSnapshot(function(q){ROSTER={};q.docs.forEach(function(d){ROSTER[d.id]=d.data();});staffRefresh();});
+      db.collection("teams").onSnapshot(function(q){TEAMS=q.docs.map(function(d){return {id:d.id,data:d.data()};});staffRefresh();});
+      db.doc("fac/ratings").onSnapshot(function(s){if(!ratingsDirty){RATINGS=s.exists?clone(s.data()):{};staffRefresh();}});
+      db.doc("fac/participants").onSnapshot(function(s){PEOPLE=s.exists?clone(s.data()):{list:[]};PEOPLE.list=PEOPLE.list||[];
+        // One grouping for the whole course: carry over the earlier per-scenario grouping once.
+        var mig=false;PEOPLE.list.forEach(function(p){if(p.group===undefined){var gs=p.groups||{};p.group=gs.colocation||gs[Object.keys(gs)[0]]||null;mig=true;}});
+        if(mig)savePeople().then(function(){return syncRoster();}).then(syncMembers);
+        renderPeople();renderReadLog();staffRefresh();});
       db.collection("members").onSnapshot(function(q){MEMBERS={};q.docs.forEach(function(d){MEMBERS[d.id]=d.data();});},function(){});
       subscribeViews();
       db.collection("staff").onSnapshot(function(q){STAFF=q.docs.map(function(d){return d.data();});renderStaff();},function(){});
     }
     onLive();
-    var h=location.hash.slice(1);show(h&&h!=="login"?h:(isStaff?"run":"brief"));
+    var h=location.hash.slice(1);show(h&&h!=="login"?h:(isStaff?"overview":(L().courseOpen&&TEAMID?"exbrief":(PERSON?"prep":"library"))));
   });
 })();
 })();
 </script>
 </body>
 </html>
+

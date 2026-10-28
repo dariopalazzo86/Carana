@@ -111,25 +111,19 @@ To add a scenario, click **New exercise** (or **Duplicate** a built-in one as a 
 
 Use **Export** to save an exercise as a file and **Import exercise** to load it into another CARANA project. Built-in exercises keep their specialised plan checks (ratios, security levels, FPU readiness, RBB wording); custom exercises check that every part is completed.
 
-## Running an exercise
+## Running the course
 
-0. **Before the course:** hand out the login cards early. Until you click **Start the course** at the top of the Run tab, participants who sign in see **only the Library**, so they can read the scenario documents in advance. Starting the course opens the brief, worksheet, messages and joint plan for everyone; **Back to library only** closes them again without losing any work.
-1. **Run › Exercise:** pick the exercise. Switching resets the clock, stage and sent messages of the run; all answers are kept.
-2. **Groups:** create the group logins once for the course (for example 4 × “Group”). Choose an exercise at the top of the table to give each group its **topic for the review and joint result**; **Assign topics in order** gives Group 1 the first topic, and so on. You can prepare topics for other exercises without changing the one that is running.
-   - Colocation topics: Galasi and Fellari; Guthar and Hanno; Barin, Leppko and Mahbek; Tereni and Koloni.
-   - FPU topics: four parts of the OPLAN.
-   - RBB topics: the three components (two groups can share one).
-   - Custom exercises: each worksheet section is a topic.
-3. **Participants:** register everyone, create personal logins if you use them, and place people in groups; each exercise can have its own grouping.
-4. Print the **login cards** (Groups tab). Every member of a group can sign in with the group login on their own device.
-5. **Start** the clock and move through the three stages. Before group work moves on, CARANA shows a check: groups that haven’t started or submitted, plan-check problems, groups without a topic and participants not placed in a group. You can go back or continue, and choose whether to build or rebuild the joint plan from the latest worksheets.
-   - **Group work: all topics.** Every group works on every part of the exercise in its own worksheet. The plan check flags problems as they type. Groups can submit their worksheet.
-   - **Review: topics.** CARANA merges all worksheets into the **joint plan**. Each group sees every group’s worksheet (filtered to its topic if it wants), and edits only its own topic in the joint plan; the rest is read-only. In RBB, groups also fill in the quality-assurance table on the other groups.
-   - **Joint result.** All groups edit the whole joint plan together, then one group clicks **Submit joint result**, which locks it for everyone. Staff can reopen it.
-6. **Scenario settings** in Run: Colocation security levels by province (Inject 1) and UNPOL available (Inject 2); FPU days until the French withdrawal. Groups are notified automatically.
-7. **Messages:** send any message with **Send now**, or give it a minute for automatic sending (keep the Run page open).
-8. **Results:** see each group’s status, progress and plan check, **Rate** each section 0–5 with comments, rate the joint plan and SMT briefing, and **Export results as PDF**. Anyone can download the joint plan as a PDF.
-9. Between courses: **Clear answers for this exercise** in Results, **New passwords for all** in Groups, and remove last course’s participants in Participants.
+The hub is organised in a sidebar. Staff see: **Course** (Overview, Course control), the **exercise** (Exercise brief, each scenario with its Brief, Group worksheets and Injects and messages, and the Scenario builder), **Final assessment**, **People** (Participants, Groups and logins), **Preparation** (Preparation course, Reading log, Library) and **Administration**. Participants see Preparation, the exercise brief and every open scenario (Brief and Worksheet), Messages and, at the end, their Final assessment. On a phone the sidebar opens from the ☰ button.
+
+1. **Before the course:** register participants, create their personal logins and place each one in a group (one group for the whole course). They can sign in at once and use the preparation course and the Library.
+2. **Start the course** in Course control. Participants then see the exercise brief.
+3. **Open scenarios one by one** in Course control as the lessons reach them (Colocation, FPU, RBB…). Once opened, a scenario stays available: every group works on every open scenario in its own worksheet, and can submit each worksheet when done.
+4. **Injects:** open a scenario’s *Injects and messages* page and use *Scenario settings* (Colocation security levels and UNPOL available; FPU days to the French withdrawal) or *Send now* on a message. Messages go to every group immediately and are labelled with their scenario; there is no countdown clock.
+5. **Overview:** one grid with a row per group and a column per scenario: status, progress, plan-check problems, score and last edit. Click a cell to open and rate that group’s worksheet.
+6. **Sharing:** tick *Groups can read each other’s worksheets* in Course control for presentations and peer reviews (RBB’s quality-assurance table appears while it is on).
+7. **Finalization:** in Final assessment, give each group the scenario it will finalize (or *Assign open scenarios in order*). Then switch the phase to **Finalization** in Course control; a check lists groups without a scenario and groups starting from an empty worksheet. Each group continues from its own worksheet in its *Final assessment* page, adds the SMT briefing and submits. Other worksheets become read-only.
+8. **SMT evaluation:** in Final assessment, *Evaluate* each group’s final product against the scenario’s criteria, then *Export the final joint assessment (PDF)*: a summary table and every group’s final product with scores and comments.
+9. Between courses: clear answers per scenario (Group worksheets page), give groups and participants new passwords, and remove last course’s participants.
 
 ## Free limits
 
