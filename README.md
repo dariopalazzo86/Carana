@@ -1,6 +1,6 @@
-# CARANA: free self-hosted setup
+# Skill Development Hub: free self-hosted setup
 
-CARANA runs the UNAC Police planning exercises (Colocation plan, Working with FPUs, Results-based budgeting) in the browser. It uses the same free services as SAREVIA:
+The Skill Development Hub gives selected participants access before a course (a preparation course and a document library) and runs the course exercise once it starts. The first exercise is **CARANA**, with three scenarios: Colocation plan, Working with FPUs and Results-based budgeting. It uses the same free services as SAREVIA:
 
 - **Firebase (Spark plan)** for sign-in, live updates, worksheets and the document library. No credit card; it cannot create a bill.
 - **GitHub Pages** to host the page.
@@ -61,9 +61,25 @@ In **Library**, choose a section (Introduction, Mission and police concepts, Dir
 - **Directives:** ROE, DUF for IPOs, DUF for FPUs
 - **Exercise instructions:** the Colocation, FPU and RBB scenario sheets
 
+Documents in **Exercise instructions** are automatically marked **Staff only**: participants don’t see them in the Library and can’t open them, while Directors, facilitators and mentors can. You can change any document’s visibility (Everyone / Staff only) next to it in the list; the database rules enforce it.
+
 ## Step 8. Load the messages
 
 In **Run**, click **Import messages** and choose `carana-messages.json`, then **Save messages**. It holds starter messages for all three exercises with staff notes. Edit them freely.
+
+## Preparation course
+
+Participants with a personal login get a **Preparation** tab before and during the course: the scenario documents turned into readable chapters, with short questions along the way.
+
+- Chapters open in a fixed order. Within a chapter, the text after a question appears only once the question is answered correctly; the next chapter opens when every question in the chapter is correct. Wrong answers get a hint and can be retried as often as needed.
+- Progress is saved on every answer, so participants can stop and continue later on any device, from where they left off.
+- The Library stays as it is, so the original PDFs can still be opened and downloaded.
+
+**Publishing:** in **Preparation** (staff), click **Load course file** and choose `carana-course.json` from this package. Loading a newer course file later replaces the content; participants keep their progress on chapters that still exist. **Preview as a participant** shows the course with every chapter open, without saving anything.
+
+**Progress:** the same tab shows a table of every participant with a personal login: progress bar, chapters completed overall and per module, the chapter they are on, the share of questions answered right at the first try, and their last activity. Click a name for each chapter’s completion time and the attempts per question (three or more are highlighted). **Reset progress** makes a participant start again.
+
+Keep `carana-course.json` off the public website: it is loaded into the protected database instead.
 
 ## Personal logins and the reading log
 
@@ -77,9 +93,13 @@ Every time a participant opens a document, CARANA records it. The **Reading log*
 
 People using a shared group login choose their name before opening documents, so those rows rely on what they selected. Staff openings aren’t recorded.
 
+## Hub settings
+
+In **Staff › Hub settings** you can change the name of the hub (default “Skill Development Hub”), the short badge at the top left, the tagline on the sign-in page and the name of the exercise the scenarios belong to (CARANA). Changes appear immediately for everyone, including on the sign-in page.
+
 ## Adding your own scenarios
 
-Open **Exercises**. The three CARANA exercises are built in; you can link each one to its scenario PDF from the Library, and participants then get an **Open the scenario document** button on their Brief page.
+Open **Scenarios**. The three CARANA scenarios are built in; you can link each one to its scenario PDF from the Library, and participants then get an **Open the scenario document** button on their Brief page.
 
 To add a scenario, click **New exercise** (or **Duplicate** a built-in one as a starting point):
 

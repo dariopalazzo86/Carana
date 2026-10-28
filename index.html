@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>CARANA — UN Police planning exercises</title>
+<title>Skill Development Hub</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
@@ -280,7 +280,7 @@ footer p{margin:0 0 8px}
 <body>
 <header class="top">
   <div class="top-inner">
-    <div class="brand"><span class="mark">CARANA</span><div class="brand-text"><b id="exTitle">UNAC Police training</b><span id="whoLine">UNAC Police Component</span></div></div>
+    <div class="brand"><span class="mark" id="hubMark">SDH</span><div class="brand-text"><b id="exTitle">Skill Development Hub</b><span id="whoLine">UNAC Police Component</span></div></div>
     <div class="clock"><span class="stage" id="stagePill" hidden></span><span class="time idle" id="time">--:--</span><button class="btn primary" id="startBtn" hidden>Start</button></div>
   </div>
   <div class="status" id="status">Connecting…</div>
@@ -292,8 +292,8 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-login">
   <div class="gate">
-    <h1>CARANA</h1>
-    <p class="lede" style="margin-bottom:16px">UNAC Police planning exercises. Sign in with your group’s login and password. Directors, facilitators and mentors: use your email address.</p>
+    <h1 id="gateTitle">Skill Development Hub</h1>
+    <p class="lede" style="margin-bottom:16px"><span id="gateTag">UN Police training</span>. Sign in with your personal login, or your group’s login. Directors, facilitators and mentors: use your email address.</p>
     <form id="gateForm" novalidate>
       <div class="field"><label for="gLogin">Login</label><input type="text" id="gLogin" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false"></div>
       <div class="field"><label for="gPass">Password</label><input type="password" id="gPass" autocomplete="current-password"></div>
@@ -305,10 +305,10 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-brief">
   <div class="assign" id="assignBox" hidden></div>
-  <h1 id="briefTitle">Exercise brief</h1>
+  <h1 id="briefTitle">Scenario brief</h1>
   <p class="lede" id="briefSub"></p>
   <div class="doc" id="briefBody"></div>
-  <details class="more"><summary>Carana at a glance</summary><div class="doc" id="caranaBody"></div></details>
+  <details class="more"><summary><span class="exName">CARANA</span> at a glance</summary><div class="doc" id="caranaBody"></div></details>
 </section>
 
 <section class="view" id="v-work">
@@ -368,7 +368,7 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-library">
   <h1>Library</h1>
-  <p class="lede">Scenario documents for all CARANA exercises. They open in a new tab.</p>
+  <p class="lede">Course documents for the exercise and its scenarios. They open in a new tab.</p>
   <div class="panel" id="libUpload" hidden style="max-width:960px;margin-bottom:18px">
     <h3 style="margin-top:0">Add documents</h3>
     <div class="row" style="align-items:end">
@@ -384,10 +384,10 @@ footer p{margin:0 0 8px}
 
 <!-- Staff views -->
 <section class="view" id="v-run">
-  <h1>Run the exercise</h1>
-  <p class="lede">Choose the exercise, control the clock and the stage, adjust the scenario and send messages. Every group follows these settings live.</p>
+  <h1>Run a scenario</h1>
+  <p class="lede">Choose the scenario, control the clock and the stage, adjust the scenario and send messages. Every group follows these settings live.</p>
   <div class="course" id="courseBox"></div>
-  <h2>Exercise</h2>
+  <h2>Scenario</h2>
   <div class="exlist" id="exPick"></div>
   <div class="grid">
     <div class="panel"><h3>Stage</h3><div class="seg" id="stageSeg"></div><p class="small" id="stageNote"></p></div>
@@ -398,7 +398,7 @@ footer p{margin:0 0 8px}
     <div class="panel" id="paramPanel"></div>
   </div>
   <h2>Messages</h2>
-  <p class="small" style="max-width:75ch">Messages for the selected exercise. Set the minute for automatic sending, or leave it empty and use Send now. Options are one per line; leave empty for a free response. Notes stay with staff.</p>
+  <p class="small" style="max-width:75ch">Messages for the selected scenario. Set the minute for automatic sending, or leave it empty and use Send now. Options are one per line; leave empty for a free response. Notes stay with staff.</p>
   <div class="row" style="margin-bottom:12px"><button class="btn" id="exportMsgs">Export messages</button><label class="btn" for="importMsgs">Import messages</label><input type="file" id="importMsgs" accept=".json,application/json" hidden></div>
   <div id="editor"></div>
   <div class="row" style="margin:6px 0 16px"><button class="btn" id="addMsg">Add message</button></div>
@@ -407,7 +407,7 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-groups">
   <h1>Groups</h1>
-  <p class="lede">Create one login per group. During group work every group covers every topic; for the review and the joint result, give each group a topic. Logins stay the same across exercises; place people in groups in the Participants tab.</p>
+  <p class="lede">Create one login per group. During group work every group covers every topic; for the review and the joint result, give each group a topic. Logins stay the same across scenarios; place people in groups in the Participants tab.</p>
   <div class="row" style="align-items:end;margin-bottom:10px">
     <div class="field" style="margin:0;max-width:130px"><label for="nTeams">Groups to add</label><input type="number" id="nTeams" min="1" max="30" value="4"></div>
     <div class="field" style="margin:0;max-width:200px"><label for="teamPrefix">Name them</label><input type="text" id="teamPrefix" value="Group" maxlength="24"></div>
@@ -427,7 +427,7 @@ footer p{margin:0 0 8px}
 
 <section class="view" id="v-people">
   <h1>Participants</h1>
-  <p class="lede">Register everyone on the course, give them a personal login, and place them in groups. Each exercise can have its own grouping. With a personal login a participant can read the Library before the course, and during the course works in whichever group they’re placed in for the running exercise.</p>
+  <p class="lede">Register everyone on the course, give them a personal login, and place them in groups. Each scenario can have its own grouping. With a personal login a participant can read the Library before the course, and during the course works in whichever group they’re placed in for the running scenario.</p>
   <div class="panel" style="max-width:1100px;margin-bottom:16px">
     <h3 style="margin-top:0">Register participants</h3>
     <div class="row" style="align-items:end">
@@ -465,7 +465,7 @@ footer p{margin:0 0 8px}
   <div class="row" style="margin-top:12px">
     <button class="btn primary" id="exportPdf">Export results as PDF</button>
     <label class="small"><input type="checkbox" id="pdfAnswers" checked> Include each group’s worksheet</label>
-    <button class="btn danger" id="clearTeams">Clear answers for this exercise</button>
+    <button class="btn danger" id="clearTeams">Clear answers for this scenario</button>
     <span class="small" id="copyNote"></span>
   </div>
   <p class="small" style="max-width:75ch">Rate each section from 0 (not done) to 5 (excellent). Totals count rated sections only. The joint plan is rated once and shown for every group.</p>
@@ -473,9 +473,9 @@ footer p{margin:0 0 8px}
 </section>
 
 <section class="view" id="v-exercises">
-  <h1>Exercises</h1>
-  <p class="lede">The three CARANA exercises are built in. Add your own scenarios here: write the brief, design the worksheet, set rating criteria and link the scenario PDF from the Library. New exercises appear in Run, Groups and Participants straight away.</p>
-  <div class="row" style="margin-bottom:12px"><button class="btn primary" id="xNew">New exercise</button><label class="btn" for="xImport">Import exercise</label><input type="file" id="xImport" accept=".json,application/json" hidden></div>
+  <h1>Scenarios</h1>
+  <p class="lede">The scenarios of the <span class="exName">CARANA</span> exercise. Colocation, FPU and RBB are built in; add your own here: write the brief, design the worksheet, set rating criteria and link the scenario PDF from the Library. New scenarios appear in Run, Groups and Participants straight away.</p>
+  <div class="row" style="margin-bottom:12px"><button class="btn primary" id="xNew">New scenario</button><label class="btn" for="xImport">Import scenario</label><input type="file" id="xImport" accept=".json,application/json" hidden></div>
   <div id="xList"></div>
   <div id="xEdit" style="margin-top:20px"></div>
 </section>
@@ -503,6 +503,14 @@ footer p{margin:0 0 8px}
     <p class="small" id="stNote"></p>
   </div>
   <div id="staffList" style="margin-top:14px"></div>
+  <h2>Hub settings</h2>
+  <div class="panel" style="max-width:720px">
+    <div class="field"><label for="setHub">Name of the hub</label><input type="text" id="setHub" maxlength="60" placeholder="Skill Development Hub"></div>
+    <div class="field"><label for="setBadge">Badge (optional)</label><span class="hint">The short label in the coloured box at the top left, up to 6 characters. Leave empty to use the initials of the name.</span><input type="text" id="setBadge" maxlength="6" placeholder="SDH"></div>
+    <div class="field"><label for="setTag">Tagline</label><span class="hint">Shown under the name on the sign-in page, e.g. the organization or programme.</span><input type="text" id="setTag" maxlength="80" placeholder="UN Police training"></div>
+    <div class="field"><label for="setEx">Exercise name</label><span class="hint">The exercise that the scenarios belong to.</span><input type="text" id="setEx" maxlength="40" placeholder="CARANA"></div>
+    <button class="btn primary" id="setSave">Save settings</button> <span class="small" id="setNote"></span>
+  </div>
   <h2>Your password</h2>
   <div class="panel" style="max-width:520px">
     <div class="field"><label for="pwNew">New password (at least 8 characters)</label><input type="password" id="pwNew" autocomplete="new-password"></div>
@@ -511,7 +519,7 @@ footer p{margin:0 0 8px}
 </section>
 </main>
 
-<footer><p>CARANA is a fictional training scenario. Scenario documents © FüAkBw.</p><button class="linkbtn" id="signOutBtn" hidden>Sign out</button></footer>
+<footer><p>The <span class="exName">CARANA</span> exercise and its scenarios are fictional. Scenario documents © FüAkBw.</p><button class="linkbtn" id="signOutBtn" hidden>Sign out</button></footer>
 
 <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="flashTitle"><div class="flash" id="flashBox"></div></div>
 <div class="overlay" id="dlg" role="dialog" aria-modal="true" aria-labelledby="dlgTitle"><div class="flash blue dlg" id="dlgBox"></div></div>
@@ -1060,7 +1068,7 @@ function keepOpen(box,html){var was=box.querySelector("details");var open=was&&w
 
 /* ---------- Navigation ---------- */
 var TEAM_VIEWS=[["brief","Brief"],["work","Worksheet"],["messages","Messages"],["others","Other groups"],["plenary","Joint plan"],["library","Library"]];
-var STAFF_VIEWS=[["run","Run"],["exercises","Exercises"],["groups","Groups"],["people","Participants"],["prep","Preparation"],["reading","Reading log"],["results","Results"],["plenary","Joint plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
+var STAFF_VIEWS=[["run","Run"],["exercises","Scenarios"],["groups","Groups"],["people","Participants"],["prep","Preparation"],["reading","Reading log"],["results","Results"],["plenary","Joint plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
 var current="login";
 function visibleViews(){
   if(!SIGNED)return [];
@@ -1110,7 +1118,7 @@ function renderBrief(){
     var mem=membersOf(TEAM,exId());
     box.hidden=false;
     box.innerHTML='<b>'+esc(TEAM.name)+'</b>'+(mem.length?'<span class="small">'+esc(mem.join(", "))+'</span>':'')+
-      '<div style="margin-top:6px">'+(L().stage==="group"?'Group work: your group works on every part of the exercise. ':'')+(myTopic()?'Your topic for the review and joint result: <b style="display:inline">'+esc(myTopic().label)+'</b>':'Your topic for the review will be assigned by staff.')+'</div>'+
+      '<div style="margin-top:6px">'+(L().stage==="group"?'Group work: your group works on every part of the scenario. ':'')+(myTopic()?'Your topic for the review and joint result: <b style="display:inline">'+esc(myTopic().label)+'</b>':'Your topic for the review will be assigned by staff.')+'</div>'+
       (exId()==="fpu"&&p.dday!=null&&p.dday!==""?'<div style="margin-top:6px;font-weight:700">French withdrawal: D-'+esc(p.dday)+'</div>':'')+
       (exId()==="colocation"&&p.ceiling?'<div style="margin-top:6px;font-weight:700">UNPOL available for colocation: '+esc(p.ceiling)+'</div>':'');
   } else box.hidden=true;
@@ -1197,7 +1205,7 @@ function renderPlenary(){
   var host=$("plenaryBody");
   if(plenaryEmpty()){
     host.__scope=null;
-    host.innerHTML='<div class="empty">'+(isStaff?'No joint plan yet for this exercise. <div style="margin-top:12px"><button class="btn primary" id="buildPlen">Build it from the group worksheets</button></div>':'The joint plan appears here when staff start the review.')+'</div>';
+    host.innerHTML='<div class="empty">'+(isStaff?'No joint plan yet for this scenario. <div style="margin-top:12px"><button class="btn primary" id="buildPlen">Build it from the group worksheets</button></div>':'The joint plan appears here when staff start the review.')+'</div>';
     $("plenIntro").textContent="";$("finalBox").hidden=true;
     $("plenaryChecks").innerHTML="";plenRenderedFor=null;return;
   }
@@ -1248,7 +1256,7 @@ function subscribePlenary(){
 $("plenaryPdf").addEventListener("click",function(){
   if(plenaryEmpty()){toast($("plenaryNote"),"Nothing to export yet.");return;}
   ensurePdf().then(function(){
-    var c=[{text:"CARANA · "+EX().title,style:"kicker"},{text:"Joint plan",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"}),style:"meta"}].concat(sheetPdf(plenarySections(EX()),PLEN,true));
+    var c=[{text:SITE.exerciseName+" · "+EX().title,style:"kicker"},{text:"Joint plan",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"}),style:"meta"}].concat(sheetPdf(plenarySections(EX()),PLEN,true));
     window.pdfMake.createPdf(pdfDoc(c)).download("carana-"+exId()+"-joint-plan.pdf");
   }).catch(function(){toast($("plenaryNote"),"Couldn’t create the PDF. Check your connection.");});
 });
@@ -1360,7 +1368,7 @@ function renderRun(){
     :'<div class="txt"><b>Course not started</b><span class="small">Participants can sign in now, but they only see the Library. Start the course to open the exercise for everyone.</span></div><button class="btn primary" id="courseOpen">Start the course</button>';
   $("exPick").innerHTML=EX_ORDER.map(function(k){var e=EXERCISES[k];return '<button class="excard'+(k===l.exId?" on":"")+'" data-ex="'+k+'"><b>'+esc(e.title)+'</b><span class="small">'+esc(e.subtitle)+'</span></button>';}).join("");
   $("stageSeg").innerHTML=STAGES.map(function(s){return '<button data-stage="'+s[0]+'" class="'+(l.stage===s[0]?"on":"")+'">'+s[1]+'</button>';}).join("");
-  $("stageNote").textContent={group:"Every group works on every part of the exercise in its own worksheet.",review:"All worksheets are merged into the joint plan. Each group reviews every group’s work on its topic and edits that part of the joint plan. Assign topics in Groups.",plenary:"All groups edit the whole joint plan together and submit one joint result."}[l.stage];
+  $("stageNote").textContent={group:"Every group works on every part of the scenario in its own worksheet.",review:"All worksheets are merged into the joint plan. Each group reviews every group’s work on its topic and edits that part of the joint plan. Assign topics in Groups.",plenary:"All groups edit the whole joint plan together and submit one joint result."}[l.stage];
   if(document.activeElement!==$("durIn"))$("durIn").value=l.duration;
   if(!$("paramPanel").contains(document.activeElement))renderParams();
   if(!$("editor").contains(document.activeElement))renderEditor();
@@ -1408,7 +1416,7 @@ function stageReadiness(target){
     else items.push(["ok","Topics:","every group has a topic."]);
   }
   var un=(PEOPLE.list||[]).filter(function(p){var g=(p.groups||{})[exId()];return !g||!gs.some(function(x){return x.id===g;});}).length;
-  if((PEOPLE.list||[]).length&&un)items.push(["info","Participants:",un+" not placed in a group for this exercise."]);
+  if((PEOPLE.list||[]).length&&un)items.push(["info","Participants:",un+" not placed in a group for this scenario."]);
   return items;
 }
 $("stageSeg").addEventListener("click",async function(e){
@@ -1443,7 +1451,7 @@ function renderParams(){
       '</div><div class="row" style="margin-top:10px;align-items:end"><div class="field" style="margin:0;max-width:180px"><label class="small" for="ceilIn">UNPOL available</label><input type="number" id="ceilIn" min="0" value="'+(p.ceiling||"")+'" placeholder="No limit"></div><button class="btn primary" id="applyParams">Apply and notify groups</button></div>';
   } else if(k==="fpu"){
     box.innerHTML='<h3>Scenario settings</h3><p class="small">Days until the French Light Infantry Unit withdraws. Shown to every group.</p><div class="row" style="align-items:end"><div class="field" style="margin:0;max-width:140px"><label class="small" for="ddayIn">D-minus days</label><input type="number" id="ddayIn" min="0" max="60" value="'+(p.dday!=null?p.dday:14)+'"></div><button class="btn primary" id="applyParams">Apply and notify groups</button></div>';
-  } else box.innerHTML='<h3>Scenario settings</h3><p class="small">This exercise has no scenario settings. Use messages for any injects.</p>';
+  } else box.innerHTML='<h3>Scenario settings</h3><p class="small">This scenario has no settings. Use messages for any injects.</p>';
 }
 $("paramPanel").addEventListener("click",function(e){
   if(e.target.id!=="applyParams")return;
@@ -1487,7 +1495,7 @@ function letterOpts(v,none){return '<option value="">'+none+'</option>'+"ABCDEF"
 function renderEditor(){
   var ms=draftList();
   if(!ms){$("editor").innerHTML='<div class="empty">Loading messages…</div>';return;}
-  if(!ms.length){$("editor").innerHTML='<div class="empty">No messages for '+esc(EX().title)+' yet. Add one, or import the CARANA message file.</div>';renderSaveBar();return;}
+  if(!ms.length){$("editor").innerHTML='<div class="empty">No messages for '+esc(EX().title)+' yet. Add one, or import the message file.</div>';renderSaveBar();return;}
   var sids=sentIds();
   var order=ms.map(function(m,i){return i;}).sort(function(a,b){var x=ms[a].sendAt,y=ms[b].sendAt;x=(x===""||x==null)?1e9:+x;y=(y===""||y==null)?1e9:+y;return x-y;});
   $("editor").innerHTML=order.map(function(i){
@@ -1531,7 +1539,7 @@ $("importMsgs").addEventListener("change",function(e){
     if(!DRAFT)DRAFT={messages:{}};DRAFT.messages=DRAFT.messages||{};
     var n=0;
     if(Array.isArray(src)){DRAFT.messages[exId()]=norm(src);n=src.length;}
-    else{if(!confirm("Replace the messages of every exercise in this file?"))return;EX_ORDER.forEach(function(k){if(Array.isArray(src[k])){DRAFT.messages[k]=norm(src[k]);n+=src[k].length;}});}
+    else{if(!confirm("Replace the messages of every scenario in this file?"))return;EX_ORDER.forEach(function(k){if(Array.isArray(src[k])){DRAFT.messages[k]=norm(src[k]);n+=src[k].length;}});}
     dirty=true;renderEditor();alert(n+" messages imported. Click Save messages to keep them.");
   }).catch(function(){alert("That file isn’t a message file. Use a .json file exported from this page.");});
   e.target.value="";
@@ -1596,7 +1604,7 @@ $("logins").addEventListener("change",function(e){
 $("gExSeg").addEventListener("click",function(e){var b=e.target.closest("[data-gex]");if(b){gEx=b.dataset.gex;renderLogins();}});
 $("fillAssign").addEventListener("click",function(){
   var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});}),ex=EXERCISES[gExId()],tops=topicsOf(ex);
-  if(!ts.length||!tops.length)return;if(!confirm("Give each group a topic for "+ex.title+", in order (Group 1 gets the first topic, and so on)? Existing topics for this exercise are replaced."))return;
+  if(!ts.length||!tops.length)return;if(!confirm("Give each group a topic for "+ex.title+", in order (Group 1 gets the first topic, and so on)? Existing topics for this scenario are replaced."))return;
   ts.forEach(function(t,i){var a={};a[gExId()]=tops[i%tops.length].id;db.doc("roster/"+t.id).merge({assign:a});});
 });
 async function newPassword(t){var c=creator(),np=genPw(8);await signInWithEmailAndPassword(c,t.login+"@"+DOMAIN,t.password);await updatePassword(c.currentUser,np);await signOut(c);t.password=np;await saveCreds();}
@@ -1626,14 +1634,14 @@ $("delAll").addEventListener("click",async function(){
 });
 $("copyLogins").addEventListener("click",function(){
   var ts=CREDS.teams||[];if(!ts.length)return;
-  var txt="CARANA – "+siteUrl()+"\n\n"+ts.map(function(t){var r=ROSTER[t.id]||{};return t.name+(membersOf(r,exId()).length?" ("+membersOf(r,exId()).join(", ")+")":"")+"\n  Login: "+t.login+"\n  Password: "+t.password;}).join("\n\n");
+  var txt=SITE.hubName+" – "+siteUrl()+"\n\n"+ts.map(function(t){var r=ROSTER[t.id]||{};return t.name+(membersOf(r,exId()).length?" ("+membersOf(r,exId()).join(", ")+")":"")+"\n  Login: "+t.login+"\n  Password: "+t.password;}).join("\n\n");
   (navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(txt):Promise.reject()).then(function(){note("Login list copied.");},function(){note("Copy isn’t available; use the login cards PDF.");});
 });
 $("cardsPdf").addEventListener("click",function(){
   var ts=(CREDS.teams||[]).slice().sort(function(a,b){return a.name.localeCompare(b.name,undefined,{numeric:true});});if(!ts.length){note("Create group logins first.");return;}
   ensurePdf().then(function(){
     var url=siteUrl(),cards=ts.map(function(t){var r=ROSTER[t.id]||{},a=rosterAssign(t.id);return {stack:[
-      {text:"CARANA · UNAC Police planning exercises",color:"#8A5A1E",bold:true,fontSize:9},{text:t.name,fontSize:20,bold:true,margin:[0,2,0,4]},
+      {text:SITE.hubName+" · "+SITE.exerciseName,color:"#8A5A1E",bold:true,fontSize:9},{text:t.name,fontSize:20,bold:true,margin:[0,2,0,4]},
       a?{text:EX().title+", review topic: "+a,fontSize:9,margin:[0,0,0,4]}:"",membersOf(r,exId()).length?{text:membersOf(r,exId()).join(", "),fontSize:8.5,color:"#566778",margin:[0,0,0,6]}:"",
       {text:"Website",fontSize:8,color:"#566778"},{text:url,fontSize:9.5,margin:[0,0,0,6]},
       {columns:[{stack:[{text:"Login",fontSize:8,color:"#566778"},{text:t.login,fontSize:15,bold:true}]},{stack:[{text:"Password",fontSize:8,color:"#566778"},{text:t.password,fontSize:15,bold:true}]}]},
@@ -1692,7 +1700,7 @@ $("pCards").addEventListener("click",function(){
   if(!ps.length){toast($("pNote"),"Create personal logins first.");return;}
   ensurePdf().then(function(){
     var url=siteUrl(),cards=ps.map(function(p){return {stack:[
-      {text:"CARANA · UNAC Police planning exercises",color:"#8A5A1E",bold:true,fontSize:9},{text:personLabel(p),fontSize:17,bold:true,margin:[0,2,0,2]},
+      {text:SITE.hubName+" · "+SITE.exerciseName,color:"#8A5A1E",bold:true,fontSize:9},{text:personLabel(p),fontSize:17,bold:true,margin:[0,2,0,2]},
       p.country?{text:p.country,fontSize:9,color:"#566778",margin:[0,0,0,6]}:{text:"",margin:[0,0,0,4]},
       {text:"Website",fontSize:8,color:"#566778"},{text:url,fontSize:9.5,margin:[0,0,0,6]},
       {columns:[{stack:[{text:"Login",fontSize:8,color:"#566778"},{text:p.login,fontSize:13,bold:true}]},{stack:[{text:"Password",fontSize:8,color:"#566778"},{text:p.password,fontSize:13,bold:true}]}]},
@@ -1811,7 +1819,7 @@ function renderResults(){
   var ex=EX(),ts=teamList();
   var subs=ts.filter(function(t){return getPath(t.data,["sub",exId()]);}).length;
   $("resultsLede").textContent=ex.title+": "+subs+" of "+ts.length+" groups have submitted.";
-  if(!ts.length){$("teams").innerHTML='<div class="empty">No group has started this exercise yet.</div>';renderRater();return;}
+  if(!ts.length){$("teams").innerHTML='<div class="empty">No group has started this scenario yet.</div>';renderRater();return;}
   $("teams").innerHTML='<div class="tablewrap"><table class="plain"><thead><tr><th>Group</th><th>Review topic</th><th>Status</th><th>Progress</th><th>Plan check</th><th>Score</th><th></th></tr></thead><tbody>'+
     ts.map(function(t){var d=getPath(t.data,["ex",exId()])||{},sub=getPath(t.data,["sub",exId()]),sc=scoreTeam(t.id);
       var ch=ex.checks(d,ctxFor(rosterAssign(t.id),false)),errs=ch.filter(function(c){return c[0]==="err";}).length,warns=ch.filter(function(c){return c[0]==="warn";}).length;
@@ -1908,8 +1916,8 @@ function sheetPdf(sections,data,plenary,groups){
   return c;
 }
 function pdfDoc(content){
-  return {pageSize:"A4",pageMargins:[44,52,44,52],info:{title:"CARANA"},content:content,
-    footer:function(cp,pc){return {columns:[{text:"CARANA · UNAC Police planning exercises",color:"#566778",fontSize:8},{text:cp+" / "+pc,alignment:"right",color:"#566778",fontSize:8}],margin:[44,20,44,0]};},
+  return {pageSize:"A4",pageMargins:[44,52,44,52],info:{title:SITE.hubName},content:content,
+    footer:function(cp,pc){return {columns:[{text:SITE.hubName+" · "+SITE.exerciseName,color:"#566778",fontSize:8},{text:cp+" / "+pc,alignment:"right",color:"#566778",fontSize:8}],margin:[44,20,44,0]};},
     defaultStyle:{fontSize:9.5,lineHeight:1.25,color:"#172A3A"},
     styles:{kicker:{fontSize:10,bold:true,color:"#8A5A1E"},title:{fontSize:22,bold:true,margin:[0,2,0,4]},meta:{fontSize:9.5,color:"#566778",margin:[0,0,0,10]},
       h1:{fontSize:17,bold:true,color:"#2C6DB5",margin:[0,0,0,4]},h2:{fontSize:12.5,bold:true,margin:[0,14,0,5]},h3:{fontSize:10.5,bold:true,color:"#2C6DB5",margin:[0,10,0,4]},
@@ -1921,7 +1929,7 @@ $("exportPdf").addEventListener("click",function(){
   ensurePdf().then(function(){
     var ex=EX(),withAns=$("pdfAnswers").checked,R=exRatings();
     var ranked=ts.map(function(t){return {t:t,sc:scoreTeam(t.id)};}).sort(function(a,b){return b.sc.pct-a.sc.pct;});
-    var c=[{text:"CARANA · "+ex.title,style:"kicker"},{text:"Results report",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"})+", "+ts.length+" groups, "+L().duration+"-minute run",style:"meta"},
+    var c=[{text:SITE.exerciseName+" · "+ex.title,style:"kicker"},{text:"Results report",style:"title"},{text:new Date().toLocaleDateString([], {day:"numeric",month:"long",year:"numeric"})+", "+ts.length+" groups, "+L().duration+"-minute run",style:"meta"},
       {text:"Sections are rated from 0 (not done) to 5 (excellent). Percentages use rated sections only. The SMT briefing is rated once for the joint plan and counts for every group.",style:"p"},
       {text:"Ranking",style:"h2"},
       {table:{headerRows:1,widths:[16,"*",110,60,45,45],body:[["#","Group","Topic","Points","Score","Unrated"].map(function(h){return {text:h,style:"th"};})].concat(ranked.map(function(r,i){return [String(i+1),{text:gName(r.t),bold:true},rosterAssign(r.t.id)||"—",r.sc.total+" / "+r.sc.max,{text:r.sc.max?r.sc.pct+"%":"—",bold:true},String(r.sc.unrated)];}))},layout:TL}];
@@ -2036,7 +2044,7 @@ $("logClear").addEventListener("click",async function(){
 
 function renderLibrary(){
   $("libUpload").hidden=!isStaff;renderReader();if(isStaff)renderReadLog();
-  if(!LIB.length){$("libList").innerHTML='<div class="empty">'+(isStaff?"No documents yet. Add the CARANA PDFs above.":"No documents have been added yet.")+'</div>';return;}
+  if(!LIB.length){$("libList").innerHTML='<div class="empty">'+(isStaff?"No documents yet. Add the course PDFs above.":"No documents have been added yet.")+'</div>';return;}
   var cats=LIB_CATS.filter(function(c){return LIB.some(function(d){return d.cat===c;});});
   LIB.forEach(function(d){if(cats.indexOf(d.cat)<0)cats.push(d.cat);});
   $("libList").innerHTML=cats.map(function(cat){return '<h3>'+esc(cat)+'</h3>'+LIB.filter(function(d){return d.cat===cat;}).sort(function(a,b){return a.title.localeCompare(b.title,undefined,{numeric:true});}).map(function(d){
@@ -2157,7 +2165,7 @@ function buildCustom(id,d){
   var sections=(d.sections||[]).map(function(s){return {id:s.id,title:s.title||"Section",fields:(s.fields||[]).filter(function(f){return f&&f.t;})};});
   var rating=(d.rating||[]).filter(function(r){return r&&r.l;}).map(function(r,i){return {k:r.k||("r"+i),l:r.l,g:r.g||""};});
   rating.push({k:"brief",l:"Joint plan and briefing",g:"One coherent product, presented and defended as a team."});
-  return {id:id,custom:true,title:d.title||"Untitled exercise",subtitle:d.subtitle||"",output:d.output||"Group products and briefing",duration:+d.duration||90,
+  return {id:id,custom:true,title:d.title||"Untitled scenario",subtitle:d.subtitle||"",output:d.output||"Group products and briefing",duration:+d.duration||90,
     brief:function(){return briefHtmlParas(d.brief);},
     sections:sections,
     plenaryExtra:[{id:"pb",title:"Briefing",fields:[{t:"text",id:"smt",label:"Briefing: key messages",max:2500,rows:6}]}],
@@ -2194,7 +2202,7 @@ function textToCols(t,old){
 }
 function renderXList(){
   if(!isStaff)return;
-  $("xList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain"><thead><tr><th>Exercise</th><th>Kind</th><th>Scenario document</th><th></th></tr></thead><tbody>'+
+  $("xList").innerHTML='<div class="tablewrap" style="max-width:1100px"><table class="plain"><thead><tr><th>Scenario</th><th>Kind</th><th>Scenario document</th><th></th></tr></thead><tbody>'+
     EX_ORDER.map(function(k){var e=EXERCISES[k],x=XDEFS[k]||{},d=x.docId&&LIB.filter(function(l){return l.id===x.docId;})[0];
       return '<tr><td><b>'+esc(e.title)+'</b><div class="small">'+esc(e.subtitle)+'</div></td><td class="small">'+(e.custom?"Custom":"Built in")+(k===exId()?", running":"")+'</td>'+
         '<td><select data-xdoc="'+esc(k)+'" style="max-width:260px"><option value="">None</option>'+LIB.slice().sort(function(a,b){return a.title.localeCompare(b.title);}).map(function(l){return '<option value="'+esc(l.id)+'"'+(d&&d.id===l.id?" selected":"")+'>'+esc(l.title)+'</option>';}).join("")+'</select></td>'+
@@ -2226,7 +2234,7 @@ function fieldCfg(f,si,fi){
 }
 function renderXEdit(){
   var box=$("xEdit");if(!XEDIT){box.innerHTML="";box.className="";return;}
-  var x=XEDIT,h='<div class="row" style="justify-content:space-between"><h2 style="margin:0">'+(XEDIT_ID?"Edit exercise":"New exercise")+'</h2><button class="btn sm" id="xClose">Close</button></div>';
+  var x=XEDIT,h='<div class="row" style="justify-content:space-between"><h2 style="margin:0">'+(XEDIT_ID?"Edit scenario":"New scenario")+'</h2><button class="btn sm" id="xClose">Close</button></div>';
   h+='<div class="grid" style="margin-top:14px"><div class="field" style="margin:0"><label>Title</label><input type="text" data-x="title" value="'+esc(x.title)+'"></div>'+
     '<div class="field" style="margin:0"><label>Subtitle</label><input type="text" data-x="subtitle" value="'+esc(x.subtitle)+'"></div>'+
     '<div class="field" style="margin:0"><label>Expected output</label><input type="text" data-x="output" value="'+esc(x.output)+'" placeholder="e.g. Outline plan and SMT briefing"></div>'+
@@ -2247,7 +2255,7 @@ function renderXEdit(){
   });
   h+='<button class="btn" id="xAddS">Add section</button>';
   h+='<h2>Rating criteria</h2><div class="field" style="max-width:none"><span class="hint">One per line: criterion | what good looks like. A “Joint plan and briefing” criterion is added automatically.</span><textarea rows="5" data-x="rating">'+esc((x.rating||[]).map(function(r){return r.l+(r.g?" | "+r.g:"");}).join("\n"))+'</textarea></div>';
-  h+='<div class="savebar'+(xDirty?" dirty":"")+'"><span>'+(xDirty?"Unsaved changes":"Saved")+'</span><button class="btn" id="xPreview">Preview worksheet</button><button class="btn primary" id="xSave">Save exercise</button></div><div id="xPrev"></div>';
+  h+='<div class="savebar'+(xDirty?" dirty":"")+'"><span>'+(xDirty?"Unsaved changes":"Saved")+'</span><button class="btn" id="xPreview">Preview worksheet</button><button class="btn primary" id="xSave">Save scenario</button></div><div id="xPrev"></div>';
   box.className="rater";box.innerHTML=h;
 }
 function xField(si,fi){return XEDIT.sections[+si].fields[+fi];}
@@ -2292,7 +2300,7 @@ $("xEdit").addEventListener("click",function(e){
   if(t.id==="xSave")saveXDef();
 });
 function validDef(x){
-  if(!String(x.title||"").trim())return "Give the exercise a title.";
+  if(!String(x.title||"").trim())return "Give the scenario a title.";
   if(!(x.sections||[]).length)return "Add at least one worksheet section.";
   var bad=null;(x.sections||[]).forEach(function(s){(s.fields||[]).forEach(function(f){if(bad)return;
     if(!String(f.label||"").trim())bad="Every question needs a label (section “"+s.title+"”).";
@@ -2306,7 +2314,7 @@ function saveXDef(){
   var err=validDef(XEDIT);if(err){alert(err);return;}
   var id=XEDIT_ID||("x"+slug(XEDIT.title)+Date.now().toString(36).slice(-4));
   var body=clone(XEDIT);body.custom=true;body.at=Date.now();if(XDEFS[id]&&XDEFS[id].docId&&!body.docId)body.docId=XDEFS[id].docId;
-  db.doc("exercises/"+id).set(body).then(function(){XEDIT_ID=id;xDirty=false;renderXEdit();},function(){alert("Couldn’t save the exercise. Check your connection and the database rules.");});
+  db.doc("exercises/"+id).set(body).then(function(){XEDIT_ID=id;xDirty=false;renderXEdit();},function(){alert("Couldn’t save the scenario. Check your connection and the database rules.");});
 }
 $("xNew").addEventListener("click",function(){openEditor(null,newDef());});
 $("xList").addEventListener("click",function(e){
@@ -2315,14 +2323,14 @@ $("xList").addEventListener("click",function(e){
   else if(b.dataset.xdup){var k=b.dataset.xdup;var d=BUILTINS[k]?defFromBuiltin(k):clone(XDEFS[k]);d.title=(BUILTINS[k]?d.title:(d.title+" (copy)"));delete d.docId;openEditor(null,d);xDirty=true;renderXEdit();}
   else if(b.dataset.xexp){var x=clone(XDEFS[b.dataset.xexp]);delete x.docId;var blob=new Blob([JSON.stringify({carana_exercise:1,exercise:x},null,2)],{type:"application/json"});
     var a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="carana-exercise-"+slug(x.title)+".json";document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},500);}
-  else if(b.dataset.xdel){var id=b.dataset.xdel;if(id===exId()){alert("This exercise is running. Switch to another exercise in Run first.");return;}
+  else if(b.dataset.xdel){var id=b.dataset.xdel;if(id===exId()){alert("This scenario is running. Switch to another scenario in Run first.");return;}
     if(!confirm("Delete “"+EXERCISES[id].title+"”? Group answers already given stay in the database but can’t be shown."))return;db.doc("exercises/"+id).delete();if(XEDIT_ID===id){XEDIT=null;renderXEdit();}}
 });
 $("xList").addEventListener("change",function(e){var s=e.target.closest("[data-xdoc]");if(s)db.doc("exercises/"+s.dataset.xdoc).merge({docId:s.value||null});});
 $("xImport").addEventListener("change",function(e){
   var f=e.target.files[0];e.target.value="";if(!f)return;
   f.text().then(function(t){var o=JSON.parse(t),x=o.exercise||o;if(!x||!x.sections)throw 0;x.custom=true;delete x.docId;openEditor(null,x);xDirty=true;renderXEdit();})
-   .catch(function(){alert("That file isn’t a CARANA exercise. Use a file exported from this page.");});
+   .catch(function(){alert("That file isn’t a scenario file. Use a file exported from this page.");});
 });
 
 
@@ -2513,7 +2521,7 @@ $("prepPreviewBtn").addEventListener("click",function(){if(!COURSE)return;prepPr
 $("prepFile").addEventListener("change",async function(e){
   var f=e.target.files[0];e.target.value="";if(!f)return;var note=$("prepNote");
   var data;try{data=JSON.parse(await f.text());}catch(x){note.textContent="That file isn’t a course file.";return;}
-  if(!data||data.format!=="carana-course"||!Array.isArray(data.modules)){note.textContent="That file isn’t a CARANA course file.";return;}
+  if(!data||data.format!=="carana-course"||!Array.isArray(data.modules)){note.textContent="That file isn’t a course file for this hub.";return;}
   var nch=data.modules.reduce(function(s,m){return s+(m.chapters||[]).length;},0);
   if(!confirm("Publish “"+(data.title||"course")+"” ("+data.modules.length+" modules, "+nch+" chapters) to participants? "+(COURSE?"It replaces the current course content. Participants keep their progress on chapters that still exist.":"")))return;
   $("prepLoadLbl").classList.add("disabled");
@@ -2533,6 +2541,21 @@ $("prepFile").addEventListener("change",async function(e){
   }catch(x){var code=x&&x.code||"",msg=x&&x.message||String(x);
     note.textContent="Publishing stopped at "+(typeof step!=="undefined"?step:"the start")+": "+(code==="permission-denied"?"the database rules don’t allow it yet. Paste the current firestore.rules into Firebase and publish them, then load the file again.":msg);}
   finally{$("prepLoadLbl").classList.remove("disabled");}
+});
+
+/* ---------- Hub settings (name, tagline, exercise) ---------- */
+var SITE={hubName:"Skill Development Hub",hubTag:"UN Police training",exerciseName:"CARANA"};
+function initials(n){var w=String(n).split(/\s+/).filter(function(x){return x&&!/^(of|the|and|for|de|la|du|et)$/i.test(x);});return (w.length>1?w.slice(0,3).map(function(x){return x[0];}).join(""):String(n).slice(0,6)).toUpperCase();}
+function applySite(){
+  document.title=SITE.hubName;$("hubMark").textContent=(SITE.hubBadge||initials(SITE.hubName)).toUpperCase();$("exTitle").textContent=SITE.hubName;
+  $("gateTitle").textContent=SITE.hubName;$("gateTag").textContent=SITE.hubTag;
+  document.querySelectorAll(".exName").forEach(function(e){e.textContent=SITE.exerciseName;});
+  if(document.activeElement&&/^set/.test(document.activeElement.id||""))return;
+  $("setHub").value=SITE.hubName;$("setBadge").value=SITE.hubBadge||"";$("setTag").value=SITE.hubTag;$("setEx").value=SITE.exerciseName;
+}
+$("setSave").addEventListener("click",function(){
+  var v={hubName:$("setHub").value.trim()||"Skill Development Hub",hubBadge:$("setBadge").value.trim(),hubTag:$("setTag").value.trim(),exerciseName:$("setEx").value.trim()||"CARANA"};
+  db.doc("settings/site").set(v).then(function(){toast($("setNote"),"Saved.");},function(){toast($("setNote"),"Couldn’t save. Paste the current firestore.rules into Firebase first.");});
 });
 
 /* ---------- Sign-in ---------- */
@@ -2573,6 +2596,7 @@ var booted=false;
   CONF=C;DOMAIN=String(C.authDomain||(C.projectId+".firebaseapp.com")).toLowerCase();
   var app=initializeApp(C);AUTH=getAuth(app);fsRef=initializeFirestore(app,{ignoreUndefinedProperties:true});db=makeDb(fsRef);
   setStatus("Sign in to continue.");
+  db.doc("settings/site").onSnapshot(function(s){if(s.exists)SITE=Object.assign({},SITE,s.data());applySite();},function(){applySite();});
   onAuthStateChanged(AUTH,async function(u){
     if(!u){SIGNED=false;$("signOutBtn").hidden=true;show("login");setTimeout(function(){$("gLogin").focus();},50);return;}
     if(booted)return;booted=true;AUTHUSER=u;uid=u.uid;$("signOutBtn").hidden=false;
@@ -2588,8 +2612,8 @@ var booted=false;
       // A personal login follows its owner into whichever group they're placed in for the running exercise.
       if(mdata)db.doc("members/"+u.uid).onSnapshot(function(s){if(!s.exists)return;var d=s.data();if((d.teamId||null)!==TEAMID){setStatus("Your group has changed. Reloading…");setTimeout(function(){location.reload();},800);}});
       if(PERSON)SIGNIN_PENDING=true;
-      if(!TEAMID&&PERSON){$("whoLine").textContent=PERSON.name+" · UNAC Police planning exercises";}
-      else if(!TEAMID){$("gErr").textContent="This account isn’t a group or staff login for CARANA.";setStatus("Signed in as "+(u.email||"unknown")+", which has no access here. Sign out and use the details your course staff gave you.",true);$("signOutBtn").hidden=false;return;}
+      if(!TEAMID&&PERSON){$("whoLine").textContent=PERSON.name+" · "+SITE.hubName;}
+      else if(!TEAMID){$("gErr").textContent="This account has no access to this hub.";setStatus("Signed in as "+(u.email||"unknown")+", which has no access here. Sign out and use the details your course staff gave you.",true);$("signOutBtn").hidden=false;return;}
       
       if(TEAMID){
       $("whoLine").textContent=(PERSON?PERSON.name+" · ":"")+TEAM.name+" · UNAC Police planning team";
