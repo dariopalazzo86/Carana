@@ -201,6 +201,58 @@ table.logins td.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,mono
 @media (max-width:640px){.rrow{grid-template-columns:1fr}}
 .score{font-weight:700;font-variant-numeric:tabular-nums}
 .lib{max-width:960px}
+/* Preparation course */
+.prog-hero{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;max-width:760px;margin:0 0 24px}
+.prog-bar{height:12px;border-radius:99px;background:var(--paper);border:1px solid var(--line);overflow:hidden}
+.prog-bar span{display:block;height:100%;background:var(--ok);border-radius:99px;transition:width .4s}
+.prog-bar.sm{height:8px;min-width:110px;display:inline-block;width:110px;vertical-align:middle;margin-right:6px}
+.prep-mod{max-width:760px;margin:0 0 22px}
+.prep-mod h2{margin:10px 0 4px}
+.chlist{list-style:none;padding:0;margin:8px 0 0;border:1px solid var(--line);border-radius:10px;background:var(--surface);overflow:hidden}
+.chlist li+li{border-top:1px solid var(--line)}
+.chlist button{display:flex;width:100%;gap:12px;align-items:center;text-align:left;border:0;background:none;padding:12px 14px;font-size:1rem}
+.chlist button:hover:not(:disabled){background:var(--un-soft)}
+.chlist button:disabled{cursor:not-allowed;color:var(--muted)}
+.chlist .ico{width:1.6em;text-align:center;font-weight:700}
+.chlist .t{flex:1;font-weight:600}
+.chlist li.done .ico{color:var(--ok)} .chlist li.cur{background:var(--terrain-soft)} .chlist li.cur .ico{color:var(--terrain)}
+.reader-top{display:flex;gap:12px;align-items:center;flex-wrap:wrap;max-width:760px;margin:0 auto 10px}
+.reader{max-width:760px;margin:0 auto;font-family:var(--serif);font-size:1.1rem;line-height:1.7}
+.reader h1{margin-bottom:16px}
+.reader h3{font-family:var(--sans);font-size:1.05rem;margin:28px 0 6px;color:var(--terrain)}
+.reader p{margin:0 0 14px}
+.reader ul,.reader ol{padding-left:1.3em;margin:0 0 14px} .reader li{margin:5px 0}
+.reader figure{margin:22px 0;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px}
+.reader figure img{display:block;width:100%;height:auto;border-radius:6px;min-height:60px;background:var(--paper)}
+.reader figcaption{font-family:var(--sans);font-size:.86rem;color:var(--muted);padding:8px 4px 0}
+.reader .kv{font-family:var(--sans);font-size:.94rem;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin:0 0 16px;overflow:hidden}
+.reader .kvt{font-weight:700;padding:9px 14px;background:var(--terrain-soft);color:var(--terrain)}
+.reader .kv dl{display:grid;grid-template-columns:minmax(120px,32%) 1fr;margin:0}
+.reader .kv dt,.reader .kv dd{margin:0;padding:7px 14px;border-top:1px solid var(--line)}
+.reader .kv dt{color:var(--muted);font-weight:600}
+.callout{border-left:4px solid var(--un);background:var(--un-soft);padding:10px 14px;border-radius:0 8px 8px 0;margin:0 0 14px}
+.qcard{font-family:var(--sans);font-size:1rem;line-height:1.5;border:2px solid var(--un);border-radius:12px;background:var(--surface);padding:16px 18px;margin:24px 0}
+.qcard.ok{border-color:var(--ok)}
+.qlabel{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--un);margin-bottom:6px}
+.qcard.ok .qlabel{color:var(--ok)}
+.qprompt{font-weight:600;margin:0 0 10px}
+.qopts{display:grid;gap:6px;margin-bottom:12px}
+.qopt{display:flex;gap:10px;align-items:flex-start;border:1px solid var(--line);border-radius:8px;padding:9px 12px;cursor:pointer}
+.qopt input{margin-top:4px}
+.qopt:has(input:checked){border-color:var(--un);background:var(--un-soft)}
+.qopt.right{border-color:var(--ok);background:var(--ok-soft)}
+.qfb{margin:0 0 10px;font-size:.95rem}
+.qfb:empty{display:none}
+.qfb.bad{background:var(--amber-soft);border-radius:8px;padding:9px 12px}
+.qfb.good{background:var(--ok-soft);border-radius:8px;padding:9px 12px;margin:0}
+.locked-more{font-family:var(--sans);text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:10px;padding:16px;margin:10px 0 30px;font-size:.92rem}
+.chend{font-family:var(--sans);font-size:1rem;background:var(--ok-soft);border-radius:10px;padding:16px 18px;margin:28px 0 40px}
+.previewbar{background:var(--amber-soft);border-radius:8px;padding:10px 14px;margin:0 0 18px;max-width:760px}
+.qchip{display:inline-block;font-size:.78rem;padding:2px 8px;border-radius:99px;background:var(--paper);margin:2px 0}
+.qchip.ok{background:var(--ok-soft);color:var(--ok)} .qchip.hard{background:var(--amber-soft);color:var(--amber);font-weight:700} .qchip.bad{background:var(--flash-soft);color:var(--flash)}
+label.btn.disabled{opacity:.5;pointer-events:none}
+@media (prefers-reduced-motion:no-preference){.reveal{animation:revealIn .5s ease-out}@keyframes revealIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}}
+@media (max-width:600px){.reader{font-size:1.02rem}.reader .kv dl{grid-template-columns:1fr}.reader .kv dd{border-top:0;padding-top:0}}
 .logtab tbody tr{cursor:pointer}
 .logtab tbody tr:hover td{filter:brightness(.97)}
 .logtab tr.sel td.rh{color:var(--un)}
@@ -297,6 +349,21 @@ footer p{margin:0 0 8px}
     <button class="btn primary" id="finalBtn">Submit joint result</button>
   </div>
   <div class="checkbox" id="plenaryChecks"></div>
+</section>
+
+<section class="view" id="v-prep">
+  <div id="prepStaff" hidden>
+    <h1>Preparation course</h1>
+    <p class="lede">The self-paced reading course for participants with a personal login. Chapters unlock in order; each question must be answered correctly to continue. Progress is saved for every participant.</p>
+    <div class="course" id="prepInfoBox"><div class="txt" id="prepInfo"></div><button class="btn" id="prepPreviewBtn">Preview as a participant</button><label class="btn primary" id="prepLoadLbl" for="prepFile">Load course file</label><input type="file" id="prepFile" accept=".json,application/json" hidden></div>
+    <p class="small" id="prepNote"></p>
+    <h2>Participants’ progress</h2>
+    <p class="small" id="prepSummary" style="font-weight:600"></p>
+    <div id="prepTable"></div>
+    <div id="prepDetail" style="margin-top:18px"></div>
+  </div>
+  <div id="prepHome"></div>
+  <div id="prepReader" hidden></div>
 </section>
 
 <section class="view" id="v-library">
@@ -992,14 +1059,16 @@ function keepOpen(box,html){var was=box.querySelector("details");var open=was&&w
 
 /* ---------- Navigation ---------- */
 var TEAM_VIEWS=[["brief","Brief"],["work","Worksheet"],["messages","Messages"],["others","Other groups"],["plenary","Joint plan"],["library","Library"]];
-var STAFF_VIEWS=[["run","Run"],["exercises","Exercises"],["groups","Groups"],["people","Participants"],["reading","Reading log"],["results","Results"],["plenary","Joint plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
+var STAFF_VIEWS=[["run","Run"],["exercises","Exercises"],["groups","Groups"],["people","Participants"],["prep","Preparation"],["reading","Reading log"],["results","Results"],["plenary","Joint plan"],["brief","Brief"],["library","Library"],["staff","Staff"]];
 var current="login";
 function visibleViews(){
   if(!SIGNED)return [];
   if(isStaff)return STAFF_VIEWS;
-  if(!L().courseOpen||!TEAMID)return [["library","Library"]];
+  var pre=PERSON?[["prep","Preparation"]]:[];
+  if(!L().courseOpen||!TEAMID)return pre.concat([["library","Library"]]);
   var st=L().stage;
-  return TEAM_VIEWS.filter(function(v){if(v[0]==="others")return st!=="group";if(v[0]==="plenary")return st!=="group";return true;});
+  var tv=TEAM_VIEWS.filter(function(v){if(v[0]==="others")return st!=="group";if(v[0]==="plenary")return st!=="group";return true;});
+  return PERSON?tv.slice(0,-1).concat(pre,tv.slice(-1)):tv;
 }
 function show(id){
   var vis=visibleViews().map(function(v){return v[0];});
@@ -1013,6 +1082,7 @@ function show(id){
   if(id==="exercises")renderXList();
   if(id==="library")renderLibrary();
   if(id==="reading")renderReadLog();
+  if(id==="prep")renderPrep();
   if(id==="messages"){acks=acks.concat(L().sent.map(function(m){return m.id;}).filter(function(x){return acks.indexOf(x)<0;}));saveAcks();renderTrack();}
   try{if(location.hash.slice(1)!==id)history.replaceState(null,"","#"+id);}catch(e){}
   window.scrollTo(0,0);
@@ -2248,6 +2318,208 @@ $("xImport").addEventListener("change",function(e){
    .catch(function(){alert("That file isn’t a CARANA exercise. Use a file exported from this page.");});
 });
 
+
+/* =====================================================================
+   Preparation course (self-paced reading with questions)
+   ===================================================================== */
+var COURSE=null,CH_CACHE={},IMG_CACHE={},PROG=null,progUnsub=null,PROG_ALL={},progAllUnsub=null;
+var prepMode="home",prepCh=null,prepPreview=false,PREVIEW_ANS={};
+function flatChapters(){var out=[];if(!COURSE)return out;(COURSE.modules||[]).forEach(function(m,mi){(m.chapters||[]).forEach(function(c,ci){out.push({id:c.id,title:c.title,nq:c.nq||0,module:m,mi:mi,ci:ci});});});return out;}
+function progData(){return prepPreview?{done:{},ans:PREVIEW_ANS}:(PROG||{done:{},ans:{}});}
+function chDone(id){if(prepPreview)return false;var p=progData();return !!(p.done&&p.done[id]);}
+function chUnlocked(i){if(prepPreview||isStaff)return true;var fl=flatChapters();return i===0||chDone(fl[i-1].id);}
+function qOk(qid){var a=(progData().ans||{})[qid];return !!(a&&a.ok);}
+function prepPct(p){var fl=flatChapters();if(!fl.length)return 0;var n=fl.filter(function(c){return p&&p.done&&p.done[c.id];}).length;return Math.round(n/fl.length*100);}
+function nextChapterIndex(){var fl=flatChapters();for(var i=0;i<fl.length;i++)if(!chDone(fl[i].id))return i;return -1;}
+function saveProg(patch){
+  if(prepPreview||!uid||isStaff)return;
+  PROG=PROG||{done:{},ans:{}};
+  Object.keys(patch).forEach(function(k){if(patch[k]&&typeof patch[k]==="object"&&!Array.isArray(patch[k])){PROG[k]=Object.assign({},PROG[k]||{},patch[k]);}else PROG[k]=patch[k];});
+  var body=Object.assign({},patch,{updatedAt:Date.now(),personId:PERSON?PERSON.id:"",name:PERSON?PERSON.name:""});
+  db.doc("progress/"+uid).merge(body).catch(function(){setStatus("Your progress couldn’t be saved. Check your connection.",true);});
+}
+function loadCourse(){
+  db.doc("course/meta").onSnapshot(function(s){COURSE=s.exists?s.data():null;CH_CACHE={};renderPrep();},function(){COURSE=null;renderPrep();});
+  if(!isStaff&&PERSON&&uid)progUnsub=db.doc("progress/"+uid).onSnapshot(function(s){var fresh=s.exists?s.data():{done:{},ans:{}};fresh.done=fresh.done||{};fresh.ans=fresh.ans||{};PROG=fresh;if(prepMode==="home")renderPrep();},function(){});
+  if(isStaff)progAllUnsub=db.collection("progress").onSnapshot(function(q){PROG_ALL={};q.docs.forEach(function(d){PROG_ALL[d.id]=d.data();});if(current==="prep"&&!prepPreview)renderPrepDash();},function(){});
+}
+function getChapter(id){if(CH_CACHE[id])return Promise.resolve(CH_CACHE[id]);return db.doc("course_ch/"+id).get().then(function(s){if(!s.exists)throw new Error("missing");CH_CACHE[id]=s.data();return CH_CACHE[id];});}
+function fillImages(host){
+  host.querySelectorAll("img[data-img]").forEach(function(el){
+    var id=el.dataset.img;if(el.src)return;
+    var put=function(src){el.src=src;el.removeAttribute("data-img");};
+    if(IMG_CACHE[id]){put(IMG_CACHE[id]);return;}
+    db.doc("course_img/"+id).get().then(function(s){if(!s.exists)return;var d=s.data();IMG_CACHE[id]="data:"+(d.type||"image/jpeg")+";base64,"+d.d;put(IMG_CACHE[id]);}).catch(function(){});
+  });
+}
+
+/* ---------- Rendering ---------- */
+function renderPrep(){
+  if(!SIGNED)return;
+  $("prepStaff").hidden=!isStaff||prepPreview;
+  if(isStaff&&!prepPreview){$("prepHome").hidden=true;$("prepReader").hidden=true;renderPrepDash();return;}
+  if(!COURSE){$("prepHome").hidden=false;$("prepReader").hidden=true;$("prepHome").innerHTML='<div class="empty">The preparation course hasn’t been published yet. Your course staff will let you know when it’s ready; meanwhile you can read the documents in the Library.</div>';return;}
+  if(prepMode==="chapter"&&prepCh){$("prepHome").hidden=true;$("prepReader").hidden=false;return;}
+  $("prepHome").hidden=false;$("prepReader").hidden=true;renderPrepHome();
+}
+function renderPrepHome(){
+  var fl=flatChapters(),p=progData(),pct=prepPreview?0:prepPct(p),ni=nextChapterIndex(),h="";
+  if(prepPreview)h+='<div class="previewbar"><b>Preview.</b> You see the course as a participant would, with every chapter open. Nothing is saved. <button class="btn sm" id="prepExitPreview">Back to the dashboard</button></div>';
+  h+='<h1>'+esc(COURSE.title||"Preparation course")+'</h1><p class="lede">'+esc(COURSE.intro||"")+'</p>';
+  if(!prepPreview){
+    var done=fl.filter(function(c){return chDone(c.id);}).length;
+    h+='<div class="prog-hero"><div class="prog-bar"><span style="width:'+pct+'%"></span></div><div class="row" style="justify-content:space-between;margin-top:8px"><b>'+pct+'% complete</b><span class="small">'+done+' of '+fl.length+' chapters</span></div>'+
+      (ni>=0?'<button class="btn primary" data-opench="'+esc(fl[ni].id)+'" style="margin-top:12px">'+(done?"Continue: ":"Start: ")+esc(fl[ni].title)+'</button>':'<p style="margin:12px 0 0;font-weight:700;color:var(--ok)">You have completed the whole preparation course. Well done.</p>')+'</div>';
+  }
+  (COURSE.modules||[]).forEach(function(m,mi){
+    var mch=fl.filter(function(c){return c.mi===mi;}),md=mch.filter(function(c){return chDone(c.id);}).length;
+    h+='<section class="prep-mod"><div class="row" style="justify-content:space-between;align-items:baseline"><h2>Module '+(mi+1)+': '+esc(m.title)+'</h2><span class="small">'+(prepPreview?mch.length+" chapters":md+" of "+mch.length+" chapters")+'</span></div>'+(m.summary?'<p class="small" style="margin-top:0">'+esc(m.summary)+'</p>':'')+'<ol class="chlist">'+
+      mch.map(function(c){var i=fl.indexOf(c),d=chDone(c.id),u=chUnlocked(i),cur=!prepPreview&&i===ni;
+        return '<li class="'+(d?"done":cur?"cur":u?"":"locked")+'"><button data-opench="'+esc(c.id)+'"'+(u?"":" disabled")+'><span class="ico" aria-hidden="true">'+(d?"✓":u?(cur?"→":"○"):"🔒")+'</span><span class="t">'+esc(c.title)+'</span><span class="small">'+(d?"Completed":u?(c.nq?c.nq+" question"+(c.nq>1?"s":""):"Reading"):"Locked")+'</span></button></li>';}).join("")+'</ol></section>';
+  });
+  $("prepHome").innerHTML=h;
+}
+var chState=null; // {id, blocks, stop}
+function openChapter(id){
+  var fl=flatChapters(),i=fl.map(function(c){return c.id;}).indexOf(id);if(i<0)return;
+  if(!chUnlocked(i)){alert("Finish the previous chapter first.");return;}
+  prepMode="chapter";prepCh=id;
+  $("prepHome").hidden=true;$("prepReader").hidden=false;$("prepReader").innerHTML='<div class="empty">Loading chapter…</div>';window.scrollTo(0,0);
+  getChapter(id).then(function(ch){chState={id:id,ch:ch,meta:fl[i],index:i};renderChapter(false);if(!prepPreview)saveProg({cur:id});})
+    .catch(function(){$("prepReader").innerHTML='<div class="empty">This chapter couldn’t be loaded. Check your connection and try again. <div style="margin-top:10px"><button class="btn" data-prephome>Back to contents</button></div></div>';});
+}
+function blockHtml(b,idx){
+  switch(b.t){
+  case "h":return '<h3>'+esc(b.x)+'</h3>';
+  case "p":return '<p>'+fmtInline(b.x)+'</p>';
+  case "note":return '<div class="callout">'+fmtInline(b.x)+'</div>';
+  case "ul":return '<ul>'+b.items.map(function(x){return '<li>'+fmtInline(x)+'</li>';}).join("")+'</ul>';
+  case "ol":return '<ol>'+b.items.map(function(x){return '<li>'+fmtInline(x)+'</li>';}).join("")+'</ol>';
+  case "kv":return '<div class="kv">'+(b.title?'<div class="kvt">'+esc(b.title)+'</div>':'')+'<dl>'+b.rows.map(function(r){return '<dt>'+esc(r[0])+'</dt><dd>'+fmtInline(r[1])+'</dd>';}).join("")+'</dl></div>';
+  case "table":return '<div class="tablewrap"><table class="plain">'+b.rows.map(function(r,ri){return '<tr>'+r.map(function(c){return ri===0&&b.head?'<th>'+esc(c)+'</th>':'<td>'+fmtInline(c)+'</td>';}).join("")+'</tr>';}).join("")+'</table></div>';
+  case "img":return '<figure><img data-img="'+esc(b.src)+'" alt="'+esc(b.cap||"")+'"><figcaption>'+esc(b.cap||"")+'</figcaption></figure>';
+  case "q":return questionHtml(b,idx);
+  }
+  return "";
+}
+function questionHtml(q,idx){
+  var ok=qOk(q.id),multi=q.kind==="multi",name="q_"+q.id;
+  var a=(progData().ans||{})[q.id]||{};
+  return '<div class="qcard'+(ok?" ok":"")+'" data-q="'+idx+'"><div class="qlabel">'+(ok?"Answered":"Check your understanding")+'</div><p class="qprompt">'+esc(q.prompt)+'</p>'+(multi&&!ok?'<p class="small" style="margin:-6px 0 8px">Select all that apply.</p>':'')+
+    '<div class="qopts">'+q.options.map(function(o,j){var isC=q.correct.indexOf(j)>=0;
+      return '<label class="qopt'+(ok&&isC?" right":"")+'"><input type="'+(multi?"checkbox":"radio")+'" name="'+esc(name)+'" value="'+j+'"'+(ok?" disabled":"")+(ok&&isC?" checked":"")+'> <span>'+esc(o)+'</span></label>';}).join("")+'</div>'+
+    (ok?'<div class="qfb good"><b>Correct.</b> '+esc(q.explain||"")+'</div>':'<div class="qfb" aria-live="polite"></div><button class="btn primary" data-check="'+idx+'">Check answer</button>'+(a.tries?'<span class="small" style="margin-left:10px">Attempts so far: '+a.tries+'</span>':''))+'</div>';
+}
+function renderChapter(keepScroll){
+  var st=chState,b=st.ch.blocks||[],fl=flatChapters(),m=st.meta,y=window.scrollY;
+  var stop=b.length;for(var i=0;i<b.length;i++){if(b[i].t==="q"&&!qOk(b[i].id)){stop=i+1;break;}}
+  st.stop=stop;
+  var allOk=b.every(function(x){return x.t!=="q"||qOk(x.id);}),hasQ=b.some(function(x){return x.t==="q";});
+  var h='<div class="reader-top">'+(prepPreview?'<span class="pill prog" style="margin-right:8px">Preview</span>':'')+'<button class="linkbtn" data-prephome>← Contents</button><span class="small">Module '+(m.mi+1)+': '+esc(m.module.title)+' · Chapter '+(m.ci+1)+' of '+m.module.chapters.length+'</span></div>'+
+    '<article class="reader"><h1>'+esc(st.ch.title)+'</h1>'+b.slice(0,stop).map(function(x,k){return blockHtml(x,k);}).join("");
+  if(stop<b.length)h+='<div class="locked-more">The rest of this chapter appears when you answer the question above.</div>';
+  else{
+    var done=chDone(st.id)||prepPreview;
+    if(!hasQ&&!done)h+='<div class="chend"><button class="btn primary" id="markRead">I have read this chapter</button></div>';
+    else{
+      var nxt=fl[st.index+1];
+      h+='<div class="chend"><b>'+(prepPreview?"End of chapter.":"Chapter completed.")+'</b> '+(nxt?(nxt.mi!==m.mi?"Next module: "+esc(nxt.module.title)+".":""):(prepPreview?"":"This was the last chapter of the course."))+
+        '<div class="row" style="margin-top:10px">'+(nxt?'<button class="btn primary" data-opench="'+esc(nxt.id)+'">Next: '+esc(nxt.title)+'</button>':'')+'<button class="btn" data-prephome>Back to contents</button></div></div>';
+    }
+  }
+  h+='</article>';
+  $("prepReader").innerHTML=h;fillImages($("prepReader"));
+  if(keepScroll)window.scrollTo(0,y);
+  if(allOk&&hasQ&&!chDone(st.id)&&!prepPreview){var d={};d[st.id]=Date.now();saveProg({done:d});}
+}
+function checkAnswer(idx){
+  var st=chState,q=st.ch.blocks[idx],card=$("prepReader").querySelector('[data-q="'+idx+'"]');
+  var picked=Array.prototype.map.call(card.querySelectorAll("input:checked"),function(i){return +i.value;}).sort();
+  var fb=card.querySelector(".qfb");
+  if(!picked.length){fb.className="qfb";fb.textContent="Choose an answer first.";return;}
+  var corr=q.correct.slice().sort(),ok=picked.length===corr.length&&picked.every(function(v,i){return v===corr[i];});
+  var prev=(progData().ans||{})[q.id]||{},tries=(prev.tries||0)+1,rec={ok:ok,tries:tries,at:Date.now()};
+  if(prepPreview){PREVIEW_ANS[q.id]=rec;}else{var a={};a[q.id]=rec;saveProg({ans:a});}
+  if(ok){renderChapter(true);var nextEl=$("prepReader").querySelector('[data-q="'+idx+'"]');if(nextEl){var n=nextEl.nextElementSibling;if(n)n.classList.add("reveal");}}
+  else{fb.className="qfb bad";fb.innerHTML='<b>Not quite.</b> '+esc(q.hint||"Have another look at the text above and try again.");
+    var t=card.querySelector(".small");if(t)t.textContent="Attempts so far: "+tries;else card.querySelector("[data-check]").insertAdjacentHTML("afterend",'<span class="small" style="margin-left:10px">Attempts so far: '+tries+'</span>');}
+}
+$("v-prep").addEventListener("click",function(e){
+  var t=e.target.closest("button");if(!t)return;
+  if(t.dataset.opench){openChapter(t.dataset.opench);return;}
+  if(t.hasAttribute("data-prephome")){prepMode="home";prepCh=null;renderPrep();window.scrollTo(0,0);return;}
+  if(t.dataset.check!=null){checkAnswer(+t.dataset.check);return;}
+  if(t.id==="markRead"){var d={};d[chState.id]=Date.now();saveProg({done:d});renderChapter(true);return;}
+  if(t.id==="prepExitPreview"){prepPreview=false;PREVIEW_ANS={};prepMode="home";prepCh=null;renderPrep();window.scrollTo(0,0);return;}
+});
+
+/* ---------- Staff: content and progress dashboard ---------- */
+var PREP_SEL=null;
+function renderPrepDash(){
+  if(!isStaff)return;
+  var fl=flatChapters(),nq=fl.reduce(function(s,c){return s+(c.nq||0);},0);
+  $("prepInfo").innerHTML=COURSE?'<b>'+esc(COURSE.title)+'</b><span class="small">'+(COURSE.modules||[]).length+' module'+((COURSE.modules||[]).length===1?"":"s")+', '+fl.length+' chapters, '+nq+' questions. Loaded '+(COURSE.loadedAt?esc(new Date(COURSE.loadedAt).toLocaleString()):"")+'.</span>'
+    :'<b>No course loaded yet.</b><span class="small">Load the course file (carana-course.json) to publish it to participants with personal logins.</span>';
+  $("prepPreviewBtn").disabled=!COURSE;
+  if(!COURSE){$("prepTable").innerHTML="";$("prepDetail").innerHTML="";return;}
+  var people=(PEOPLE.list||[]).filter(function(p){return p.uid;}).sort(function(a,b){return a.name.localeCompare(b.name);});
+  var rows=people.map(function(p){return {p:p,g:PROG_ALL[p.uid]};});
+  Object.keys(PROG_ALL).forEach(function(k){if(!people.some(function(p){return p.uid===k;}))rows.push({p:{name:PROG_ALL[k].name||"(unknown)",uid:k,orphan:true},g:PROG_ALL[k]});});
+  var started=rows.filter(function(r){return r.g&&Object.keys(r.g.ans||{}).length;}).length,finished=rows.filter(function(r){return r.g&&prepPct(r.g)===100;}).length;
+  $("prepSummary").textContent=rows.length?rows.length+" participants with a personal login. "+started+" have started, "+finished+" have finished.":"";
+  if(!rows.length){$("prepTable").innerHTML='<div class="empty">No participants have a personal login yet. Create them in the Participants tab.</div>';$("prepDetail").innerHTML="";return;}
+  var dt=function(t){return t?new Date(t).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"–";};
+  var groupsById={};groupsSorted().forEach(function(g){groupsById[g.id]=g.name;});
+  $("prepTable").innerHTML='<div class="wide"><table class="ws logtab"><thead><tr><th style="min-width:180px">Participant</th><th>Group</th><th style="min-width:150px">Progress</th><th>Chapters</th>'+(COURSE.modules||[]).map(function(m,mi){return '<th title="'+esc(m.title)+'">Module '+(mi+1)+'</th>';}).join("")+'<th>Now reading</th><th>First-try correct</th><th>Last activity</th></tr></thead><tbody>'+
+    rows.map(function(r){var g=r.g||{done:{},ans:{}},pct=prepPct(g),dn=fl.filter(function(c){return g.done&&g.done[c.id];}).length;
+      var ans=Object.keys(g.ans||{}).map(function(k){return g.ans[k];}).filter(function(a){return a.ok;}),first=ans.filter(function(a){return a.tries===1;}).length;
+      var curC=fl.filter(function(c){return c.id===g.cur&&!(g.done&&g.done[c.id]);})[0]||(Object.keys(g.ans||{}).length?fl.filter(function(c){return !(g.done&&g.done[c.id]);})[0]:null),gid=r.p.groups?(r.p.groups[exId()]):null;
+      return '<tr data-prow="'+esc(r.p.uid)+'"'+(PREP_SEL===r.p.uid?' class="sel"':'')+'><td class="rh">'+esc(r.p.orphan?r.p.name:personLabel(r.p))+(r.p.orphan?' <span class="small">(not registered)</span>':'')+'</td><td class="small">'+esc(gid&&groupsById[gid]||"–")+'</td>'+
+        '<td><div class="prog-bar sm"><span style="width:'+pct+'%"></span></div><span class="small">'+pct+'%</span></td><td class="score">'+dn+' / '+fl.length+'</td>'+
+        (COURSE.modules||[]).map(function(m,mi){var mc=fl.filter(function(c){return c.mi===mi;}),md=mc.filter(function(c){return g.done&&g.done[c.id];}).length;return '<td class="'+(md===mc.length?"hit":md?"":"miss")+'">'+md+' / '+mc.length+'</td>';}).join("")+
+        '<td class="small">'+(pct===100?"Finished":curC?esc(curC.title):"Not started")+'</td><td class="small">'+(ans.length?Math.round(first/ans.length*100)+"%":"–")+'</td><td class="small">'+dt(g.updatedAt)+'</td></tr>';}).join("")+
+    '</tbody></table></div><p class="small">Click a participant for chapter-by-chapter detail.</p>';
+  var sel=rows.filter(function(r){return r.p.uid===PREP_SEL;})[0];
+  if(!sel){$("prepDetail").innerHTML="";return;}
+  var g=sel.g||{done:{},ans:{}};
+  var detail=fl.map(function(c){var d=g.done&&g.done[c.id];var ch=CH_CACHE[c.id];
+    var qs=ch?(ch.blocks||[]).filter(function(b){return b.t==="q";}):[];
+    var qinfo=qs.length?qs.map(function(q,k){var a=(g.ans||{})[q.id];return '<span class="qchip'+(a&&a.ok?(a.tries>2?" hard":" ok"):a?" bad":"")+'" title="'+esc(q.prompt)+'">Q'+(k+1)+': '+(a?(a.ok?a.tries+(a.tries===1?" try":" tries"):"not yet ("+a.tries+")"):"–")+'</span>';}).join(" "):'<span class="small">'+(c.nq?'<button class="linkbtn" data-loadq="'+esc(c.id)+'">Show question detail</button>':"No questions")+'</span>';
+    return '<tr><td class="small">M'+(c.mi+1)+'.'+(c.ci+1)+'</td><td>'+esc(c.title)+'</td><td class="small">'+(d?"✓ "+esc(new Date(d).toLocaleString([], {day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})):(g.cur===c.id?"Reading":"–"))+'</td><td>'+qinfo+'</td></tr>';}).join("");
+  $("prepDetail").innerHTML='<div class="panel" style="max-width:1100px"><div class="row" style="justify-content:space-between"><h3 style="margin:0">'+esc(sel.p.orphan?sel.p.name:personLabel(sel.p))+'</h3><div class="row"><button class="btn sm danger" data-preset="'+esc(sel.p.uid)+'">Reset progress</button><button class="btn sm" id="prepDetailClose">Close</button></div></div>'+
+    '<div class="tablewrap" style="margin-top:10px"><table class="plain"><thead><tr><th></th><th>Chapter</th><th>Completed</th><th>Questions (attempts)</th></tr></thead><tbody>'+detail+'</tbody></table></div><p class="small">Questions needing three or more attempts are highlighted.</p></div>';
+}
+$("prepTable").addEventListener("click",function(e){var tr=e.target.closest("[data-prow]");if(!tr)return;PREP_SEL=PREP_SEL===tr.dataset.prow?null:tr.dataset.prow;renderPrepDash();
+  if(PREP_SEL)Promise.all(flatChapters().map(function(c){return getChapter(c.id).catch(function(){});})).then(renderPrepDash);});
+$("prepDetail").addEventListener("click",function(e){
+  if(e.target.id==="prepDetailClose"){PREP_SEL=null;renderPrepDash();}
+  var r=e.target.closest("[data-preset]");if(r&&confirm("Delete this participant’s preparation progress? They will start again from the first chapter."))db.doc("progress/"+r.dataset.preset).delete().catch(function(){alert("Couldn’t reset. Try again.");});
+  var l=e.target.closest("[data-loadq]");if(l)getChapter(l.dataset.loadq).then(renderPrepDash);
+});
+$("prepPreviewBtn").addEventListener("click",function(){if(!COURSE)return;prepPreview=true;PREVIEW_ANS={};prepMode="home";prepCh=null;renderPrep();window.scrollTo(0,0);});
+$("prepFile").addEventListener("change",async function(e){
+  var f=e.target.files[0];e.target.value="";if(!f)return;var note=$("prepNote");
+  var data;try{data=JSON.parse(await f.text());}catch(x){note.textContent="That file isn’t a course file.";return;}
+  if(!data||data.format!=="carana-course"||!Array.isArray(data.modules)){note.textContent="That file isn’t a CARANA course file.";return;}
+  var nch=data.modules.reduce(function(s,m){return s+(m.chapters||[]).length;},0);
+  if(!confirm("Publish “"+(data.title||"course")+"” ("+data.modules.length+" modules, "+nch+" chapters) to participants? "+(COURSE?"It replaces the current course content. Participants keep their progress on chapters that still exist.":"")))return;
+  $("prepLoadLbl").classList.add("disabled");
+  try{
+    var imgs=data.images||{},keys=Object.keys(imgs),k=0;
+    for(k=0;k<keys.length;k++){note.textContent="Uploading images… ("+(k+1)+" of "+keys.length+")";await db.doc("course_img/"+keys[k]).set(imgs[keys[k]]);}
+    var ids={},done=0;
+    for(var mi=0;mi<data.modules.length;mi++){var m=data.modules[mi];for(var ci=0;ci<(m.chapters||[]).length;ci++){var c=m.chapters[ci];ids[c.id]=1;
+      note.textContent="Uploading chapters… ("+(++done)+" of "+nch+")";await db.doc("course_ch/"+c.id).set({moduleId:m.id,title:c.title,blocks:c.blocks});}}
+    var meta={title:data.title||"Preparation course",intro:data.intro||"",version:data.version||1,loadedAt:Date.now(),
+      modules:data.modules.map(function(m){return {id:m.id,title:m.title,summary:m.summary||"",source:m.source||"",chapters:(m.chapters||[]).map(function(c){return {id:c.id,title:c.title,nq:(c.blocks||[]).filter(function(b){return b.t==="q";}).length};})};})};
+    await db.doc("course/meta").set(meta);
+    var old=await db.collection("course_ch").get();for(var i=0;i<old.docs.length;i++)if(!ids[old.docs[i].id])await db.doc("course_ch/"+old.docs[i].id).delete();
+    var oldI=await db.collection("course_img").get();for(var j=0;j<oldI.docs.length;j++)if(!imgs[oldI.docs[j].id])await db.doc("course_img/"+oldI.docs[j].id).delete();
+    CH_CACHE={};note.textContent="Course published: "+nch+" chapters.";
+  }catch(x){note.textContent="Publishing stopped: check your connection and the database rules, then load the file again.";}
+  finally{$("prepLoadLbl").classList.remove("disabled");}
+});
+
 /* ---------- Sign-in ---------- */
 function loginToEmail(v){v=v.trim().toLowerCase();return v.indexOf("@")>=0?v:v.replace(/\s+/g,"")+"@"+DOMAIN;}
 $("gateForm").addEventListener("submit",function(e){
@@ -2317,6 +2589,7 @@ var booted=false;
         workRenderedFor=null;plenRenderedFor=null;lastEx=null;onLive();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){if(first){first=false;res();}});});
     SIGNED=true;
     db.doc("live/state").onSnapshot(function(s){LIVE=s.exists?s.data():null;if(SIGNIN_PENDING){SIGNIN_PENDING=false;logEvent({type:"signin"});}onLive();},function(){setStatus("Lost the live connection. Reload the page.",true);});
+    loadCourse();
     db.collection("docs").onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});renderLibrary();renderBrief();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){});
     if(isStaff){
       db.doc("fac/config").onSnapshot(function(s){CFG=s.exists?s.data():{messages:{}};CFG.messages=CFG.messages||{};if(!dirty){DRAFT=clone(CFG);delete DRAFT.updatedAt;if(!$("editor").contains(document.activeElement))renderEditor();}});
