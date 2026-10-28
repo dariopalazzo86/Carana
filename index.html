@@ -280,7 +280,7 @@ footer p{margin:0 0 8px}
 <body>
 <header class="top">
   <div class="top-inner">
-    <div class="brand"><span class="mark">CARANA</span><div class="brand-text"><b id="exTitle">UN Police planning exercises</b><span id="whoLine">UNAC Police Component</span></div></div>
+    <div class="brand"><span class="mark">CARANA</span><div class="brand-text"><b id="exTitle">UNAC Police training</b><span id="whoLine">UNAC Police Component</span></div></div>
     <div class="clock"><span class="stage" id="stagePill" hidden></span><span class="time idle" id="time">--:--</span><button class="btn primary" id="startBtn" hidden>Start</button></div>
   </div>
   <div class="status" id="status">Connecting…</div>
@@ -373,9 +373,10 @@ footer p{margin:0 0 8px}
     <h3 style="margin-top:0">Add documents</h3>
     <div class="row" style="align-items:end">
       <div class="field" style="margin:0;min-width:200px;flex:1"><label for="libCat">Section</label><select id="libCat"><option>Introduction</option><option>Mission and police concepts</option><option>Directives</option><option>Maps</option><option>Exercise instructions</option><option>Other</option></select></div>
+      <label class="small" style="margin-bottom:10px"><input type="checkbox" id="libStaff"> Staff only</label>
       <label class="btn primary" for="libFiles">Choose PDF files</label><input type="file" id="libFiles" accept="application/pdf,.pdf" multiple hidden>
     </div>
-    <p class="small" id="libNote">Each file is stored in the database in pieces and is visible only to signed-in users. Up to about 20 MB per file.</p>
+    <p class="small" id="libNote">Each file is stored in the database and visible only to signed-in users. Documents marked <b>Staff only</b> (for example exercise instructions) are hidden from participants. Up to about 20 MB per file.</p>
   </div>
   <div class="assign" id="readerBox" hidden></div>
   <div class="lib" id="libList"></div>
@@ -520,7 +521,7 @@ footer p{margin:0 0 8px}
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, initializeAuth, inMemoryPersistence, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, updatePassword, deleteUser, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { initializeFirestore, doc as fDoc, collection as fCollection, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeFirestore, doc as fDoc, collection as fCollection, getDoc, getDocs, setDoc, updateDoc, deleteDoc, onSnapshot, writeBatch, query as fQuery, where as fWhere } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 (function(){
 "use strict";
 /* =====================================================================
@@ -1100,7 +1101,6 @@ $("track").addEventListener("click",function(e){var b=e.target.closest("[data-go
 /* ---------- Brief ---------- */
 function renderBrief(){
   var ex=EX();
-  $("exTitle").textContent=ex.title;
   $("briefTitle").textContent=ex.title;
   $("briefSub").textContent=ex.subtitle+". Output: "+ex.output+".";
   $("briefBody").innerHTML=scenarioDocBtn()+ex.brief();
@@ -1336,8 +1336,8 @@ function onLive(){
   if(current==="others")renderOthers();
   if(!isStaff&&openChanged&&l.courseOpen)show("brief");
   if(visibleViews().map(function(v){return v[0];}).indexOf(current)<0)show(visibleViews()[0][0]);
-  if(!isStaff&&!l.courseOpen){$("exTitle").textContent="UNAC Police planning exercises";setStatus("The course hasn’t started yet. You can already read the scenario documents in the Library.");return;}
-  if(!isStaff&&!TEAMID){$("exTitle").textContent="UNAC Police planning exercises";setStatus("You aren’t in a group for "+EX().title+" yet. Your course staff will place you; meanwhile you can read the Library.");return;}
+  if(!isStaff&&!l.courseOpen){setStatus("The course hasn’t started yet. You can already read the scenario documents in the Library.");return;}
+  if(!isStaff&&!TEAMID){setStatus("You aren’t in a group for "+EX().title+" yet. Your course staff will place you; meanwhile you can read the Library.");return;}
   var st={group:"Group work: every group works on all topics",review:"Review: each group works on its topic in the joint plan",plenary:"Joint result: everyone finishes the joint plan together"}[l.stage];
   if(isStaff&&!l.courseOpen)setStatus("Course not started: participants who sign in see only the Library. Start the course in Run when you’re ready.");
   else if(isStaff)setStatus(l.status==="idle"?EX().title+" is ready. Set up groups and messages, then start.":l.status==="paused"?"Paused. "+st+".":"Running. "+st+". Keep this page open so scheduled messages go out.");
@@ -2000,7 +2000,7 @@ var LOG_SEL=null;
 function renderReadLog(){
   if(!isStaff)return;subscribeViews();
   if(current!=="reading")return;
-  var docs=LIB.slice().sort(function(a,b){return a.cat.localeCompare(b.cat)||a.title.localeCompare(b.title,undefined,{numeric:true});}),rows=readLogRows();
+  var docs=LIB.filter(function(d){return !d.staffOnly;}).sort(function(a,b){return a.cat.localeCompare(b.cat)||a.title.localeCompare(b.title,undefined,{numeric:true});}),rows=readLogRows();
   var logs=VIEWS_LOG.filter(function(v){return (v.type||"open")==="open"&&(!$("logPre").checked||v.pre);});
   var withAny=rows.filter(function(r){return Object.keys(r.docs).length;}).length,all=rows.filter(function(r){return docs.length&&docs.every(function(d){return r.docs[d.id];});}).length;
   $("logSummary").textContent=logs.length+" document opening"+(logs.length===1?"":"s")+($("logPre").checked?" before the course started":"")+". "+withAny+" of "+rows.length+" people have opened at least one document; "+all+" have opened all "+docs.length+".";
@@ -2040,20 +2040,22 @@ function renderLibrary(){
   var cats=LIB_CATS.filter(function(c){return LIB.some(function(d){return d.cat===c;});});
   LIB.forEach(function(d){if(cats.indexOf(d.cat)<0)cats.push(d.cat);});
   $("libList").innerHTML=cats.map(function(cat){return '<h3>'+esc(cat)+'</h3>'+LIB.filter(function(d){return d.cat===cat;}).sort(function(a,b){return a.title.localeCompare(b.title,undefined,{numeric:true});}).map(function(d){
-    return '<div class="item"><b>'+esc(d.title)+'</b><span class="small">'+Math.round((d.size||0)/1024)+' KB</span><button class="btn sm primary" data-open="'+esc(d.id)+'"'+(!isStaff&&!PERSON&&TEAMID&&(!getReader()||$("readerBox").dataset.editing)?" disabled title=\"Choose your name first\"":"")+'>Open</button>'+
-      (isStaff?'<select data-cat="'+esc(d.id)+'" aria-label="Section" style="width:auto">'+LIB_CATS.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+c+'</option>';}).join("")+'</select><button class="btn sm danger" data-rm="'+esc(d.id)+'">Remove</button>':'')+'</div>';}).join("");}).join("");
+    return '<div class="item"><b>'+esc(d.title)+(isStaff&&d.staffOnly?' <span class="pill prog">Staff only</span>':'')+'</b><span class="small">'+Math.round((d.size||0)/1024)+' KB</span><button class="btn sm primary" data-open="'+esc(d.id)+'"'+(!isStaff&&!PERSON&&TEAMID&&(!getReader()||$("readerBox").dataset.editing)?" disabled title=\"Choose your name first\"":"")+'>Open</button>'+
+      (isStaff?'<select data-cat="'+esc(d.id)+'" aria-label="Section" style="width:auto">'+LIB_CATS.map(function(c){return '<option'+(c===d.cat?" selected":"")+'>'+c+'</option>';}).join("")+'</select>'+
+        '<select data-vis="'+esc(d.id)+'" aria-label="Visible to" style="width:auto"><option value="all"'+(d.staffOnly?"":" selected")+'>Everyone</option><option value="staff"'+(d.staffOnly?" selected":"")+'>Staff only</option></select>'+
+        '<button class="btn sm danger" data-rm="'+esc(d.id)+'">Remove</button>':'')+'</div>';}).join("");}).join("");
 }
 function b64(buf){var bin="",bytes=new Uint8Array(buf),step=0x8000;for(var i=0;i<bytes.length;i+=step)bin+=String.fromCharCode.apply(null,bytes.subarray(i,i+step));return btoa(bin);}
 $("libFiles").addEventListener("change",async function(e){
   var files=Array.prototype.slice.call(e.target.files||[]);e.target.value="";if(!files.length)return;
-  var cat=$("libCat").value,nt=$("libNote"),done=0;
+  var cat=$("libCat").value,staffOnly=$("libStaff").checked,nt=$("libNote"),done=0;
   for(var i=0;i<files.length;i++){
     var f=files[i];if(f.size>20*1024*1024){nt.textContent=f.name+" is larger than 20 MB and was skipped.";continue;}
     nt.textContent="Uploading "+f.name+" ("+(i+1)+" of "+files.length+")…";
     try{
       var data=b64(await f.arrayBuffer()),id=newId("d"),n=Math.ceil(data.length/CHUNK);
       for(var k=0;k<n;k++)await db.doc("docs/"+id+"/chunks/"+String(k).padStart(3,"0")).set({d:data.slice(k*CHUNK,(k+1)*CHUNK)});
-      await db.doc("docs/"+id).set({title:f.name.replace(/\.pdf$/i,"").replace(/_/g," "),name:f.name,cat:cat,size:f.size,n:n,at:Date.now()});
+      await db.doc("docs/"+id).set({title:f.name.replace(/\.pdf$/i,"").replace(/_/g," "),name:f.name,cat:cat,staffOnly:staffOnly,size:f.size,n:n,at:Date.now()});
       done++;
     }catch(x){nt.textContent="Uploading "+f.name+" failed. Check your connection and the database rules.";return;}
   }
@@ -2077,7 +2079,12 @@ $("libList").addEventListener("click",async function(e){
   if(o)openDoc(o.dataset.open,o);
   if(r&&confirm("Remove this document from the library?")){var id=r.dataset.rm;try{var q2=await db.collection("docs/"+id+"/chunks").get();for(var j=0;j<q2.docs.length;j++)await db.doc("docs/"+id+"/chunks/"+q2.docs[j].id).delete();await db.doc("docs/"+id).delete();}catch(x){alert("Couldn’t remove it. Try again.");}}
 });
-$("libList").addEventListener("change",function(e){var s=e.target.closest("[data-cat]");if(s)db.doc("docs/"+s.dataset.cat).merge({cat:s.value});});
+$("libList").addEventListener("change",function(e){
+  var s=e.target.closest("[data-cat]"),v=e.target.closest("[data-vis]");
+  if(s){var p={cat:s.value};if(s.value==="Exercise instructions")p.staffOnly=true;db.doc("docs/"+s.dataset.cat).merge(p);}
+  if(v)db.doc("docs/"+v.dataset.vis).merge({staffOnly:v.value==="staff"});
+});
+$("libCat").addEventListener("change",function(){$("libStaff").checked=$("libCat").value==="Exercise instructions";});
 
 /* ---------- Staff accounts ---------- */
 function renderStaff(){
@@ -2550,6 +2557,7 @@ function makeDb(fs){
   function wrap(s){return {id:s.id,exists:s.exists(),data:function(){return s.data();}};}
   return {
     doc:function(path){var r=fDoc(fs,path);return {get:function(){return getDoc(r).then(wrap);},set:function(d){return setDoc(r,d);},merge:function(d){return setDoc(r,d,{merge:true});},update:function(d){return updateDoc(r,d);},delete:function(){return deleteDoc(r);},onSnapshot:function(n,e){return onSnapshot(r,function(s){n(wrap(s));},e);}};},
+    where:function(path,field,value){var qy=fQuery(fCollection(fs,path),fWhere(field,"==",value));return {get:function(){return getDocs(qy).then(function(q){return {docs:q.docs.map(wrap)};});},onSnapshot:function(n,e){return onSnapshot(qy,function(q){n({docs:q.docs.map(wrap)});},e);}};},
     collection:function(path){var c=fCollection(fs,path);return {get:function(){return getDocs(c).then(function(q){return {docs:q.docs.map(wrap)};});},onSnapshot:function(n,e){return onSnapshot(c,function(q){n({docs:q.docs.map(wrap)});},e);}};}
   };
 }
@@ -2598,7 +2606,10 @@ var booted=false;
     SIGNED=true;
     db.doc("live/state").onSnapshot(function(s){LIVE=s.exists?s.data():null;if(SIGNIN_PENDING){SIGNIN_PENDING=false;logEvent({type:"signin"});}onLive();},function(){setStatus("Lost the live connection. Reload the page.",true);});
     loadCourse();
-    db.collection("docs").onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});renderLibrary();renderBrief();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){});
+    (isStaff?db.collection("docs"):db.where("docs","staffOnly",false)).onSnapshot(function(q){LIB=q.docs.map(function(d){return Object.assign({id:d.id},d.data());});
+      // Older documents have no visibility flag yet: exercise instructions become staff-only, the rest stay open to everyone.
+      if(isStaff)LIB.forEach(function(d){if(typeof d.staffOnly!=="boolean")db.doc("docs/"+d.id).merge({staffOnly:d.cat==="Exercise instructions"});});
+      renderLibrary();renderBrief();if(current==="exercises"&&!$("xList").contains(document.activeElement))renderXList();},function(){});
     if(isStaff){
       db.doc("fac/config").onSnapshot(function(s){CFG=s.exists?s.data():{messages:{}};CFG.messages=CFG.messages||{};if(!dirty){DRAFT=clone(CFG);delete DRAFT.updatedAt;if(!$("editor").contains(document.activeElement))renderEditor();}});
       db.doc("fac/teamCreds").onSnapshot(function(s){if(!busyLogins){CREDS=s.exists?clone(s.data()):{teams:[]};CREDS.teams=CREDS.teams||[];}renderLogins();renderPeople();});
